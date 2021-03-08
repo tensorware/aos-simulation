@@ -257,34 +257,24 @@ class Drone {
             for (let i = 0; i < personPosition.count; i++) {
                 personVector.fromBufferAttribute(personPosition, i);
                 person.localToWorld(personVector);
+                personVector.y = 0;
 
-                // const geometry = new THREE.BufferGeometry().setFromPoints([cameraVector, personVector]);
-                // const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x990000 }));
-                // this.scene.add(line);
+                const rayVector = new THREE.Vector3();
+                rayVector.subVectors(personVector, cameraVector);
+                const ray = new THREE.Raycaster(cameraVector, rayVector.normalize());
+
+                const barriers = [].concat(this.forest.trees, this.forest.persons);
+                const intersects = ray.intersectObjects(barriers);
+                if (intersects.length > 0) {
+                    intersects.forEach((intersect) => {
+                        const intersectVector = new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z);
+                        const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
+                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
+                        this.scene.add(intersectLine);
+                    });
+                }
             }
         });
-
-        return;
-
-        // -------------
-
-        for (let point in rectangle.geometry.vertices) {
-            const direction = rectangle.geometry.vertices[point].clone();
-
-            const vector = new THREE.Vector3();
-            vector.subVectors(direction, startPoint);
-
-            //const ray = new THREE.Raycaster();
-            //ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
-
-            const ray = new THREE.Raycaster(startPoint, vector.clone().normalize());
-
-            const intersects = ray.intersectObjects(this.forest.persons);
-            if (intersects.length > 0) {
-                log('found');
-                gridPointsVisible.pop(rectangle.geometry.vertices[point]);
-            }
-        }
     }
 
     clear() {
