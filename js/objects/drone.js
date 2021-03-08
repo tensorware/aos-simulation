@@ -179,7 +179,6 @@ class Drone {
             this.config.droneEastWest = this.camera.cone.position.x;
             this.config.droneNorthSouth = this.camera.cone.position.z;
             this.goal = intersects[0].point;
-
             this.move();
         }
     }
@@ -236,29 +235,38 @@ class Drone {
         this.scene.add(plane);
         this.captures.push(plane);
 
+        const persons = [];
+        const viewParameters = this.getViewParameters(this.camera.height);
+        const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 1;
+
+        this.forest.persons.forEach((person) => {
+            const start = new THREE.Vector3(this.camera.cone.position.x, 0, this.camera.cone.position.z);
+            const end = new THREE.Vector3(person.position.x, 0, person.position.z);
+
+            const personDistance = start.distanceTo(end);
+            if (personDistance <= cornerDistance) {
+                persons.push(person);
+            }
+        });
+
+        const cameraVector = new THREE.Vector3(this.camera.cone.position.x, this.camera.height, this.camera.cone.position.z);
+        persons.forEach((person) => {
+            const personPosition = person.geometry.attributes.position;
+            const personVector = new THREE.Vector3();
+
+            for (let i = 0; i < personPosition.count; i++) {
+                personVector.fromBufferAttribute(personPosition, i);
+                person.localToWorld(personVector);
+
+                // const geometry = new THREE.BufferGeometry().setFromPoints([cameraVector, personVector]);
+                // const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x990000 }));
+                // this.scene.add(line);
+            }
+        });
+
         return;
 
         // -------------
-
-
-        const startPoint = this.camera.cone.position.clone();
-
-        var intersects = new THREE.Vector3();
-        raycaster.ray.intersectPlane(planeX, intersects);
-
-        console.log(raycaster.ray);
-        console.log(intersects);
-
-
-        return;
-
-
-        // -------------
-
-
-        const gridPointsVisible = rectangle.geometry.vertices.slice(0);
-
-        log(len(rectangle.geometry.vertices));
 
         for (let point in rectangle.geometry.vertices) {
             const direction = rectangle.geometry.vertices[point].clone();
