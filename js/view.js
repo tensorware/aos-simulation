@@ -8,7 +8,8 @@ const CONFIG = {
     cameraResolution: 512,
     processingSpeed: 0.5,
     size: 32.6 * 4,
-    trees: 100,
+    trees: 30,
+    persons: 3,
     segments: 6,
     levels: 5,
     vMultiplier: 2.36,
@@ -46,7 +47,7 @@ class View {
         this.stage = new Stage(this.root, this.config);
         this.forest = new Forest(this.stage);
         this.drone = new Drone(this.forest);
-
+       
         this.addControls();
     }
 
@@ -75,11 +76,21 @@ class View {
         const forestFolder = this.gui.addFolder('forest');
         forestFolder.add(this.config, 'size').min(30).max(1000).onFinishChange(() => {
             this.forest.update();
+            this.forest.clear();
             this.forest.addTrees();
+            this.forest.addPersons();
         }).listen();
         forestFolder.add(this.config, 'trees').min(1).max(1000).onFinishChange(() => {
             this.forest.update();
+            this.forest.clear();
             this.forest.addTrees();
+            this.forest.addPersons();
+        }).listen();
+        forestFolder.add(this.config, 'persons').min(1).max(100).onFinishChange(() => {
+            this.forest.update();
+            this.forest.clear();
+            this.forest.addTrees();
+            this.forest.addPersons();
         }).listen();
 
         const treeFolder = forestFolder.addFolder('tree');

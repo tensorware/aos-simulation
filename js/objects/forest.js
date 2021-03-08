@@ -6,6 +6,7 @@ class Forest {
         this.stage = stage;
 
         this.trees = [];
+        this.persons = [];
         this.grounds = [];
         this.positions = [];
 
@@ -31,9 +32,9 @@ class Forest {
         });
 
         this.update();
-
         this.addGround();
         this.addTrees();
+        this.addPersons();
     }
 
     addGround() {
@@ -66,26 +67,39 @@ class Forest {
 
         const scale = 3.5;
         treeGroup.position.x = this.positions[index].x;
-        treeGroup.position.z = this.positions[index].y;
+        treeGroup.position.z = this.positions[index].z;
         treeGroup.scale.set(scale, scale, scale);
 
         this.trees.push(treeGroup);
         this.scene.add(treeGroup);
     }
 
-    addTrees() {
-        this.clear();
+    addTrees() {        
         for (let i = 0; i < this.config.trees; i++) {
             this.addTree(i);
         }
     }
 
+    addPerson(index) {
+        const person = new Person(this.config);
+        this.persons.push(person.mesh);
+        this.scene.add(person.mesh);
+    }
+
+    addPersons() {
+        for (let i = 0; i < this.config.persons; i++) {
+            this.addPerson(i);
+        }
+    }
+
     update() {
+        const margin = 1;
+
         this.positions = [];
         for (let i = 0; i < 1000; i++) {
             this.positions.push({
-                x: randomInt(-this.config.size / 2, this.config.size / 2),
-                y: randomInt(-this.config.size / 2, this.config.size / 2)
+                x: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin),
+                z: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin)
             });
         }
 
@@ -94,6 +108,16 @@ class Forest {
         this.grounds.forEach((ground) => {
             ground.geometry.copy(planeGeometry);
         });
+
+        const position = {
+            x: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin),
+            z: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin)
+        };
+        const personGeometry = new THREE.PlaneGeometry(1, 2);
+        personGeometry.rotateX(-Math.PI / 2).translate(position.x, 0.10, position.z);
+        this.persons.forEach((person) => {
+            person.geometry.copy(personGeometry);
+        });
     }
 
     clear() {
@@ -101,6 +125,11 @@ class Forest {
             this.scene.remove(tree);
         });
         this.trees = [];
+
+        this.persons.forEach((person) => {
+            this.scene.remove(person);
+        });
+        this.persons = [];
     }
 
     reset() {
@@ -109,6 +138,8 @@ class Forest {
         this.twigMaterial.color.setHex(this.config.twigColor);
         this.groundMaterial.color.setHex(this.config.groundColor);
         this.update();
+        this.clear();
         this.addTrees();
+        this.addPersons();
     }
 }
