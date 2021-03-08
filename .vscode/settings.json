@@ -1,0 +1,8 @@
+{
+    "previewServer.browsers": [
+        "firefox",
+        "chrome"
+    ],
+    "previewServer.ignoreDefaultBrowser": true,
+    "previewServer.port": 8080
+}
