@@ -8,7 +8,9 @@ class Forest {
         this.trees = [];
         this.persons = [];
         this.grounds = [];
-        this.positions = [];
+
+        this.treePositions = [];
+        this.personPositions = [];
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
             color: this.config.groundColor,
@@ -46,7 +48,7 @@ class Forest {
         this.scene.add(plane);
     }
 
-    addTree(index) {
+    addTree(i) {
         const tree = new Tree({ ...this.config, seed: randomInt(0, 1000) });
 
         const treeGeometry = new THREE.BufferGeometry();
@@ -66,24 +68,27 @@ class Forest {
         treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
 
         const scale = 3.5;
-        treeGroup.position.x = this.positions[index].x;
-        treeGroup.position.z = this.positions[index].z;
+        treeGroup.position.x = this.treePositions[i].x;
+        treeGroup.position.z = this.treePositions[i].z;
         treeGroup.scale.set(scale, scale, scale);
 
         this.trees.push(treeGroup);
         this.scene.add(treeGroup);
     }
 
-    addTrees() {        
+    addTrees() {
         for (let i = 0; i < this.config.trees; i++) {
             this.addTree(i);
         }
     }
 
-    addPerson(index) {
-        const person = new Person(this.config);
-        this.persons.push(person.mesh);
-        this.scene.add(person.mesh);
+    addPerson(i) {
+        const person = new Person(this.config).mesh;
+        person.position.x = this.personPositions[i].x;
+        person.position.z = this.personPositions[i].z;
+
+        this.persons.push(person);
+        this.scene.add(person);
     }
 
     addPersons() {
@@ -93,13 +98,21 @@ class Forest {
     }
 
     update() {
-        const margin = 1;
+        const treeMargin = 1;
+        this.treePositions = [];
+        for (let i = 0; i <= this.config.trees; i++) {
+            this.treePositions.push({
+                x: randomInt(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin),
+                z: randomInt(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin)
+            });
+        }
 
-        this.positions = [];
-        for (let i = 0; i < 1000; i++) {
-            this.positions.push({
-                x: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin),
-                z: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin)
+        const personMargin = 2;
+        this.personPositions = [];
+        for (let i = 0; i <= this.config.persons; i++) {
+            this.personPositions.push({
+                x: randomInt(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin),
+                z: randomInt(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin)
             });
         }
 
@@ -107,16 +120,6 @@ class Forest {
         planeGeometry.rotateX(Math.PI / 2).translate(0, 0, 0);
         this.grounds.forEach((ground) => {
             ground.geometry.copy(planeGeometry);
-        });
-
-        const position = {
-            x: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin),
-            z: randomInt(-this.config.size / 2 + margin, this.config.size / 2 - margin)
-        };
-        const personGeometry = new THREE.PlaneGeometry(1, 2);
-        personGeometry.rotateX(-Math.PI / 2).translate(position.x, 0.10, position.z);
-        this.persons.forEach((person) => {
-            person.geometry.copy(personGeometry);
         });
     }
 
