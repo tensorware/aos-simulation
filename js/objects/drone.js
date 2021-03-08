@@ -15,7 +15,7 @@ class Drone {
         this.captures = [];
 
         const cameraGeometry = new THREE.ConeGeometry();
-        const cameraMaterial = new THREE.MeshStandardMaterial({ color: 0x98be1f });
+        const cameraMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
         this.camera.cone = new THREE.Mesh(cameraGeometry, cameraMaterial);
 
         this.lines = [];
@@ -26,18 +26,18 @@ class Drone {
             ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
 
-        const planeGeometry = new THREE.PlaneGeometry(10, 10);
-        planeGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
-        const planeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x98be1f,
-            opacity: 0.2,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
+        const rectangleGeometry = new THREE.PlaneGeometry();
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
+        const rectangleMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
+        const rectangle = new THREE.Mesh(rectangleGeometry, rectangleMaterial);
 
-        const rectangle = new THREE.Mesh(planeGeometry, planeMaterial);
+        const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
+        const wireMaterial = new THREE.LineBasicMaterial({ color: 0x990000 });
+        const wireFrame = new THREE.LineSegments(wireGeometry, wireMaterial);
+
         this.plane = {
             rectangle: rectangle,
+            wire: wireFrame,
             border: new THREE.BoxHelper(rectangle, 0x990000)
         };
 
@@ -109,6 +109,7 @@ class Drone {
 
     addPlane() {
         this.scene.add(this.plane.rectangle);
+        // this.scene.add(this.plane.wire);
         this.scene.add(this.plane.border);
     }
 
@@ -209,9 +210,13 @@ class Drone {
             ]));
         });
 
-        const planeGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        planeGeometry.rotateX(-Math.PI / 2).translate(this.camera.cone.position.x, 0.05, this.camera.cone.position.z);
-        this.plane.rectangle.geometry.copy(planeGeometry);
+        const resolution = 5; // this.config.cameraResolution;
+        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage, resolution, resolution);
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(this.camera.cone.position.x, 0.05, this.camera.cone.position.z);
+        const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
+
+        this.plane.rectangle.geometry.copy(rectangleGeometry);
+        this.plane.wire.geometry.copy(wireGeometry);
         this.plane.border.update();
     }
 
@@ -230,6 +235,48 @@ class Drone {
 
         this.scene.add(plane);
         this.captures.push(plane);
+
+        return;
+
+        // -------------
+
+
+        const startPoint = this.camera.cone.position.clone();
+
+        var intersects = new THREE.Vector3();
+        raycaster.ray.intersectPlane(planeX, intersects);
+
+        console.log(raycaster.ray);
+        console.log(intersects);
+
+
+        return;
+
+
+        // -------------
+
+
+        const gridPointsVisible = rectangle.geometry.vertices.slice(0);
+
+        log(len(rectangle.geometry.vertices));
+
+        for (let point in rectangle.geometry.vertices) {
+            const direction = rectangle.geometry.vertices[point].clone();
+
+            const vector = new THREE.Vector3();
+            vector.subVectors(direction, startPoint);
+
+            //const ray = new THREE.Raycaster();
+            //ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
+
+            const ray = new THREE.Raycaster(startPoint, vector.clone().normalize());
+
+            const intersects = ray.intersectObjects(this.forest.persons);
+            if (intersects.length > 0) {
+                log('found');
+                gridPointsVisible.pop(rectangle.geometry.vertices[point]);
+            }
+        }
     }
 
     clear() {
