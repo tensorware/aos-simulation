@@ -58,7 +58,7 @@ class Stage {
         this.controls.minDistance = 1;
         this.controls.maxDistance = 300;
         this.controls.autoRotateSpeed = 0.2;
-        this.controls.autoRotate = true;
+        this.controls.autoRotate = false;
         this.controls.enablePan = true;
 
         const light = new THREE.DirectionalLight(0xFFFFFF, 1);
