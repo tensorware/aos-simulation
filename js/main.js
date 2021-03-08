@@ -119,7 +119,7 @@ class Forest {
         });
 
         this.twigMaterial = new THREE.MeshStandardMaterial({
-            map: new THREE.TextureLoader().load('../img/leaf.png'),
+            map: new THREE.TextureLoader().load('img/leaf.png'),
             color: this.config.twigColor,
             roughness: 1.0,
             metalness: 0.3,
