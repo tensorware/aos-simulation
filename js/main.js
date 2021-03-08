@@ -7,7 +7,8 @@ const CONFIG = {
     cameraSampling: 1,
     cameraResolution: 512,
     processingSpeed: 0.5,
-    trees: 50,
+    size: 32.6 * 4,
+    trees: 100,
     segments: 6,
     levels: 5,
     vMultiplier: 2.36,
@@ -103,7 +104,6 @@ class Forest {
         this.trees = [];
         this.grounds = [];
         this.positions = [];
-        this.groundSize = 32.6 * 2;
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
             color: this.config.groundColor,
@@ -133,7 +133,7 @@ class Forest {
     }
 
     addGround() {
-        const geometry = new THREE.PlaneGeometry(this.groundSize, this.groundSize);
+        const geometry = new THREE.PlaneGeometry(this.config.size, this.config.size);
         geometry.rotateX(Math.PI / 2).translate(0, 0, 0);
         const plane = new THREE.Mesh(geometry, this.groundMaterial);
 
@@ -160,8 +160,10 @@ class Forest {
         treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
         treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
 
+        const scale = 3.5;
         treeGroup.position.x = this.positions[index].x;
         treeGroup.position.z = this.positions[index].y;
+        treeGroup.scale.set(scale, scale, scale);
 
         this.trees.push(treeGroup);
         this.scene.add(treeGroup);
@@ -178,16 +180,23 @@ class Forest {
         this.positions = [];
         for (let i = 0; i < 1000; i++) {
             this.positions.push({
-                x: randomInt(-this.groundSize / 2, this.groundSize / 2),
-                y: randomInt(-this.groundSize / 2, this.groundSize / 2)
+                x: randomInt(-this.config.size / 2, this.config.size / 2),
+                y: randomInt(-this.config.size / 2, this.config.size / 2)
             });
         }
+
+        const planeGeometry = new THREE.PlaneGeometry(this.config.size, this.config.size);
+        planeGeometry.rotateX(Math.PI / 2).translate(0, 0, 0);
+        this.grounds.forEach((ground) => {
+            ground.geometry.copy(planeGeometry);
+        });
     }
 
     clear() {
         this.trees.forEach((tree) => {
             this.scene.remove(tree);
         });
+        this.trees = [];
     }
 
     reset() {
@@ -469,8 +478,8 @@ class View {
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config, 'droneSpeed').min(1.).max(20.).onChange((v) => { this.drone.setSpeed(v) }).listen();
         droneFolder.add(this.config, 'droneHeight').min(0.).max(50.).onChange((v) => { this.drone.setHeight(v) }).listen();
-        droneFolder.add(this.config, 'droneEastWest').min(-this.forest.groundSize / 2).max(this.forest.groundSize / 2.).onChange((v) => { this.drone.setEastWest(v) }).listen();
-        droneFolder.add(this.config, 'droneNorthSouth').min(-this.forest.groundSize / 2.).max(this.forest.groundSize / 2.).onChange((v) => { this.drone.setNorthSouth(v) }).listen();
+        droneFolder.add(this.config, 'droneEastWest').min(-this.forest.config.size / 2).max(this.forest.config.size / 2.).onChange((v) => { this.drone.setEastWest(v) }).listen();
+        droneFolder.add(this.config, 'droneNorthSouth').min(-this.forest.config.size / 2.).max(this.forest.config.size / 2.).onChange((v) => { this.drone.setNorthSouth(v) }).listen();
 
         // camera
         const cameraFolder = droneFolder.addFolder('camera');
@@ -484,21 +493,26 @@ class View {
 
         // forest
         const forestFolder = this.gui.addFolder('forest');
+        forestFolder.add(this.config, 'size').min(30).max(1000).onFinishChange(() => {
+            this.forest.update();
+            this.forest.addTrees();
+        }).listen();
         forestFolder.add(this.config, 'trees').min(1).max(1000).onFinishChange(() => {
             this.forest.update();
             this.forest.addTrees();
         }).listen();
 
         const treeFolder = forestFolder.addFolder('tree');
-        const branchFolder = forestFolder.addFolder('branching');
-        const trunkFolder = forestFolder.addFolder('trunk');
-
-        const forestFolders = [
-
+        const treeFolders = [
             // tree
             treeFolder.add(this.config, 'levels').min(0).max(10),
-            treeFolder.add(this.config, 'twigScale').min(0).max(1),
+            treeFolder.add(this.config, 'twigScale').min(0).max(1)
+        ];
 
+        const branchFolder = treeFolder.addFolder('branching');
+        const trunkFolder = treeFolder.addFolder('trunk');
+
+        const forestFolders = [].concat(treeFolders, [
             // branching
             branchFolder.add(this.config, 'initalBranchLength').min(0.1).max(1),
             branchFolder.add(this.config, 'lengthFalloffFactor').min(0.5).max(1),
@@ -519,12 +533,12 @@ class View {
             trunkFolder.add(this.config, 'radiusFalloffRate').min(0.5).max(0.8),
             trunkFolder.add(this.config, 'twistRate').min(0.0).max(10.0),
             trunkFolder.add(this.config, 'trunkLength').min(0.1).max(5.0)
-        ];
+        ]);
 
         forestFolders.forEach((e) => { e.onChange(() => this.forest.addTrees()).listen() });
 
         // materials
-        const matFolder = forestFolder.addFolder('materials');
+        const matFolder = this.gui.addFolder('materials');
         matFolder.addColor(this.config, 'treeColor').onChange((v) => this.forest.treeMaterial.color.setHex(v)).listen();
         matFolder.addColor(this.config, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v)).listen();
         matFolder.addColor(this.config, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v)).listen();
