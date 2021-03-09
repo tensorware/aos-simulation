@@ -43,11 +43,11 @@ class View {
         this.root = root;
         this.config = config;
 
-        this.stage = new Stage(this.root, this.config);
-        this.forest = new Forest(this.stage);
-        this.drone = new Drone(this.forest);
-
-        this.addControls();
+        this.stage = new Stage(this.root, this.config, () => {
+            this.forest = new Forest(this.stage);
+            this.drone = new Drone(this.forest);
+            this.addControls();
+        });
     }
 
     addControls() {
