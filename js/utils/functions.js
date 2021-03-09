@@ -18,6 +18,13 @@ function normalizeAttribute(attribute) {
     return attribute;
 }
 
+function ray(from, to, intersects) {
+    const rayVector = new THREE.Vector3();
+    rayVector.subVectors(to, from);
+    const ray = new THREE.Raycaster(from, rayVector.normalize());
+    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
+}
+
 function isValid() {
     Array.from(arguments).forEach((arg) => {
         if (typeof arg === 'undefined') {
