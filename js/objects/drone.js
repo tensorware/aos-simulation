@@ -6,18 +6,20 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        this.drone = {};
-        this.camera = {};
-        this.cpu = {};
-        this.image = {};
-        this.goal = { x: 0, y: 0 };
-
         this.rays = [];
         this.captures = [];
 
-        const cameraGeometry = new THREE.ConeGeometry();
-        const cameraMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
-        this.camera.cone = new THREE.Mesh(cameraGeometry, cameraMaterial);
+        this.goal = {
+            x: 0,
+            y: 0
+        };
+
+        this.planeMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
+
+        this.camera = {
+            height: 0,
+            cone: new THREE.Mesh(new THREE.ConeGeometry(), this.planeMaterial)
+        };
 
         this.lines = [];
         for (let i = 0; i < 4; i++) {
@@ -29,8 +31,7 @@ class Drone {
 
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
-        const rectangleMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
-        const rectangle = new THREE.Mesh(rectangleGeometry, rectangleMaterial);
+        const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
         const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
         const wireMaterial = new THREE.LineBasicMaterial({ color: 0x990000 });
@@ -48,10 +49,8 @@ class Drone {
         const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xffffff });
         this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
-        this.setSpeed(this.config.droneSpeed);
         this.setHeight(this.config.droneHeight);
         this.setView(this.config.cameraView);
-        this.setProcessing(this.config.processingSpeed);
 
         this.addCamera();
         this.addPlane();
@@ -74,11 +73,11 @@ class Drone {
         const start = new THREE.Vector3(this.config.droneEastWest, this.config.droneHeight, this.config.droneNorthSouth);
         const end = new THREE.Vector3(this.goal.x, this.config.droneHeight, this.goal.z);
 
-        const moveDuration = start.distanceTo(end) / this.drone.speed * 1000;
+        const moveDuration = start.distanceTo(end) / this.config.droneSpeed * 1000;
         const deltaTime = currentTime - this.startTime;
         const trajectoryTime = deltaTime / moveDuration;
 
-        const currentDistance = deltaTime * this.drone.speed / 1000;
+        const currentDistance = deltaTime * this.config.droneSpeed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
 
         // log('debug', moveDuration, deltaTime, start.distanceTo(end), currentDistance);
@@ -95,7 +94,6 @@ class Drone {
                 this.lastCapture = Math.floor(currentDistance);
                 this.capture();
             }
-
             requestAnimationFrame(this.move);
         }
         else {
@@ -135,11 +133,6 @@ class Drone {
         };
     }
 
-    setSpeed(speed) {
-        this.drone.speed = speed;
-        this.update();
-    }
-
     setHeight(height) {
         this.camera.height = height;
         this.camera.cone.position.y = height + .5;
@@ -161,11 +154,6 @@ class Drone {
         const viewParameters = this.getViewParameters(1);
         const viewGeometry = new THREE.ConeGeometry(viewParameters.radius, viewParameters.height, 30, 30);
         this.camera.cone.geometry.copy(viewGeometry);
-        this.update();
-    }
-
-    setProcessing(speed) {
-        this.cpu.speed = speed;
         this.update();
     }
 
@@ -192,14 +180,14 @@ class Drone {
     }
 
     update() {
-        if (!isValid(this.drone.speed, this.cpu.speed, this.camera.height, this.camera.view)) {
+        if (!isValid(this.camera.height, this.camera.view)) {
             return;
         }
 
-        const distance = this.drone.speed * this.cpu.speed;
+        const distance = this.config.droneSpeed * this.config.processingSpeed;
         const coverage = 2 * this.camera.height * Math.tan(radian(this.camera.view / 2));
         const overlap = coverage / distance;
-        const time = coverage / this.drone.speed;
+        const time = coverage / this.config.droneSpeed;
 
         // log('debug', distance, coverage, overlap, time);
 

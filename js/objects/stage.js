@@ -19,7 +19,7 @@ class Stage {
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
             this.controls.minDistance = 1;
             this.controls.maxDistance = 300;
-            this.controls.autoRotateSpeed = 0.2;
+            this.controls.autoRotateSpeed = 1;
             this.controls.autoRotate = false;
             this.controls.enablePan = true;
 
