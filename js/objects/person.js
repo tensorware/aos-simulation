@@ -4,8 +4,10 @@ class Person {
 
         const width = 1;
         const height = 2;
-        const widthSegments = width * 10;
-        const heightSegments = height * 10;
+
+        const segments = 2
+        const widthSegments = width * segments;
+        const heightSegments = height * segments;
 
         const planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
         planeGeometry.rotateX(-Math.PI / 2).translate(0, 0.10, 0);
