@@ -8,7 +8,7 @@ class Stage {
             this.scene = new THREE.Scene();
 
             this.camera = new THREE.PerspectiveCamera(100, this.root.clientWidth / this.root.clientHeight, 1, 1000);
-            this.camera.position.set(30, 30, 30);
+            this.camera.position.set(0, 30, 40);
             this.scene.add(this.camera);
 
             this.renderer = new THREE.WebGLRenderer({ antialias: true });

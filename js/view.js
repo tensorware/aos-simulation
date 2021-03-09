@@ -1,3 +1,5 @@
+Math.seedrandom('AOS-Simulation');
+
 const CONFIG = {
     droneSpeed: 4,
     droneHeight: 35.,
@@ -8,7 +10,7 @@ const CONFIG = {
     cameraResolution: 512,
     processingSpeed: 0.5,
     size: 32.6 * 2,
-    trees: 30,
+    trees: 40,
     persons: 4,
     levels: 5,
     vMultiplier: 2.36,
@@ -23,7 +25,7 @@ const CONFIG = {
     dropAmount: -0.1,
     growAmount: 0.235,
     sweepAmount: 0.01,
-    maxRadius: 0.139,
+    maxRadius: 0.1,
     climbRate: 0.5,
     trunkKink: 0.09,
     treeSteps: 8,
@@ -37,8 +39,6 @@ const CONFIG = {
     planeColor: 0xdcdc69,
     backgroundColor: 0x8fbde8
 };
-
-const ROOT = document.querySelector('#root');
 
 class View {
     constructor(root, config) {
@@ -115,7 +115,7 @@ class View {
         // trunk
         const trunkFolder = treeFolder.addFolder('trunk');
         const trunkFolders = [
-            trunkFolder.add(this.config, 'maxRadius', .05, 1.0, .05),
+            trunkFolder.add(this.config, 'maxRadius', .05, 0.5, .05),
             trunkFolder.add(this.config, 'climbRate', .05, 1.0, .05),
             trunkFolder.add(this.config, 'trunkKink', 0.0, 0.5, .05),
             trunkFolder.add(this.config, 'treeSteps', 0, 35, 1),
@@ -153,4 +153,4 @@ class View {
     }
 }
 
-const view = new View(ROOT, Object.assign({}, CONFIG));
+const view = new View(document.querySelector('#root'), Object.assign({}, CONFIG));
