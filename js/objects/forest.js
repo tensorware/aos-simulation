@@ -49,7 +49,14 @@ class Forest {
     }
 
     addTree(i) {
-        const tree = new Tree({ ...this.config, seed: randomInt(0, 1000) });
+        const config = { ... this.config, seed: randomInt(0, 1000) };
+        for (let key in config) {
+            if (randomInt(0, 100) <= 50) {
+                config[key] = config[key] * (randomInt(this.config.homogeneity, 100) / 100);
+            }
+        }
+
+        const tree = new Tree(config);
 
         const treeGeometry = new THREE.BufferGeometry();
         treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));

@@ -13,6 +13,7 @@ const CONFIG = {
     levels: 5,
     vMultiplier: 2.36,
     twigScale: 0.39,
+    homogeneity: 80,
     initalBranchLength: 0.49,
     lengthFalloffFactor: 0.85,
     lengthFalloffPower: 0.99,
@@ -93,7 +94,8 @@ class View {
         const treeFolder = forestFolder.addFolder('tree');
         const treeFolders = [
             treeFolder.add(this.config, 'levels', 0, 10, 1),
-            treeFolder.add(this.config, 'twigScale', 0., 1., .05)
+            treeFolder.add(this.config, 'twigScale', 0., 1., .05),
+            treeFolder.add(this.config, 'homogeneity', 50, 100, 1)
         ];
 
         // branching
