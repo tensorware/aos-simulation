@@ -125,7 +125,6 @@ class View {
         [treeFolders, branchFolders, trunkFolders].forEach((folder) => {
             forestFolders = [].concat(forestFolders, folder);
         });
-        log(forestFolders);
         forestFolders.forEach((e) => { e.onChange(() => this.forest.addTrees()).listen() });
 
         // materials
