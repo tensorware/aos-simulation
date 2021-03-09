@@ -325,7 +325,6 @@ class Drone {
     }
 
     reset() {
-        Object.assign(this.config, this.stage._config);
         this.clear();
         this.update();
     }

@@ -7,8 +7,8 @@ const CONFIG = {
     cameraSampling: 1,
     cameraResolution: 512,
     processingSpeed: 0.5,
-    size: 32.6 * 4,
-    trees: 200,
+    size: 32.6 * 2,
+    trees: 30,
     persons: 4,
     levels: 5,
     vMultiplier: 2.36,
@@ -138,7 +138,6 @@ class View {
     }
 
     reset() {
-        Object.assign(this.config, this.stage._config);
         this.forest.reset();
         this.drone.reset();
     }

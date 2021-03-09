@@ -136,12 +136,9 @@ class Forest {
     }
 
     reset() {
-        Object.assign(this.config, this.stage._config);
-        this.treeMaterial.color.setHex(this.config.treeColor);
-        this.twigMaterial.color.setHex(this.config.twigColor);
-        this.groundMaterial.color.setHex(this.config.groundColor);
-        this.update();
         this.clear();
+        this.update();
+
         this.addTrees();
         this.addPersons();
     }

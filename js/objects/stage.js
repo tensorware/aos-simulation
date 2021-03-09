@@ -2,7 +2,6 @@ class Stage {
     constructor(root, config, callback) {
         this.root = root;
         this.config = config;
-        this._config = Object.assign({}, this.config);
 
         new THREE.FontLoader().load('fonts/opensans.json', (font) => {
             this.font = font;
