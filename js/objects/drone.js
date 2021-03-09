@@ -236,6 +236,8 @@ class Drone {
         this.captures.push(plane);
 
         const persons = [];
+        const obstacles = [];
+
         const viewParameters = this.getViewParameters(this.camera.height);
         const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 1;
 
@@ -249,6 +251,18 @@ class Drone {
             }
         });
 
+        this.forest.trees.forEach((tree) => {
+            const start = new THREE.Vector3(this.camera.cone.position.x, 0, this.camera.cone.position.z);
+            const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
+
+            const treeDistance = start.distanceTo(end);
+            if (treeDistance <= cornerDistance) {
+                tree.children.every((children) => {
+                    obstacles.push(children);
+                });
+            }
+        });
+
         const cameraVector = new THREE.Vector3(this.camera.cone.position.x, this.camera.height, this.camera.cone.position.z);
         persons.forEach((person) => {
             const personPosition = person.geometry.attributes.position;
@@ -257,21 +271,20 @@ class Drone {
             for (let i = 0; i < personPosition.count; i++) {
                 personVector.fromBufferAttribute(personPosition, i);
                 person.localToWorld(personVector);
-                personVector.y = 0;
 
-                const rayVector = new THREE.Vector3();
-                rayVector.subVectors(personVector, cameraVector);
-                const ray = new THREE.Raycaster(cameraVector, rayVector.normalize());
+                const radiations = ray(cameraVector, personVector, person);
+                if (radiations.length) {
+                    const radiation = radiations[0];
+                    const intersectVector = new THREE.Vector3(radiation.point.x, radiation.point.y, radiation.point.z);
+                    const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
+                    const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
 
-                const barriers = [].concat(this.forest.trees, this.forest.persons);
-                const intersects = ray.intersectObjects(barriers);
-                if (intersects.length > 0) {
-                    intersects.forEach((intersect) => {
-                        const intersectVector = new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z);
-                        const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
-                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
-                        this.scene.add(intersectLine);
-                    });
+                    const groundVector = new THREE.Vector3(radiation.point.x, 0, radiation.point.z);
+                    if (ray(intersectVector, groundVector, rectangle).length) {
+                        if (!ray(cameraVector, intersectVector, obstacles).length) {
+                            this.scene.add(intersectLine);
+                        }
+                    }
                 }
             }
         });
