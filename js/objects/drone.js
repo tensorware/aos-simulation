@@ -39,8 +39,14 @@ class Drone {
         this.plane = {
             rectangle: rectangle,
             wire: wireFrame,
-            border: new THREE.BoxHelper(rectangle, 0x990000)
+            border: new THREE.BoxHelper(rectangle, 0x990000),
+            text: new THREE.Mesh()
         };
+
+        const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
+        textGeometry.rotateX(-Math.PI / 2);
+        const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xffffff });
+        this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
         this.setSpeed(this.config.droneSpeed);
         this.setHeight(this.config.droneHeight);
@@ -70,7 +76,7 @@ class Drone {
 
         const moveDuration = start.distanceTo(end) / this.drone.speed * 1000;
         const deltaTime = currentTime - this.startTime;
-        const t = deltaTime / moveDuration;
+        const trajectoryTime = deltaTime / moveDuration;
 
         const currentDistance = deltaTime * this.drone.speed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
@@ -80,7 +86,7 @@ class Drone {
         if (deltaTime <= moveDuration) {
             const current = new THREE.Vector3();
             const trajectory = new THREE.Line3(start, end);
-            trajectory.at(t, current);
+            trajectory.at(trajectoryTime, current);
 
             this.setEastWest(current.x);
             this.setNorthSouth(current.z);
@@ -112,6 +118,7 @@ class Drone {
         this.scene.add(this.plane.rectangle);
         // this.scene.add(this.plane.wire);
         this.scene.add(this.plane.border);
+        this.scene.add(this.plane.text);
     }
 
     getViewParameters(height) {
@@ -210,14 +217,27 @@ class Drone {
             ]));
         });
 
-        const resolution = 5; // this.config.cameraResolution;
-        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage, resolution, resolution);
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(this.camera.cone.position.x, 0.05, this.camera.cone.position.z);
+        const x = this.camera.cone.position.x;
+        const y = 0.05;
+        const z = this.camera.cone.position.z;
+
+        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
         const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
+
+        const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
+        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.05 });
+        textGeometry.rotateX(-Math.PI / 2);
 
         this.plane.rectangle.geometry.copy(rectangleGeometry);
         this.plane.wire.geometry.copy(wireGeometry);
+        this.plane.text.geometry.copy(textGeometry);
         this.plane.border.update();
+
+        const textSize = new THREE.Vector3();
+        new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
+        textGeometry.translate(x - textSize.x / 2, y, z + textSize.z / 2);
+        this.plane.text.geometry.copy(textGeometry);
     }
 
     capture() {
