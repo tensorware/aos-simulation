@@ -296,9 +296,12 @@ class Drone {
         this.captures.forEach((capture) => {
             this.scene.remove(capture);
         });
+        this.captures = [];
+
         this.rays.forEach((ray) => {
             this.scene.remove(ray);
         });
+        this.rays = [];
     }
 
     reset() {
