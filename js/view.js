@@ -8,7 +8,7 @@ const CONFIG = {
     cameraResolution: 512,
     processingSpeed: 0.5,
     size: 32.6 * 4,
-    trees: 100,
+    trees: 200,
     persons: 4,
     levels: 5,
     vMultiplier: 2.36,
@@ -46,13 +46,22 @@ class View {
         this.stage = new Stage(this.root, this.config);
         this.forest = new Forest(this.stage);
         this.drone = new Drone(this.forest);
-       
+
         this.addControls();
     }
 
     addControls() {
         this.gui = new dat.GUI({ autoPlace: true, width: 320 });
         this.gui.close();
+
+        const clear = () => {
+            this.drone.clear();
+            this.drone.update();
+            this.forest.clear();
+            this.forest.update();
+            this.forest.addTrees();
+            this.forest.addPersons();
+        };
 
         // drone
         const droneFolder = this.gui.addFolder('drone');
@@ -73,37 +82,20 @@ class View {
 
         // forest
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config, 'size').min(30).max(1000).onFinishChange(() => {
-            this.forest.update();
-            this.forest.clear();
-            this.forest.addTrees();
-            this.forest.addPersons();
-        }).listen();
-        forestFolder.add(this.config, 'trees').min(1).max(1000).onFinishChange(() => {
-            this.forest.update();
-            this.forest.clear();
-            this.forest.addTrees();
-            this.forest.addPersons();
-        }).listen();
-        forestFolder.add(this.config, 'persons').min(1).max(100).onFinishChange(() => {
-            this.forest.update();
-            this.forest.clear();
-            this.forest.addTrees();
-            this.forest.addPersons();
-        }).listen();
+        forestFolder.add(this.config, 'size').min(30).max(1000).onFinishChange(clear.bind(this)).listen();
+        forestFolder.add(this.config, 'trees').min(1).max(1000).onFinishChange(clear.bind(this)).listen();
+        forestFolder.add(this.config, 'persons').min(1).max(100).onFinishChange(clear.bind(this)).listen();
 
+        // tree
         const treeFolder = forestFolder.addFolder('tree');
         const treeFolders = [
-            // tree
             treeFolder.add(this.config, 'levels').min(0).max(10),
             treeFolder.add(this.config, 'twigScale').min(0).max(1)
         ];
 
+        // branching
         const branchFolder = treeFolder.addFolder('branching');
-        const trunkFolder = treeFolder.addFolder('trunk');
-
-        const forestFolders = [].concat(treeFolders, [
-            // branching
+        const branchFolders = [
             branchFolder.add(this.config, 'initalBranchLength').min(0.1).max(1),
             branchFolder.add(this.config, 'lengthFalloffFactor').min(0.5).max(1),
             branchFolder.add(this.config, 'lengthFalloffPower').min(0.1).max(1.5),
@@ -112,9 +104,12 @@ class View {
             branchFolder.add(this.config, 'branchFactor').min(2).max(4),
             branchFolder.add(this.config, 'dropAmount').min(-1).max(1),
             branchFolder.add(this.config, 'growAmount').min(-0.5).max(1),
-            branchFolder.add(this.config, 'sweepAmount').min(-1).max(1),
+            branchFolder.add(this.config, 'sweepAmount').min(-1).max(1)
+        ];
 
-            // trunk
+        // trunk
+        const trunkFolder = treeFolder.addFolder('trunk');
+        const trunkFolders = [
             trunkFolder.add(this.config, 'maxRadius').min(0.05).max(1.0),
             trunkFolder.add(this.config, 'climbRate').min(0.05).max(1.0),
             trunkFolder.add(this.config, 'trunkKink').min(0.0).max(0.5),
@@ -123,8 +118,14 @@ class View {
             trunkFolder.add(this.config, 'radiusFalloffRate').min(0.5).max(0.8),
             trunkFolder.add(this.config, 'twistRate').min(0.0).max(10.0),
             trunkFolder.add(this.config, 'trunkLength').min(0.1).max(5.0)
-        ]);
+        ];
 
+        // forest
+        let forestFolders = [];
+        [treeFolders, branchFolders, trunkFolders].forEach((folder) => {
+            forestFolders = [].concat(forestFolders, folder);
+        });
+        log(forestFolders);
         forestFolders.forEach((e) => { e.onChange(() => this.forest.addTrees()).listen() });
 
         // materials
