@@ -12,6 +12,7 @@ class Drone {
         this.image = {};
         this.goal = { x: 0, y: 0 };
 
+        this.rays = [];
         this.captures = [];
 
         const cameraGeometry = new THREE.ConeGeometry();
@@ -175,7 +176,7 @@ class Drone {
         ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
 
         const intersects = ray.intersectObjects(this.forest.grounds);
-        if (intersects.length > 0) {
+        if (intersects.length) {
             this.config.droneEastWest = this.camera.cone.position.x;
             this.config.droneNorthSouth = this.camera.cone.position.z;
             this.goal = intersects[0].point;
@@ -282,6 +283,7 @@ class Drone {
                     const groundVector = new THREE.Vector3(radiation.point.x, 0, radiation.point.z);
                     if (ray(intersectVector, groundVector, rectangle).length) {
                         if (!ray(cameraVector, intersectVector, obstacles).length) {
+                            this.rays.push(intersectLine);
                             this.scene.add(intersectLine);
                         }
                     }
@@ -294,12 +296,13 @@ class Drone {
         this.captures.forEach((capture) => {
             this.scene.remove(capture);
         });
+        this.rays.forEach((ray) => {
+            this.scene.remove(ray);
+        });
     }
 
     reset() {
         Object.assign(this.config, this.stage._config);
-        this.setEastWest(0);
-        this.setNorthSouth(0);
         this.clear();
         this.update();
     }
