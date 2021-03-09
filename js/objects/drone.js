@@ -51,7 +51,7 @@ class Drone {
         this.addPlane();
 
         this.move = this.move.bind(this);
-        window.addEventListener('dblclick', this.click.bind(this), false);
+        window.addEventListener('pointerdown', doubletap(this.click.bind(this)), false);
     }
 
     move(currentTime) {

@@ -18,6 +18,20 @@ function normalizeAttribute(attribute) {
     return attribute;
 }
 
+function doubletap(callback) {
+    let timer = 0;
+    return (e) => {
+        if (timer == 0) {
+            timer = 1;
+            timer = setTimeout(() => { timer = 0 }, 400);
+        }
+        else {
+            timer = 0;
+            callback(e);
+        }
+    }
+}
+
 function ray(from, to, intersects) {
     const rayVector = new THREE.Vector3();
     rayVector.subVectors(to, from);
