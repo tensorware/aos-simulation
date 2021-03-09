@@ -3,6 +3,6 @@
         "firefox",
         "chrome"
     ],
-    "previewServer.ignoreDefaultBrowser": true,
+    "previewServer.ignoreDefaultBrowser": false,
     "previewServer.port": 8080
 }
