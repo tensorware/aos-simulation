@@ -9,8 +9,8 @@ const CONFIG = {
     cameraSampling: 1,
     cameraResolution: 512,
     processingSpeed: 0.5,
-    size: 32.6 * 2,
-    trees: 40,
+    size: 32.6 * 4,
+    trees: 200,
     persons: 4,
     levels: 5,
     vMultiplier: 2.36,
@@ -26,7 +26,7 @@ const CONFIG = {
     growAmount: 0.235,
     sweepAmount: 0.01,
     maxRadius: 0.1,
-    climbRate: 0.5,
+    climbRate: 0.6,
     trunkKink: 0.09,
     treeSteps: 8,
     taperRate: 0.947,
@@ -70,13 +70,13 @@ class View {
         // drone
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config, 'droneSpeed', 1, 20, 1).onChange(() => this.drone.update()).listen();
-        droneFolder.add(this.config, 'droneHeight', 0, 100, 1).onChange((v) => this.drone.setHeight(v)).listen();
-        droneFolder.add(this.config, 'droneEastWest', -this.forest.config.size / 2, this.forest.config.size / 2, 1).onChange((v) => this.drone.setEastWest(v)).listen();
-        droneFolder.add(this.config, 'droneNorthSouth', -this.forest.config.size / 2, this.forest.config.size / 2, 1).onChange((v) => this.drone.setNorthSouth(v)).listen();
+        droneFolder.add(this.config, 'droneHeight', 1, 100, 1).onChange(() => this.drone.update()).listen();
+        droneFolder.add(this.config, 'droneEastWest', -this.forest.config.size / 2, this.forest.config.size / 2, 0.5).onChange((v) => this.drone.setEastWest(v)).listen();
+        droneFolder.add(this.config, 'droneNorthSouth', -this.forest.config.size / 2, this.forest.config.size / 2, 0.5).onChange((v) => this.drone.setNorthSouth(v)).listen();
 
         // camera
         const cameraFolder = droneFolder.addFolder('camera');
-        cameraFolder.add(this.config, 'cameraView', 15, 160, 1).onChange((v) => this.drone.setView(v)).listen();
+        cameraFolder.add(this.config, 'cameraView', 15, 160, 1).onChange(() => this.drone.update()).listen();
         cameraFolder.add(this.config, 'cameraSampling', .1, 10., .5).onChange(() => this.drone.update()).listen();
         cameraFolder.add(this.config, 'cameraResolution', 128, 1024, 1).onChange(() => this.drone.update()).listen();
 

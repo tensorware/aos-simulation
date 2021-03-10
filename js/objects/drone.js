@@ -6,57 +6,60 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        this.rays = [];
-        this.captures = [];
+        new THREE.STLLoader().load('objects/drone.stl', ((droneGeometry) => {
+            this.rays = [];
+            this.captures = [];
+            this.goal = { x: 0, y: 0 };
 
-        this.goal = {
-            x: 0,
-            y: 0
-        };
+            droneGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
+            const droneMaterial = new THREE.MeshStandardMaterial({
+                color: 0x666666,
+                roughness: 0.8,
+                metalness: 0.8
+            });
 
-        this.planeMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
+            const scale = 0.15;
+            const droneMesh = new THREE.Mesh(droneGeometry, droneMaterial);
+            droneMesh.scale.set(scale, scale, scale);
+            this.camera = droneMesh;
 
-        this.camera = {
-            height: 0,
-            cone: new THREE.Mesh(new THREE.ConeGeometry(), this.planeMaterial)
-        };
+            this.lines = [];
+            for (let i = 0; i < 4; i++) {
+                this.lines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, this.config.droneHeight, 0),
+                    new THREE.Vector3(0, 0, 0)
+                ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
+            }
 
-        this.lines = [];
-        for (let i = 0; i < 4; i++) {
-            this.lines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(0, this.camera.height, 0),
-                new THREE.Vector3(0, 0, 0)
-            ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
-        }
+            this.planeMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
 
-        const rectangleGeometry = new THREE.PlaneGeometry();
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
-        const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
+            const rectangleGeometry = new THREE.PlaneGeometry();
+            rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
+            const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
-        const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
-        const wireMaterial = new THREE.LineBasicMaterial({ color: 0x990000 });
-        const wireFrame = new THREE.LineSegments(wireGeometry, wireMaterial);
+            const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
+            const wireMaterial = new THREE.LineBasicMaterial({ color: 0x990000 });
+            const wireFrame = new THREE.LineSegments(wireGeometry, wireMaterial);
 
-        this.plane = {
-            rectangle: rectangle,
-            wire: wireFrame,
-            border: new THREE.BoxHelper(rectangle, 0x990000),
-            text: new THREE.Mesh()
-        };
+            this.plane = {
+                rectangle: rectangle,
+                wire: wireFrame,
+                border: new THREE.BoxHelper(rectangle, 0x990000),
+                text: new THREE.Mesh()
+            };
 
-        const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(-Math.PI / 2);
-        const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xffffff });
-        this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
+            const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
+            textGeometry.rotateX(-Math.PI / 2);
+            const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff6666 });
+            this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
-        this.setHeight(this.config.droneHeight);
-        this.setView(this.config.cameraView);
+            this.update();
+            this.addCamera();
+            this.addPlane();
 
-        this.addCamera();
-        this.addPlane();
-
-        this.move = this.move.bind(this);
-        window.addEventListener('pointerdown', doubletap(this.click.bind(this)), false);
+            this.move = this.move.bind(this);
+            window.addEventListener('pointerdown', doubletap(this.click.bind(this)), false);
+        }).bind(this));
     }
 
     move(currentTime) {
@@ -103,7 +106,7 @@ class Drone {
     }
 
     addCamera() {
-        this.scene.add(this.camera.cone);
+        this.scene.add(this.camera);
 
         const lineGroup = new THREE.Group();
         this.lines.forEach((line) => {
@@ -120,7 +123,7 @@ class Drone {
     }
 
     getViewParameters(height) {
-        const alpha = this.camera.view / 2;
+        const alpha = this.config.cameraView / 2;
         const beta = 90 - alpha;
 
         const hypotenuse = height / Math.sin(radian(beta));
@@ -133,27 +136,13 @@ class Drone {
         };
     }
 
-    setHeight(height) {
-        this.camera.height = height;
-        this.camera.cone.position.y = height + .5;
-        this.update();
-    }
-
     setEastWest(ew) {
-        this.camera.cone.position.x = ew;
+        this.camera.position.x = ew;
         this.update();
     }
 
     setNorthSouth(ns) {
-        this.camera.cone.position.z = ns;
-        this.update();
-    }
-
-    setView(view) {
-        this.camera.view = view;
-        const viewParameters = this.getViewParameters(1);
-        const viewGeometry = new THREE.ConeGeometry(viewParameters.radius, viewParameters.height, 30, 30);
-        this.camera.cone.geometry.copy(viewGeometry);
+        this.camera.position.z = ns;
         this.update();
     }
 
@@ -172,49 +161,47 @@ class Drone {
 
         const intersects = ray.intersectObjects(this.forest.grounds);
         if (intersects.length) {
-            this.config.droneEastWest = this.camera.cone.position.x;
-            this.config.droneNorthSouth = this.camera.cone.position.z;
+            this.config.droneEastWest = this.camera.position.x;
+            this.config.droneNorthSouth = this.camera.position.z;
             this.goal = intersects[0].point;
             this.move();
         }
     }
 
     update() {
-        if (!isValid(this.camera.height, this.camera.view)) {
-            return;
-        }
+        this.camera.position.y = this.config.droneHeight;
 
         const distance = this.config.droneSpeed * this.config.processingSpeed;
-        const coverage = 2 * this.camera.height * Math.tan(radian(this.camera.view / 2));
+        const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
         const overlap = coverage / distance;
         const time = coverage / this.config.droneSpeed;
 
-        // log('debug', distance, coverage, overlap, time);
+        log('debug', distance, coverage, overlap, time);
 
-        const viewHeight = this.camera.height;
+        const viewHeight = this.config.droneHeight;
         const viewCorners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
         const viewParameters = this.getViewParameters(viewHeight);
 
         this.lines.forEach((line, index) => {
-            const x = viewParameters.radius * viewCorners[index][0] + this.camera.cone.position.x;
-            const z = viewParameters.radius * viewCorners[index][1] + this.camera.cone.position.z;
+            const x = viewParameters.radius * viewCorners[index][0] + this.camera.position.x;
+            const z = viewParameters.radius * viewCorners[index][1] + this.camera.position.z;
 
             line.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(this.camera.cone.position.x, viewHeight, this.camera.cone.position.z),
+                new THREE.Vector3(this.camera.position.x, viewHeight, this.camera.position.z),
                 new THREE.Vector3(x, 0, z)
             ]));
         });
 
-        const x = this.camera.cone.position.x;
+        const x = this.camera.position.x;
         const y = 0.05;
-        const z = this.camera.cone.position.z;
+        const z = this.camera.position.z;
 
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
         rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
         const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
 
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
-        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.05 });
+        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
         textGeometry.rotateX(-Math.PI / 2);
 
         this.plane.rectangle.geometry.copy(rectangleGeometry);
@@ -247,11 +234,11 @@ class Drone {
         const persons = [];
         const obstacles = [];
 
-        const viewParameters = this.getViewParameters(this.camera.height);
+        const viewParameters = this.getViewParameters(this.config.droneHeight);
         const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 1;
 
         this.forest.persons.forEach((person) => {
-            const start = new THREE.Vector3(this.camera.cone.position.x, 0, this.camera.cone.position.z);
+            const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
             const end = new THREE.Vector3(person.position.x, 0, person.position.z);
 
             const personDistance = start.distanceTo(end);
@@ -261,7 +248,7 @@ class Drone {
         });
 
         this.forest.trees.forEach((tree) => {
-            const start = new THREE.Vector3(this.camera.cone.position.x, 0, this.camera.cone.position.z);
+            const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
             const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
             const treeDistance = start.distanceTo(end);
@@ -272,7 +259,7 @@ class Drone {
             }
         });
 
-        const cameraVector = new THREE.Vector3(this.camera.cone.position.x, this.camera.height, this.camera.cone.position.z);
+        const cameraVector = new THREE.Vector3(this.camera.position.x, this.config.droneHeight, this.camera.position.z);
         persons.forEach((person) => {
             const personPosition = person.geometry.attributes.position;
             const personVector = new THREE.Vector3();

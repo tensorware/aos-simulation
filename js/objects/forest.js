@@ -74,7 +74,7 @@ class Forest {
         treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
         treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
 
-        const scale = 3.5;
+        const scale = 3;
         treeGroup.position.x = this.treePositions[i].x;
         treeGroup.position.z = this.treePositions[i].z;
         treeGroup.scale.set(scale, scale, scale);
