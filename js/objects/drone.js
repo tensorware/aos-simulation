@@ -176,7 +176,7 @@ class Drone {
         const overlap = coverage / distance;
         const time = coverage / this.config.droneSpeed;
 
-        log('debug', distance, coverage, overlap, time);
+        // log('debug', distance, coverage, overlap, time);
 
         const viewHeight = this.config.droneHeight;
         const viewCorners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
