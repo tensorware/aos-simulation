@@ -86,9 +86,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		var faces = this.faces;
 		var verts = this.verts;
 		var allNormals = [];
+
 		for (var i = 0; i < verts.length; i++) {
 			allNormals[i] = [];
 		}
+
 		for (i = 0; i < faces.length; i++) {
 			var face = faces[i];
 			var norm = normalize(cross(subVec(verts[face[1]], verts[face[2]]), subVec(verts[face[1]], verts[face[0]])));
@@ -96,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			allNormals[face[1]].push(norm);
 			allNormals[face[2]].push(norm);
 		}
+
 		for (i = 0; i < allNormals.length; i++) {
 			var total = [0, 0, 0];
 			var l = allNormals[i].length;
@@ -108,18 +111,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	Tree.prototype.doFaces = function (branch) {
 		if (!branch) branch = this.root;
+
 		var segments = this.properties.segments;
 		var faces = this.faces;
 		var verts = this.verts;
 		var UV = this.UV;
+
 		if (!branch.parent) {
 			for (i = 0; i < verts.length; i++) {
 				UV[i] = [0, 0];
 			}
+
 			var tangent = normalize(cross(subVec(branch.child0.head, branch.head), subVec(branch.child1.head, branch.head)));
 			var normal = normalize(branch.head);
 			var angle = Math.acos(dot(tangent, [-1, 0, 0]));
+
 			if (dot(cross([-1, 0, 0], tangent), normal) > 0) angle = 2 * Math.PI - angle;
+
 			var segOffset = Math.round((angle / Math.PI / 2 * segments));
 			for (var i = 0; i < segments; i++) {
 				var v1 = branch.ring0[i];
@@ -149,12 +157,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			for (i = 0; i < segments; i++) {
 				var d = normalize(subVec(verts[branch.child0.ring0[i]], branch.child0.head));
 				var l = dot(d, v1);
+
 				if (segOffset0 === undefined || l > match0) {
 					match0 = l;
 					segOffset0 = segments - i;
 				}
+
 				d = normalize(subVec(verts[branch.child1.ring0[i]], branch.child1.head));
 				l = dot(d, v2);
+
 				if (segOffset1 == undefined || l > match1) {
 					match1 = l;
 					segOffset1 = segments - i;
@@ -162,18 +173,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			}
 
 			var UVScale = this.properties.maxRadius / branch.radius;
-
 			for (i = 0; i < segments; i++) {
 				v1 = branch.child0.ring0[i];
 				v2 = branch.ring1[(i + segOffset0 + 1) % segments];
 				v3 = branch.ring1[(i + segOffset0) % segments];
 				v4 = branch.child0.ring0[(i + 1) % segments];
+
 				faces.push([v1, v4, v3]);
 				faces.push([v4, v2, v3]);
+
 				v1 = branch.child1.ring0[i];
 				v2 = branch.ring2[(i + segOffset1 + 1) % segments];
 				v3 = branch.ring2[(i + segOffset1) % segments];
 				v4 = branch.child1.ring0[(i + 1) % segments];
+
 				faces.push([v1, v2, v3]);
 				faces.push([v1, v4, v2]);
 
@@ -192,7 +205,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 			this.doFaces(branch.child0);
 			this.doFaces(branch.child1);
-		} else {
+		}
+		else {
 			for (var i = 0; i < segments; i++) {
 				faces.push([branch.child0.end, branch.ring1[(i + 1) % segments], branch.ring1[i]]);
 				faces.push([branch.child1.end, branch.ring2[(i + 1) % segments], branch.ring2[i]]);
@@ -207,6 +221,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	Tree.prototype.createTwigs = function (branch) {
 		if (!branch) branch = this.root;
+
 		var vertsTwig = this.vertsTwig;
 		var normalsTwig = this.normalsTwig;
 		var facesTwig = this.facesTwig;
@@ -263,7 +278,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			uvsTwig.push([1, 1]);
 			uvsTwig.push([1, 0]);
 			uvsTwig.push([0, 0]);
-		} else {
+		}
+		else {
 			this.createTwigs(branch.child0);
 			this.createTwigs(branch.child1);
 		}
@@ -281,7 +297,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		var segments = this.properties.segments;
 
 		var segmentAngle = Math.PI * 2 / segments;
-
 		if (!branch.parent) {
 			// create the root of the tree
 			branch.root = [];
@@ -297,7 +312,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		if (branch.child0) {
 			if (branch.parent) {
 				var axis = normalize(subVec(branch.head, branch.parent.head));
-			} else {
+			}
+			else {
 				var axis = normalize(branch.head);
 			}
 
@@ -315,7 +331,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			var ring2 = branch.ring2 = [];
 
 			var scale = this.properties.radiusFalloffRate;
-
 			if (branch.child0.type == "trunk" || branch.type == "trunk") {
 				scale = 1 / this.properties.taperRate;
 			}
@@ -361,39 +376,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				verts.push(addVec(centerloc, v));
 			}
 
-			// child radius is related to the brans direction and the length of the branch
-			var length0 = length(subVec(branch.head, branch.child0.head));
-			var length1 = length(subVec(branch.head, branch.child1.head));
-
 			var radius0 = 1 * radius * this.properties.radiusFalloffRate;
 			var radius1 = 1 * radius * this.properties.radiusFalloffRate;
+
 			if (branch.child0.type == "trunk") radius0 = radius * this.properties.taperRate;
+
 			this.createForks(branch.child0, radius0);
 			this.createForks(branch.child1, radius1);
-		} else {
-			// add points for the ends of braches
-			branch.end = verts.length;
-			// branch.head=addVec(branch.head,scaleVec([this.properties.xBias,this.properties.yBias,this.properties.zBias],branch.length*3));
-			verts.push(branch.head);
-
 		}
-
+		else {
+			// add points for the ends of branches
+			branch.end = verts.length;
+			verts.push(branch.head);
+		}
 	};
 
 	var Branch = function (head, parent) {
 		this.head = head;
 		this.parent = parent;
 	};
+
 	Branch.prototype.child0 = null;
 	Branch.prototype.child1 = null;
 	Branch.prototype.parent = null;
 	Branch.prototype.head = null;
 	Branch.prototype.length = 1;
+
 	Branch.prototype.mirrorBranch = function (vec, norm, properties) {
 		var v = cross(norm, cross(vec, norm));
 		var s = properties.branchFactor * dot(v, vec);
 		return [vec[0] - v[0] * s, vec[1] - v[1] * s, vec[2] - v[2] * s];
 	};
+
 	Branch.prototype.split = function (level, steps, properties, l1, l2) {
 		if (l1 == undefined) l1 = 1;
 		if (l2 == undefined) l2 = 1;
@@ -404,10 +418,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		var po;
 		if (this.parent) {
 			po = this.parent.head;
-		} else {
+		}
+		else {
 			po = [0, 0, 0];
 			this.type = "trunk";
 		}
+
 		var so = this.head;
 		var dir = normalize(subVec(so, po));
 
@@ -430,6 +446,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			newdir = newdir2;
 			newdir2 = tmp;
 		}
+
 		if (steps > 0) {
 			var angle = steps / properties.treeSteps * 2 * Math.PI * properties.twistRate;
 			newdir2 = normalize([Math.sin(angle), r, Math.cos(angle)]);
@@ -443,17 +460,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 		var head0 = addVec(so, scaleVec(newdir, this.length));
 		var head1 = addVec(so, scaleVec(newdir2, this.length));
+
 		this.child0 = new Branch(head0, this);
 		this.child1 = new Branch(head1, this);
 		this.child0.length = Math.pow(this.length, properties.lengthFalloffPower) * properties.lengthFalloffFactor;
 		this.child1.length = Math.pow(this.length, properties.lengthFalloffPower) * properties.lengthFalloffFactor;
+
 		if (level > 0) {
 			if (steps > 0) {
 				this.child0.head = addVec(this.head, [(r - 0.5) * 2 * properties.trunkKink, properties.climbRate, (r - 0.5) * 2 * properties.trunkKink]);
 				this.child0.type = "trunk";
 				this.child0.length = this.length * properties.taperRate;
 				this.child0.split(level, steps - 1, properties, l1 + 1, l2);
-			} else {
+			}
+			else {
 				this.child0.split(level - 1, 0, properties, l1 + 1, l2);
 			}
 			this.child1.split(level - 1, 0, properties, l1, l2 + 1);
@@ -490,7 +510,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	};
 
 	var vecAxisAngle = function (vec, axis, angle) {
-		// v cos(T) + (axis x v) * sin(T) + axis*(axis . v)(1-cos(T)
 		var cosr = Math.cos(angle);
 		var sinr = Math.sin(angle);
 		return addVec(addVec(scaleVec(vec, cosr), scaleVec(cross(axis, vec), sinr)), scaleVec(axis, dot(axis, vec) * (1 - cosr)));
