@@ -48,10 +48,9 @@ function isValid() {
     return true;
 }
 
-function randomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min);
+function random(min, max, seed) {
+    const rng = seed === void (0) ? Math.random : new Math.seedrandom(seed);
+    return Math.floor(rng() * (max - min) + min);
 }
 
 function radian(degree) {

@@ -12,6 +12,8 @@ class Forest {
         this.treePositions = [];
         this.personPositions = [];
 
+        this.treeWorker = new Worker('js/objects/tree.js');
+
         this.groundMaterial = new THREE.MeshStandardMaterial({
             color: this.config.groundColor,
             side: THREE.DoubleSide,
@@ -39,87 +41,114 @@ class Forest {
         this.addPersons();
     }
 
-    addGround() {
+    getGround() {
         const geometry = new THREE.PlaneGeometry(this.config.size, this.config.size);
         geometry.rotateX(Math.PI / 2).translate(0, 0, 0);
-        const plane = new THREE.Mesh(geometry, this.groundMaterial);
-
-        this.grounds.push(plane);
-        this.scene.add(plane);
+        return new THREE.Mesh(geometry, this.groundMaterial);
     }
 
-    addTree(i) {
-        const config = { ... this.config, seed: randomInt(0, 1000) };
+    getTree(index) {
+        const seed = random(0, 1000, index);
+        const config = { ... this.config };
         for (let key in config) {
-            if (randomInt(0, 100) <= 50) {
-                config[key] = config[key] * (randomInt(this.config.homogeneity, 100) / 100);
+            if (random(0, 100, seed) <= 50) {
+                config[key] = config[key] * (random(this.config.homogeneity, 100, seed) / 100);
             }
         }
+        config.seed = seed;
+        config.index = index;
+        return config;
+    }
 
-        const tree = new Tree(config);
+    getPerson(index) {
+        const person = new Person(this.config).mesh;
+        person.position.x = this.personPositions[index].x;
+        person.position.z = this.personPositions[index].z;
+        return person;
+    }
 
-        const treeGeometry = new THREE.BufferGeometry();
-        treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
-        treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
-        treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
-        treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
-
-        const twigGeometry = new THREE.BufferGeometry();
-        twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
-        twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
-        twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
-        twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
-
-        const treeGroup = new THREE.Group();
-        treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
-        treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
-
-        const scale = 3;
-        treeGroup.position.x = this.treePositions[i].x;
-        treeGroup.position.z = this.treePositions[i].z;
-        treeGroup.scale.set(scale, scale, scale);
-
-        this.trees.push(treeGroup);
-        this.scene.add(treeGroup);
+    addGround() {
+        const ground = this.getGround();
+        this.grounds.push(ground);
+        this.scene.add(ground);
     }
 
     addTrees() {
+        const treeConfigs = [];
         for (let i = 0; i < this.config.trees; i++) {
-            this.addTree(i);
+            treeConfigs.push(this.getTree(i));
         }
-    }
 
-    addPerson(i) {
-        const person = new Person(this.config).mesh;
-        person.position.x = this.personPositions[i].x;
-        person.position.z = this.personPositions[i].z;
+        this.treeWorker.terminate();
+        this.treeWorker = new Worker('js/objects/tree.js');
 
-        this.persons.push(person);
-        this.scene.add(person);
+        this.treeWorker.postMessage(treeConfigs);
+        this.treeWorker.onmessage = ((e) => {
+            e.data.forEach((tree) => {
+                const treeGeometry = new THREE.BufferGeometry();
+                treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
+                treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
+                treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
+                treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
+
+                const twigGeometry = new THREE.BufferGeometry();
+                twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
+                twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
+                twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
+                twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
+
+                const treeGroup = new THREE.Group();
+                treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
+                treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
+
+                const scale = 3;
+                treeGroup.scale.set(scale, scale, scale);
+
+                if (tree.index < this.trees.length) {
+                    treeGroup.position.x = this.trees[tree.index].position.x;
+                    treeGroup.position.z = this.trees[tree.index].position.z;
+
+                    this.scene.remove(this.trees[tree.index]);
+                    this.trees[tree.index] = treeGroup;
+                } else {
+                    treeGroup.position.x = this.treePositions[tree.index].x;
+                    treeGroup.position.z = this.treePositions[tree.index].z;
+
+                    this.trees.push(treeGroup);
+                }
+                this.scene.add(treeGroup);
+            });
+        }).bind(this);
     }
 
     addPersons() {
+        const persons = [];
         for (let i = 0; i < this.config.persons; i++) {
-            this.addPerson(i);
+            persons.push(this.getPerson(i));
         }
+
+        persons.forEach((person) => {
+            this.persons.push(person);
+            this.scene.add(person);
+        });
     }
 
     update() {
         const treeMargin = 1;
         this.treePositions = [];
-        for (let i = 0; i <= this.config.trees; i++) {
+        for (let i = 0; i <= 100000; i++) {
             this.treePositions.push({
-                x: randomInt(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin),
-                z: randomInt(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin)
+                x: random(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin),
+                z: random(-this.config.size / 2 + treeMargin, this.config.size / 2 - treeMargin)
             });
         }
 
         const personMargin = 2;
         this.personPositions = [];
-        for (let i = 0; i <= this.config.persons; i++) {
+        for (let i = 0; i <= 100000; i++) {
             this.personPositions.push({
-                x: randomInt(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin),
-                z: randomInt(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin)
+                x: random(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin),
+                z: random(-this.config.size / 2 + personMargin, this.config.size / 2 - personMargin)
             });
         }
 
@@ -130,23 +159,35 @@ class Forest {
         });
     }
 
-    clear() {
-        this.trees.forEach((tree) => {
-            this.scene.remove(tree);
-        });
-        this.trees = [];
+    clear(full) {
+        if (full) {
+            this.trees.forEach((tree) => {
+                this.scene.remove(tree);
+            });
+            this.trees = [];
 
-        this.persons.forEach((person) => {
-            this.scene.remove(person);
-        });
-        this.persons = [];
+            this.persons.forEach((person) => {
+                this.scene.remove(person);
+            });
+            this.persons = [];
+        }
+
+        for (let i = (this.trees.length - 1); i >= this.config.trees; i--) {
+            this.scene.remove(this.trees[i]);
+            this.trees.splice(i, 1);
+        };
+
+        for (let i = (this.persons.length - 1); i >= 0; i--) {
+            this.scene.remove(this.persons[i]);
+            this.persons.splice(i, 1);
+        };
     }
 
     reset() {
         this.clear();
         this.update();
 
-        this.addTrees();
+        // this.addTrees();
         this.addPersons();
     }
 }

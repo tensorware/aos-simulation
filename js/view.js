@@ -9,8 +9,8 @@ const CONFIG = {
     cameraSampling: 1,
     cameraResolution: 512,
     processingSpeed: 0.5,
-    size: 32.6 * 4,
-    trees: 200,
+    size: 100,
+    trees: 300,
     persons: 4,
     levels: 5,
     vMultiplier: 2.36,
@@ -57,10 +57,10 @@ class View {
         this.gui.close();
 
         const clear = () => {
-            this.drone.clear();
+            this.drone.clear(true);
             this.drone.update();
 
-            this.forest.clear();
+            this.forest.clear(true);
             this.forest.update();
 
             this.forest.addTrees();
