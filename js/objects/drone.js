@@ -11,7 +11,7 @@ class Drone {
             this.captures = [];
             this.goal = { x: 0, y: 0 };
 
-            droneGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
+            droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
             const droneMaterial = new THREE.MeshStandardMaterial({
                 color: 0x666666,
                 roughness: 0.8,
