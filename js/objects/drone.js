@@ -256,7 +256,7 @@ class Drone {
 
                 const treeDistance = start.distanceTo(end);
                 if (treeDistance <= cornerDistance) {
-                    tree.children.forEach((children) => {
+                    tree.children.every((children) => {
                         obstacles.push(children);
                     });
                 }
