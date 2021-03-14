@@ -29,7 +29,10 @@ class Stage {
             this.camera.add(directionalLight);
             this.camera.add(ambientLight);
 
+            this.stats = new Stats();
+            this.root.appendChild(this.stats.dom);
             this.root.appendChild(this.renderer.domElement);
+
             this.animate = this.animate.bind(this);
             requestAnimationFrame(this.animate);
 
@@ -45,7 +48,9 @@ class Stage {
     }
 
     render() {
+        this.stats.begin();
         this.renderer.render(this.scene, this.camera);
+        this.stats.end();
     }
 
     resize() {
