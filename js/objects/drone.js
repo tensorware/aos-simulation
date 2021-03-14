@@ -58,7 +58,7 @@ class Drone {
             this.addPlane();
 
             this.move = this.move.bind(this);
-            window.addEventListener('pointerdown', doubletap(this.click.bind(this)), false);
+            window.addEventListener('pointerdown', doubleClick(this.click.bind(this)), false);
         }).bind(this));
     }
 
@@ -268,7 +268,7 @@ class Drone {
                 personVector.fromBufferAttribute(personPosition, i);
                 person.localToWorld(personVector);
 
-                const radiations = ray(cameraVector, personVector, person);
+                const radiations = raycast(cameraVector, personVector, person);
                 if (radiations.length) {
                     const radiation = radiations[0];
                     const intersectVector = new THREE.Vector3(radiation.point.x, radiation.point.y, radiation.point.z);
@@ -276,8 +276,8 @@ class Drone {
                     const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
 
                     const groundVector = new THREE.Vector3(radiation.point.x, 0, radiation.point.z);
-                    if (ray(intersectVector, groundVector, rectangle).length) {
-                        if (!ray(cameraVector, intersectVector, obstacles).length) {
+                    if (raycast(intersectVector, groundVector, rectangle).length) {
+                        if (!raycast(cameraVector, intersectVector, obstacles).length) {
                             this.rays.push(intersectLine);
                             this.scene.add(intersectLine);
                         }

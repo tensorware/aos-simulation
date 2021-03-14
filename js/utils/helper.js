@@ -1,10 +1,10 @@
 function createFloatAttribute(array, itemSize) {
-    const typedArray = new Float32Array(Tree.flattenArray(array));
+    const typedArray = new Float32Array(flattenArray(array));
     return new THREE.BufferAttribute(typedArray, itemSize);
 }
 
 function createIntAttribute(array, itemSize) {
-    const typedArray = new Uint16Array(Tree.flattenArray(array));
+    const typedArray = new Uint16Array(flattenArray(array));
     return new THREE.BufferAttribute(typedArray, itemSize);
 }
 
@@ -18,12 +18,38 @@ function normalizeAttribute(attribute) {
     return attribute;
 }
 
-function doubletap(callback) {
+function flattenArray(input) {
+    const result = [];
+    for (let i = 0; i < input.length; i++) {
+        for (let j = 0; j < input[i].length; j++) {
+            result.push(input[i][j]);
+        }
+    }
+    return result;
+}
+
+function splitArray(items, chunks) {
+    const result = [];
+    const n = Math.ceil(items.length / chunks);
+    for (let j = 0; j < chunks; j++) {
+        result.push([]);
+        for (let i = 0; i < n; i++) {
+            let v = items[i + j * n];
+            if (v == undefined) {
+                continue;
+            }
+            result[j].push(v);
+        }
+    }
+    return result;
+}
+
+function doubleClick(callback) {
     let timer = 0;
     return (e) => {
         if (timer == 0) {
             timer = 1;
-            timer = setTimeout(() => { timer = 0 }, 400);
+            timer = setTimeout(() => { timer = 0 }, 300);
         }
         else {
             timer = 0;
@@ -32,20 +58,19 @@ function doubletap(callback) {
     }
 }
 
-function ray(from, to, intersects) {
+function getWorkers() {
+    const workers = [];
+    for (let i = 0; i < navigator.hardwareConcurrency; i++) {
+        workers.push(new Worker('js/utils/worker.js'));
+    }
+    return workers;
+}
+
+function raycast(from, to, intersects) {
     const rayVector = new THREE.Vector3();
     rayVector.subVectors(to, from);
     const ray = new THREE.Raycaster(from, rayVector.normalize());
     return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
-}
-
-function isValid() {
-    Array.from(arguments).forEach((arg) => {
-        if (typeof arg === 'undefined') {
-            return false;
-        }
-    });
-    return true;
 }
 
 function random(min, max, seed) {

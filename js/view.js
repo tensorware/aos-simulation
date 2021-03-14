@@ -56,17 +56,6 @@ class View {
         this.gui = new dat.GUI({ autoPlace: true, width: 320 });
         this.gui.close();
 
-        const clear = () => {
-            this.drone.clear(true);
-            this.drone.update();
-
-            this.forest.clear(true);
-            this.forest.update();
-
-            this.forest.addTrees();
-            this.forest.addPersons();
-        };
-
         // drone
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config, 'droneSpeed', 1, 20, 1).onChange(() => this.drone.update()).listen();
@@ -86,9 +75,25 @@ class View {
 
         // forest
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config, 'size', 30, 1000, 1).onFinishChange(clear.bind(this)).listen();
-        forestFolder.add(this.config, 'trees', 1, 1000, 1).onFinishChange(clear.bind(this)).listen();
-        forestFolder.add(this.config, 'persons', 1, 10, 1).onFinishChange(clear.bind(this)).listen();
+        forestFolder.add(this.config, 'size', 30, 1000, 1).onFinishChange(() => {
+            this.drone.clear();
+            this.drone.update();
+
+            this.forest.clear(true);
+            this.forest.update();
+            this.forest.addTrees();
+            this.forest.addPersons();
+        }).listen();
+        forestFolder.add(this.config, 'trees', 1, 1000, 1).onFinishChange(() => {
+            this.drone.clear();
+            this.drone.update();
+
+            this.forest.clear();
+            this.forest.update();
+            this.forest.addTrees();
+            this.forest.addPersons();
+        }).listen();
+        forestFolder.add(this.config, 'persons', 1, 10, 1).onFinishChange(this.reset.bind(this)).listen();
 
         // tree
         const treeFolder = forestFolder.addFolder('tree');
