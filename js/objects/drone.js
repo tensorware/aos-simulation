@@ -238,32 +238,28 @@ class Drone {
         const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 1;
 
         this.forest.persons.forEach((person) => {
-            if (!person) {
-                return;
-            }
+            if (person) {
+                const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
+                const end = new THREE.Vector3(person.position.x, 0, person.position.z);
 
-            const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
-            const end = new THREE.Vector3(person.position.x, 0, person.position.z);
-
-            const personDistance = start.distanceTo(end);
-            if (personDistance <= cornerDistance) {
-                persons.push(person);
+                const personDistance = start.distanceTo(end);
+                if (personDistance <= cornerDistance) {
+                    persons.push(person);
+                }
             }
         });
 
         this.forest.trees.forEach((tree) => {
-            if (!tree) {
-                return;
-            }
+            if (tree) {
+                const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
+                const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
-            const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
-            const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
-
-            const treeDistance = start.distanceTo(end);
-            if (treeDistance <= cornerDistance) {
-                tree.children.forEach((children) => {
-                    obstacles.push(children);
-                });
+                const treeDistance = start.distanceTo(end);
+                if (treeDistance <= cornerDistance) {
+                    tree.children.forEach((children) => {
+                        obstacles.push(children);
+                    });
+                }
             }
         });
 
