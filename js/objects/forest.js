@@ -5,14 +5,14 @@ class Forest {
         this.scene = stage.scene;
         this.stage = stage;
 
-        this.trees = [];
-        this.persons = [];
-        this.grounds = [];
+        this.trees = [...new Array(this.config.trees)];
+        this.persons = [... new Array(this.config.persons)];
 
+        this.grounds = [];
         this.treePositions = [];
         this.personPositions = [];
 
-        this.treeWorker = new Worker('js/objects/tree.js');
+        this.workers = getWorkers();
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
             color: this.config.groundColor,
@@ -74,51 +74,53 @@ class Forest {
     }
 
     addTrees() {
-        const treeConfigs = [];
+        const configs = [];
         for (let i = 0; i < this.config.trees; i++) {
-            treeConfigs.push(this.getTree(i));
+            configs.push(this.getTree(i));
         }
 
-        this.treeWorker.terminate();
-        this.treeWorker = new Worker('js/objects/tree.js');
+        this.workers.forEach((worker) => { worker.terminate() });
+        this.workers = getWorkers();
 
-        this.treeWorker.postMessage(treeConfigs);
-        this.treeWorker.onmessage = ((e) => {
-            e.data.forEach((tree) => {
-                const treeGeometry = new THREE.BufferGeometry();
-                treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
-                treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
-                treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
-                treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
+        splitArray(configs, this.workers.length).forEach((config, i) => {
+            this.workers[i].postMessage(config);
+            this.workers[i].onmessage = ((e) => {
+                e.data.forEach((tree) => {
+                    const treeGeometry = new THREE.BufferGeometry();
+                    treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
+                    treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
+                    treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
+                    treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
 
-                const twigGeometry = new THREE.BufferGeometry();
-                twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
-                twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
-                twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
-                twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
+                    const twigGeometry = new THREE.BufferGeometry();
+                    twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
+                    twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
+                    twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
+                    twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
-                const treeGroup = new THREE.Group();
-                treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
-                treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
+                    const treeGroup = new THREE.Group();
+                    treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
+                    treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
 
-                const scale = 3;
-                treeGroup.scale.set(scale, scale, scale);
-
-                if (tree.index < this.trees.length) {
-                    treeGroup.position.x = this.trees[tree.index].position.x;
-                    treeGroup.position.z = this.trees[tree.index].position.z;
-
-                    this.scene.remove(this.trees[tree.index]);
-                    this.trees[tree.index] = treeGroup;
-                } else {
+                    const scale = 3;
+                    treeGroup.scale.set(scale, scale, scale);
                     treeGroup.position.x = this.treePositions[tree.index].x;
                     treeGroup.position.z = this.treePositions[tree.index].z;
 
-                    this.trees.push(treeGroup);
-                }
-                this.scene.add(treeGroup);
-            });
-        }).bind(this);
+                    if (tree.index < this.trees.length) {
+                        if (this.trees[tree.index]) {
+                            treeGroup.position.x = this.trees[tree.index].position.x;
+                            treeGroup.position.z = this.trees[tree.index].position.z;
+                            this.scene.remove(this.trees[tree.index]);
+                        }
+                        this.trees[tree.index] = treeGroup;
+                    } else {
+                        this.trees.push(treeGroup);
+                    }
+                    this.scene.add(treeGroup);
+                });
+            }).bind(this);
+        });
     }
 
     addPersons() {
@@ -127,8 +129,8 @@ class Forest {
             persons.push(this.getPerson(i));
         }
 
-        persons.forEach((person) => {
-            this.persons.push(person);
+        persons.forEach((person, i) => {
+            this.persons[i] = person;
             this.scene.add(person);
         });
     }
@@ -175,12 +177,17 @@ class Forest {
         for (let i = (this.trees.length - 1); i >= this.config.trees; i--) {
             this.scene.remove(this.trees[i]);
             this.trees.splice(i, 1);
-        };
+        }
 
         for (let i = (this.persons.length - 1); i >= 0; i--) {
             this.scene.remove(this.persons[i]);
             this.persons.splice(i, 1);
-        };
+        }
+
+        const appendTrees = this.config.trees - this.trees.length;
+        if (appendTrees > 0) {
+            this.trees.push.apply(this.trees, [...new Array(appendTrees)]);
+        }
     }
 
     reset() {

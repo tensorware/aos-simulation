@@ -1,6 +1,4 @@
 /*
-tree.js with worker support
-
 Copyright (c) 2012, Paul Brunt (proctree.js)
 All rights reserved.
 
@@ -522,26 +520,4 @@ var scaleInDirection = function (vector, direction, scale) {
 	var currentMag = dot(vector, direction);
 	var change = scaleVec(direction, currentMag * scale - currentMag);
 	return addVec(vector, change);
-};
-
-Tree.flattenArray = function (input) {
-	var retArray = [];
-	for (var i = 0; i < input.length; i++) {
-		for (var j = 0; j < input[i].length; j++) {
-			retArray.push(input[i][j]);
-		}
-	}
-	return retArray;
-}
-
-self.onmessage = (e) => {
-	const trees = [];
-	(e.data || []).forEach((config, i) => {
-		trees.push(new Tree(config));
-		if ((i + 1) % 10 == 0) {
-			self.postMessage(trees);
-			trees.splice(0, trees.length);
-		}
-	});
-	self.postMessage(trees);
 };
