@@ -13,5 +13,5 @@ const getTrees = (configs, chunks) => {
 }
 
 self.onmessage = (e) => {
-    getTrees(e.data || [], 15);
+    getTrees(e.data || [], 10);
 }
