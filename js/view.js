@@ -11,7 +11,7 @@ const CONFIG = {
     processingSpeed: 0.5,
     size: 100,
     trees: 300,
-    persons: 4,
+    persons: 3,
     levels: 5,
     vMultiplier: 2.36,
     twigScale: 0.39,
