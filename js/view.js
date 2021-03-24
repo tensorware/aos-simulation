@@ -53,8 +53,8 @@ class View {
     }
 
     addControls() {
-        this.gui = new dat.GUI({ autoPlace: true, width: 320 });
-        this.gui.close();
+        this.gui = new dat.GUI({ autoPlace: false, width: 320 });
+        this.root.querySelector('#controls').appendChild(this.gui.domElement);
 
         // drone
         const droneFolder = this.gui.addFolder('drone');
@@ -150,6 +150,7 @@ class View {
         matFolder.addColor(this.config, 'backgroundColor').onChange((v) => this.stage.renderer.setClearColor(v)).listen();
 
         this.gui.add(this, 'reset');
+        this.gui.close();
     }
 
     reset() {

@@ -30,8 +30,8 @@ class Stage {
             this.camera.add(ambientLight);
 
             this.stats = new Stats();
-            this.root.appendChild(this.stats.dom);
-            this.root.appendChild(this.renderer.domElement);
+            this.root.querySelector('#info').appendChild(this.stats.dom);
+            this.root.querySelector('#stage').appendChild(this.renderer.domElement);
 
             this.animate = this.animate.bind(this);
             requestAnimationFrame(this.animate);
