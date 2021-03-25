@@ -58,7 +58,11 @@ class Drone {
             this.addPlane();
 
             this.move = this.move.bind(this);
-            window.addEventListener('pointerdown', doubleClick(this.click.bind(this)), false);
+            this.click = doubleClick(this.click.bind(this));
+
+            window.addEventListener('pointerdown', this.click, false);
+            window.addEventListener('pointerup', this.click, false);
+
         }).bind(this));
     }
 
@@ -232,10 +236,10 @@ class Drone {
         this.captures.push(plane);
 
         const persons = [];
-        const obstacles = [];
+        const trees = [];
 
         const viewParameters = this.getViewParameters(this.config.droneHeight);
-        const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 1;
+        const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 3;
 
         this.forest.persons.forEach((person) => {
             if (person) {
@@ -257,7 +261,7 @@ class Drone {
                 const treeDistance = start.distanceTo(end);
                 if (treeDistance <= cornerDistance) {
                     tree.children.every((children) => {
-                        obstacles.push(children);
+                        trees.push(children);
                     });
                 }
             }
@@ -268,23 +272,44 @@ class Drone {
             const personPosition = person.geometry.attributes.position;
             const personVector = new THREE.Vector3();
 
+            // check each vertices on person
             for (let i = 0; i < personPosition.count; i++) {
                 personVector.fromBufferAttribute(personPosition, i);
                 person.localToWorld(personVector);
 
-                const radiations = raycast(cameraVector, personVector, person);
-                if (radiations.length) {
-                    const radiation = radiations[0];
-                    const intersectVector = new THREE.Vector3(radiation.point.x, radiation.point.y, radiation.point.z);
-                    const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
-                    const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
+                // check if person is inside field of view
+                const groundVector = new THREE.Vector3(personVector.x, 0, personVector.z);
+                if (raycast(cameraVector, groundVector, rectangle).length) {
 
-                    const groundVector = new THREE.Vector3(radiation.point.x, 0, radiation.point.z);
-                    if (raycast(intersectVector, groundVector, rectangle).length) {
-                        if (!raycast(cameraVector, intersectVector, obstacles).length) {
-                            this.rays.push(intersectLine);
-                            this.scene.add(intersectLine);
+                    // obstacles near the person 
+                    const obstacles = trees.filter((tree) => {
+                        const treeBox = new THREE.BoxHelper(tree, 0xffffff);
+                        const treeCenter = getCenter(treeBox);
+
+                        const treeAngle = new THREE.Vector3();
+                        treeAngle.copy(cameraVector).sub(new THREE.Vector3(treeCenter.x, cameraVector.y, treeCenter.z));
+
+                        const personAngle = new THREE.Vector3();
+                        personAngle.copy(cameraVector).sub(new THREE.Vector3(personVector.x, cameraVector.y, personVector.z));
+
+                        const treeDistance = treeAngle.length();
+                        const personDistance = personAngle.length();
+
+                        const angle = treeAngle.angleTo(personAngle);
+                        if (angle < Math.PI / 4 && (treeDistance - 3) < personDistance) {
+                            // this.scene.add(treeBox);
+                            return true;
                         }
+                    });
+
+                    // check if obstacles are in between
+                    const intersectVector = new THREE.Vector3(personVector.x, personVector.y, personVector.z);
+                    if (!raycast(cameraVector, intersectVector, obstacles).length) {
+                        const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
+                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
+
+                        this.rays.push(intersectLine);
+                        this.scene.add(intersectLine);
                     }
                 }
             }
