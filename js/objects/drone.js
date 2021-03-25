@@ -316,14 +316,22 @@ class Drone {
         });
 
         // generate image
-        const image = this.image(this.lines, rays);
+        const image = this.image(rays, this.lines);
     }
 
-    image(border, rays) {
-        const borderPoints = border.map(getPoints);
+    image(rays, border) {
         const rayPoints = rays.map(getPoints);
+        const borderPoints = border.map(getPoints);
 
-        // log(borderPoints, rayPoints);
+        const minX = Math.min.apply(Math, borderPoints.map((p) => { return p[1].x }));
+        const minY = Math.min.apply(Math, borderPoints.map((p) => { return p[1].y }));
+        const minZ = Math.min.apply(Math, borderPoints.map((p) => { return p[1].z }));
+
+        const min = new THREE.Vector3(minX, minY, minZ);
+        rayPoints.forEach((rayPoint) => { rayPoint.forEach((p) => { p.sub(min) }) });
+        borderPoints.forEach((borderPoint) => { borderPoint.forEach((p) => { p.sub(min) }) });
+
+        // log(rayPoints, borderPoints);
     }
 
     clear() {
