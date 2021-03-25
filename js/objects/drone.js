@@ -156,8 +156,8 @@ class Drone {
         }
 
         const mouse = {
-            x: (e.clientX / window.innerWidth) * 2 - 1,
-            y: (e.clientY / window.innerHeight) * -2 + 1
+            x: (e.clientX / this.root.clientWidth) * 2 - 1,
+            y: (e.clientY / this.root.clientHeight) * -2 + 1
         };
 
         const ray = new THREE.Raycaster();

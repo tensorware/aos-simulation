@@ -50,6 +50,15 @@ class View {
             this.drone = new Drone(this.forest);
             this.addControls();
         });
+
+        Split(['#top', '#bottom'], {
+            gutterSize: 4,
+            sizes: [80, 20],
+            minSize: [0, 0],
+            cursor: 'ns-resize',
+            direction: 'vertical',
+            onDrag: () => { this.stage.resize() }
+        });
     }
 
     addControls() {
@@ -159,4 +168,6 @@ class View {
     }
 }
 
-const view = new View(document.querySelector('#root'), Object.assign({}, CONFIG));
+const root = document.querySelector('#top');
+const config = Object.assign({}, CONFIG);
+const view = new View(root, config);

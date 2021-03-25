@@ -1,4 +1,4 @@
-body, html, #root {
+body, html {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -6,26 +6,50 @@ body, html, #root {
     overflow: hidden;
 }
 
-#root #stage {
-    position: absolute;
+#main {
     width: 100%;
     height: 100%;
 }
 
-#root #info {
+#main #top {
+    width: 100%;
+    height: 80%;
+}
+
+#main #top #info {
     top: 0;
     left: 0;
     position: absolute;
 }
 
-#root #info div {
+#main #top #info div {
     padding: 3px;
     position: absolute;
 }
 
-#root #controls {
+#main #top #stage {
+    width: 100%;
+    height: 100%;
+}
+
+#main #top #controls {
     top: 0;
     right: 0;
     padding: 3px;
-    position: absolute;    
+    position: absolute;
+}
+
+#main .gutter {
+    cursor: ns-resize;
+    background-color: #dddddd;
+}
+
+#main #top {
+    width: 100%;
+    height: 20%;
+}
+
+#main #bottom #captures {
+    width: 100%;
+    height: 100%;
 }

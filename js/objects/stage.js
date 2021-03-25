@@ -54,9 +54,8 @@ class Stage {
     }
 
     resize() {
-        const { clientHeight, clientWidth } = this.root.parentElement;
-        this.camera.aspect = clientWidth / clientHeight;
+        this.camera.aspect = this.root.clientWidth / this.root.clientHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(clientWidth, clientHeight);
+        this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
     }
 }
