@@ -237,10 +237,12 @@ class Drone {
 
         const persons = [];
         const trees = [];
+        const lines = [];
 
         const viewParameters = this.getViewParameters(this.config.droneHeight);
         const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 3;
 
+        // nearby persons
         this.forest.persons.forEach((person) => {
             if (person) {
                 const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
@@ -253,6 +255,7 @@ class Drone {
             }
         });
 
+        // nearby trees
         this.forest.trees.forEach((tree) => {
             if (tree) {
                 const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
@@ -267,6 +270,7 @@ class Drone {
             }
         });
 
+        // raycast persons
         const cameraVector = new THREE.Vector3(this.camera.position.x, this.config.droneHeight, this.camera.position.z);
         persons.forEach((person) => {
             const personPosition = person.geometry.attributes.position;
@@ -307,12 +311,16 @@ class Drone {
                     if (!raycast(cameraVector, intersectVector, obstacles).length) {
                         const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
                         const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
-
-                        this.rays.push(intersectLine);
-                        this.scene.add(intersectLine);
+                        lines.push(intersectLine);
                     }
                 }
             }
+        });
+
+        // append ray lines
+        lines.forEach((line) => {
+            this.rays.push(line);
+            this.scene.add(line);
         });
     }
 
