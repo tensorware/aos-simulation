@@ -150,7 +150,7 @@ class View {
         matFolder.addColor(this.config, 'backgroundColor').onChange((v) => this.stage.renderer.setClearColor(v)).listen();
 
         this.gui.add(this, 'reset');
-        this.gui.close();
+        // this.gui.close();
     }
 
     reset() {
