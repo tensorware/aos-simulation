@@ -90,19 +90,31 @@ function getWorkers() {
     return workers;
 }
 
-function raycast(from, to, intersects) {
-    const rayVector = new THREE.Vector3();
-    rayVector.subVectors(to, from);
-    const ray = new THREE.Raycaster(from, rayVector.normalize());
-    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
-}
-
 function getCenter(mesh) {
     const center = new THREE.Vector3();
     mesh.geometry.computeBoundingBox();
     mesh.geometry.boundingBox.getCenter(center);
     mesh.localToWorld(center);
     return center;
+}
+
+function getPoints(mesh) {
+    const points = [];
+    const vector = new THREE.Vector3();
+    const position = mesh.geometry.attributes.position;
+    for (let i = 0; i < position.count; i++) {
+        vector.fromBufferAttribute(position, i);
+        mesh.localToWorld(vector);
+        points.push(new THREE.Vector3().copy(vector));
+    }
+    return points;
+}
+
+function rayCast(from, to, intersects) {
+    const rayVector = new THREE.Vector3();
+    rayVector.subVectors(to, from);
+    const ray = new THREE.Raycaster(from, rayVector.normalize());
+    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
 }
 
 function random(min, max, seed) {

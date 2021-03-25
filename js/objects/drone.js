@@ -237,7 +237,7 @@ class Drone {
 
         const persons = [];
         const trees = [];
-        const lines = [];
+        const rays = [];
 
         const viewParameters = this.getViewParameters(this.config.droneHeight);
         const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 3;
@@ -273,17 +273,11 @@ class Drone {
         // raycast persons
         const cameraVector = new THREE.Vector3(this.camera.position.x, this.config.droneHeight, this.camera.position.z);
         persons.forEach((person) => {
-            const personPosition = person.geometry.attributes.position;
-            const personVector = new THREE.Vector3();
 
-            // check each vertices on person
-            for (let i = 0; i < personPosition.count; i++) {
-                personVector.fromBufferAttribute(personPosition, i);
-                person.localToWorld(personVector);
-
-                // check if person is inside field of view
+            // check if person is inside field of view
+            getPoints(person).forEach((personVector) => {
                 const groundVector = new THREE.Vector3(personVector.x, 0, personVector.z);
-                if (raycast(cameraVector, groundVector, rectangle).length) {
+                if (rayCast(cameraVector, groundVector, rectangle).length) {
 
                     // obstacles near the person 
                     const obstacles = trees.filter((tree) => {
@@ -308,20 +302,28 @@ class Drone {
 
                     // check if obstacles are in between
                     const intersectVector = new THREE.Vector3(personVector.x, personVector.y, personVector.z);
-                    if (!raycast(cameraVector, intersectVector, obstacles).length) {
+                    if (!rayCast(cameraVector, intersectVector, obstacles).length) {
                         const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
                         const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
-                        lines.push(intersectLine);
+
+                        // append ray lines
+                        rays.push(intersectLine);
+                        this.rays.push(intersectLine);
+                        this.scene.add(intersectLine);
                     }
                 }
-            }
+            });
         });
 
-        // append ray lines
-        lines.forEach((line) => {
-            this.rays.push(line);
-            this.scene.add(line);
-        });
+        // generate image
+        const image = this.image(this.lines, rays);
+    }
+
+    image(border, rays) {
+        const borderPoints = border.map(getPoints);
+        const rayPoints = rays.map(getPoints);
+
+        // log(borderPoints, rayPoints);
     }
 
     clear() {
