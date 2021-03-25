@@ -30,11 +30,11 @@ function flattenArray(input) {
 
 function splitArray(items, chunks) {
     const result = [];
-    const n = Math.ceil(items.length / chunks);
+    const length = Math.ceil(items.length / chunks);
     for (let j = 0; j < chunks; j++) {
         result.push([]);
-        for (let i = 0; i < n; i++) {
-            let v = items[i + j * n];
+        for (let i = 0; i < length; i++) {
+            let v = items[i + j * length];
             if (v == undefined) {
                 continue;
             }
@@ -45,15 +45,39 @@ function splitArray(items, chunks) {
 }
 
 function doubleClick(callback) {
-    let timer = 0;
+    let click = false;
+    let which = -1;
+    let state = 0;
+
+    const reset = () => {
+        click = false;
+        which = -1;
+        state = 0;
+    };
+
+    let states = ['pointerdown', 'pointerup', 'pointerdown', 'pointerup'];
+
     return (e) => {
-        if (timer == 0) {
-            timer = 1;
-            timer = setTimeout(() => { timer = 0 }, 300);
+        if (state === 0) {
+            which = e.which;
+        }
+
+        if (e.type === states[state] && which === e.which) {
+            state = state < 3 ? state + 1 : 0;
         }
         else {
-            timer = 0;
-            callback(e);
+            reset();
+        }
+
+        if (states[state] === 'pointerup') {
+            if (!click) {
+                click = true;
+                setTimeout(reset, 300);
+            }
+            else {
+                reset();
+                callback(e);
+            }
         }
     }
 }
@@ -71,6 +95,14 @@ function raycast(from, to, intersects) {
     rayVector.subVectors(to, from);
     const ray = new THREE.Raycaster(from, rayVector.normalize());
     return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
+}
+
+function getCenter(mesh) {
+    const center = new THREE.Vector3();
+    mesh.geometry.computeBoundingBox();
+    mesh.geometry.boundingBox.getCenter(center);
+    mesh.localToWorld(center);
+    return center;
 }
 
 function random(min, max, seed) {
