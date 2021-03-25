@@ -23,13 +23,13 @@ body, html {
 }
 
 #root #info div {
-    padding: 5px;
+    padding: 3px;
     position: absolute;
 }
 
 #root #controls {
     top: 0;
     right: 0;
-    padding: 5px;
+    padding: 3px;
     position: absolute;    
 }
