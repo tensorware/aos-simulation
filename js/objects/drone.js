@@ -50,7 +50,7 @@ class Drone {
 
             const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
             textGeometry.rotateX(-Math.PI / 2);
-            const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff6666 });
+            const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
             this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
             this.update();
