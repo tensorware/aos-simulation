@@ -31,7 +31,7 @@ class Drone {
                 ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
             }
 
-            this.planeMaterial = new THREE.MeshStandardMaterial({ color: 0xdddd88 });
+            this.planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.planeColor });
 
             const rectangleGeometry = new THREE.PlaneGeometry();
             rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);

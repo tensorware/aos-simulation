@@ -35,8 +35,8 @@ const CONFIG = {
     trunkLength: 2.4,
     treeColor: 0x613615,
     twigColor: 0x418c45,
-    groundColor: 0x595959,
-    planeColor: 0xdcdc69,
+    groundColor: 0x727272,
+    planeColor: 0xededed,
     backgroundColor: 0x8fbde8
 };
 
