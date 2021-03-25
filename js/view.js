@@ -52,7 +52,7 @@ class View {
         });
 
         Split(['#top', '#bottom'], {
-            gutterSize: 4,
+            gutterSize: 3,
             sizes: [80, 20],
             minSize: [0, 0],
             cursor: 'ns-resize',
@@ -156,7 +156,11 @@ class View {
         matFolder.addColor(this.config, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v)).listen();
         matFolder.addColor(this.config, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v)).listen();
         matFolder.addColor(this.config, 'planeColor').onChange((v) => this.drone.planeMaterial.color.setHex(v)).listen();
-        matFolder.addColor(this.config, 'backgroundColor').onChange((v) => this.stage.renderer.setClearColor(v)).listen();
+        matFolder.addColor(this.config, 'backgroundColor').onChange((v) => {
+            this.stage.renderer.setClearColor(v);
+            this.root.parentElement.style.backgroundColor = '#' + v.toString(16);
+        }).listen();
+        this.root.parentElement.style.backgroundColor = '#' + this.config.backgroundColor.toString(16);
 
         this.gui.add(this, 'reset');
         // this.gui.close();
