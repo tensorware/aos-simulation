@@ -150,14 +150,14 @@ class Drone {
         this.update();
     }
 
-    click(event) {
-        if (event.which != 1) {
+    click(e) {
+        if (e.target.parentElement.id !== 'stage' || e.which != 1) {
             return;
         }
 
         const mouse = {
-            x: (event.clientX / window.innerWidth) * 2 - 1,
-            y: (event.clientY / window.innerHeight) * -2 + 1
+            x: (e.clientX / window.innerWidth) * 2 - 1,
+            y: (e.clientY / window.innerHeight) * -2 + 1
         };
 
         const ray = new THREE.Raycaster();
