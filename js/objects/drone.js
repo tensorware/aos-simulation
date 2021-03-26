@@ -6,6 +6,8 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
+        this.images = document.querySelector('#images');
+
         new THREE.STLLoader().load('objects/drone.stl', ((droneGeometry) => {
             this.rays = [];
             this.captures = [];
@@ -323,15 +325,57 @@ class Drone {
         const rayPoints = rays.map(getPoints);
         const borderPoints = border.map(getPoints);
 
-        const minX = Math.min.apply(Math, borderPoints.map((p) => { return p[1].x }));
-        const minY = Math.min.apply(Math, borderPoints.map((p) => { return p[1].y }));
-        const minZ = Math.min.apply(Math, borderPoints.map((p) => { return p[1].z }));
+        // get min values for each axes
+        const min = new THREE.Vector3(
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].x })),
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].y })),
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].z }))
+        );
 
-        const min = new THREE.Vector3(minX, minY, minZ);
-        rayPoints.forEach((rayPoint) => { rayPoint.forEach((p) => { p.sub(min) }) });
-        borderPoints.forEach((borderPoint) => { borderPoint.forEach((p) => { p.sub(min) }) });
+        // subtract min point value for each axes
+        const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1] });
+        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1] });
 
-        // log(rayPoints, borderPoints);
+        // get max values for each axes
+        const max = new THREE.Vector3(
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.x })),
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.y })),
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.z }))
+        );
+
+        // convert simulation coordinates (meter) into image coordinates (pixel)
+        const resolution = {
+            x: this.config.cameraResolution,
+            y: 0,
+            z: this.config.cameraResolution
+        };
+        const pixels = rayPointsGround.map((p) => {
+            return {
+                x: Math.round(p.x * resolution.x / max.x),
+                y: 0,
+                z: Math.round(p.z * resolution.z / max.z)
+            };
+        });
+
+        // create image canvas
+        const img = document.createElement('canvas');
+        img.className = 'image menu--item';
+        img.width = resolution.x;
+        img.height = resolution.z;
+
+        // background
+        const ctx = img.getContext('2d');
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, img.width, img.height);
+
+        // draw pixels
+        pixels.forEach((p) => {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(p.x, p.z, 1, 1);
+        });
+
+        // append image
+        this.images.appendChild(img);
     }
 
     clear() {
@@ -344,6 +388,8 @@ class Drone {
             this.scene.remove(ray);
         });
         this.rays = [];
+
+        this.images.textContent = '';
     }
 
     reset() {
