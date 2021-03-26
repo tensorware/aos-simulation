@@ -358,15 +358,17 @@ class Drone {
         });
 
         // create image canvas
-        const img = document.createElement('canvas');
-        img.className = 'image menu--item';
-        img.width = resolution.x;
-        img.height = resolution.z;
+        const container = document.createElement('div');
+        container.className = 'image';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = resolution.x;
+        canvas.height = resolution.z;
 
         // background
-        const ctx = img.getContext('2d');
+        const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, img.width, img.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw pixels
         pixels.forEach((p) => {
@@ -375,7 +377,8 @@ class Drone {
         });
 
         // append image
-        this.images.appendChild(img);
+        container.appendChild(canvas);
+        this.images.appendChild(container);
     }
 
     clear() {
