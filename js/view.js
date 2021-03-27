@@ -52,7 +52,7 @@ class View {
         });
 
         Split(['#top', '#bottom'], {
-            gutterSize: 3,
+            gutterSize: 4,
             sizes: [80, 20],
             minSize: [0, 0],
             cursor: 'ns-resize',

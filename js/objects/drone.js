@@ -362,6 +362,7 @@ class Drone {
         container.className = 'image';
 
         const canvas = document.createElement('canvas');
+        canvas.className = 'canvas';
         canvas.width = resolution.x;
         canvas.height = resolution.z;
 
