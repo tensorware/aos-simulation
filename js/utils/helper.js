@@ -117,6 +117,10 @@ function rayCast(from, to, intersects) {
     return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
 }
 
+function interpolate(v0, v1, t) {
+    return v0 * (1 - t) + v1 * t;
+}
+
 function random(min, max, seed) {
     const rng = seed === void (0) ? Math.random : new Math.seedrandom(seed);
     return Math.floor(rng() * (max - min) + min);

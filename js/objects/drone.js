@@ -6,7 +6,7 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        this.images = document.querySelector('#images');
+        this.slider = new Slider(document.querySelector('#captures'));
 
         new THREE.STLLoader().load('objects/drone.stl', ((droneGeometry) => {
             this.rays = [];
@@ -62,8 +62,8 @@ class Drone {
             this.move = this.move.bind(this);
             this.click = doubleClick(this.click.bind(this));
 
-            window.addEventListener('pointerdown', this.click, false);
-            window.addEventListener('pointerup', this.click, false);
+            window.addEventListener('pointerdown', this.click);
+            window.addEventListener('pointerup', this.click);
 
         }).bind(this));
     }
@@ -379,7 +379,7 @@ class Drone {
 
         // append image
         container.appendChild(canvas);
-        this.images.appendChild(container);
+        this.slider.append(container);
     }
 
     clear() {
@@ -393,7 +393,7 @@ class Drone {
         });
         this.rays = [];
 
-        this.images.textContent = '';
+        this.slider.clear();
     }
 
     reset() {
