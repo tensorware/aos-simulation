@@ -36,7 +36,7 @@ class Stage {
             this.animate = this.animate.bind(this);
             requestAnimationFrame(this.animate);
 
-            window.addEventListener('resize', this.resize.bind(this), false);
+            window.addEventListener('resize', this.resize.bind(this));
             callback(this);
         });
     }
