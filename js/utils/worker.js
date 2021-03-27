@@ -1,4 +1,4 @@
-importScripts('../objects/tree.js', '../objects/person.js');
+importScripts('../objects/tree.js');
 
 const getTrees = (configs, chunks) => {
     const trees = [];
@@ -13,5 +13,11 @@ const getTrees = (configs, chunks) => {
 }
 
 self.onmessage = (e) => {
-    getTrees(e.data || [], 10);
+    if (e.data) {
+        const method = e.data.method;
+        const params = e.data.params;
+        if (method === 'getTrees') {
+            getTrees(params.configs || [], params.chunks);
+        }
+    }
 }

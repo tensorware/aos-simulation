@@ -74,16 +74,23 @@ class Forest {
     }
 
     addTrees() {
-        const configs = [];
+        const workerConfigs = [];
         for (let i = 0; i < this.config.trees; i++) {
-            configs.push(this.getTree(i));
+            workerConfigs.push(this.getTree(i));
         }
 
         this.workers.forEach((worker) => { worker.terminate() });
         this.workers = getWorkers();
 
-        splitArray(configs, this.workers.length).forEach((config, i) => {
-            this.workers[i].postMessage(config);
+        splitArray(workerConfigs, this.workers.length).forEach((configs, i) => {
+            this.workers[i].postMessage({
+                method: 'getTrees',
+                params: {
+                    configs: configs,
+                    chunks: 10
+                }
+            });
+
             this.workers[i].onmessage = ((e) => {
                 e.data.forEach((tree) => {
                     const treeGeometry = new THREE.BufferGeometry();
