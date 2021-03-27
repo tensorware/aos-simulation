@@ -10,7 +10,7 @@ const CONFIG = {
     cameraResolution: 512,
     processingSpeed: 0.5,
     size: 100,
-    trees: 300,
+    trees: 30,
     persons: 3,
     levels: 5,
     vMultiplier: 2.36,
@@ -57,7 +57,14 @@ class View {
             minSize: [0, 0],
             cursor: 'ns-resize',
             direction: 'vertical',
-            onDrag: () => { this.stage.resize() }
+            onDrag: () => {
+                this.stage.resize()
+            },
+            gutter: () => {
+                const gutter = document.createElement('div');
+                gutter.id = 'gutter';
+                return gutter;
+            }
         });
     }
 

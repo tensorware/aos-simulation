@@ -17,6 +17,7 @@ html {
 #main #top {
   width: 100%;
   height: 80%;
+  background: inherit;
 }
 
 #main #top #info {
@@ -42,27 +43,32 @@ html {
   position: absolute;
 }
 
-#main .gutter {
+#main #gutter {
   cursor: ns-resize;
-  background-color: #dddddd;
+  background: #dddddd;
 }
 
 #main #bottom {
   width: 100%;
   height: 20%;
+  background: inherit;
 }
 
 #main #bottom #captures {
-  width: 80%;
+  width: 100%;
   height: 100%;
+  display: flex;
   overflow: hidden;
   position: relative;
+  background: inherit;
 }
 
 #main #bottom #captures #images {
-  width: 100%;
+  flex: 3;
+  z-index: 1;
   cursor: grab;
   display: flex;
+  background: inherit;
   counter-reset: count;
 }
 
@@ -94,7 +100,24 @@ html {
   height: 100%;
 }
 
-#main #bottom #captures #image {
-  width: 20%;
+#main #bottom #captures #previews {
+  flex: 1;
+  z-index: 1;
   height: 100%;
+  display: flex;
+  background: inherit;
+  justify-content: center;
+}
+
+#main #bottom #captures #previews .image {
+  height: 100%;
+  padding: 4px 2px;
+  display: flex;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+#main #bottom #captures #previews .image .canvas {
+  height: 100%;
+  background: gray;
 }

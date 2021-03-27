@@ -1,35 +1,26 @@
 class Slider {
-    constructor(root) {
+    constructor(root, size) {
         this.root = root;
+        this.size = size;
 
         this.images = root.querySelector('#images');
-        this.image = root.querySelectorAll('.image');
+        this.previews = root.querySelector('#previews');
 
-        this.width = {
-            captures: 0,
-            images: 0,
-            image: 0
-        };
+        this.image = this.images.querySelectorAll('.image');
+        this.preview = this.previews.querySelector('.image');
 
-        this.scroll = {
-            start: 0,
-            next: 0,
-            x: 0
-        };
+        this.width = { slider: 0, images: 0, image: 0 };
+        this.scroll = { start: 0, next: 0, x: 0 };
+        this.touch = { start: 0, x: 0 };
 
-        this.touch = {
-            start: 0,
-            x: 0
-        };
-
-        this.root.addEventListener('wheel', this.scrollWheel.bind(this));
-        this.root.addEventListener('touchstart', this.touchStart.bind(this));
-        this.root.addEventListener('touchmove', this.touchMove.bind(this));
-        this.root.addEventListener('touchend', this.touchEnd.bind(this));
-        this.root.addEventListener('mousedown', this.touchStart.bind(this));
-        this.root.addEventListener('mousemove', this.touchMove.bind(this));
-        this.root.addEventListener('mouseleave', this.touchEnd.bind(this));
-        this.root.addEventListener('mouseup', this.touchEnd.bind(this));
+        this.images.addEventListener('wheel', this.scrollWheel.bind(this));
+        this.images.addEventListener('touchstart', this.touchStart.bind(this));
+        this.images.addEventListener('touchmove', this.touchMove.bind(this));
+        this.images.addEventListener('touchend', this.touchEnd.bind(this));
+        this.images.addEventListener('mousedown', this.touchStart.bind(this));
+        this.images.addEventListener('mousemove', this.touchMove.bind(this));
+        this.images.addEventListener('mouseleave', this.touchEnd.bind(this));
+        this.images.addEventListener('mouseup', this.touchEnd.bind(this));
 
         // TODO stay on current items
         window.addEventListener('resize', this.update.bind(this));
@@ -51,7 +42,6 @@ class Slider {
         if (!this.images.classList.contains('dragging')) {
             return;
         }
-
         this.touch.x = e.clientX || e.touches && e.touches[0].clientX || this.touch.x;
         this.scroll.x += (this.touch.x - this.touch.start) * 2.5;
         this.touch.start = this.touch.x;
@@ -61,8 +51,18 @@ class Slider {
         this.images.classList.remove('dragging');
     }
 
-    append(element) {
-        this.images.appendChild(element);
+    append(image) {
+        // TEST
+        if (this.count == 0) {
+            this.previews.appendChild(image.cloneNode(true));
+        }
+
+        if (this.count >= this.size) {
+            const image = this.image[0];
+            image.classList.add('removed');
+            setTimeout(() => { this.images.removeChild(image); }, 0);
+        }
+        this.images.appendChild(image);
     }
 
     clear() {
@@ -70,21 +70,21 @@ class Slider {
     }
 
     update() {
-        this.image = document.querySelectorAll('.image');
+        this.image = this.images.querySelectorAll('.image:not(.removed)');
+        this.count = this.image.length;
 
-        if (this.image.length) {
-
+        if (this.count) {
             this.width = {
-                captures: this.root.clientWidth,
-                images: this.image.length * this.width.image,
+                slider: this.images.clientWidth,
+                images: this.count * this.width.image,
                 image: this.image[0].clientWidth
             };
 
             gsap.set(this.image, {
                 x: (i) => { return i * this.width.image + this.scroll.next; },
-                modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.captures, this.width.images, parseInt(x)) + 'px'; } }
+                modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x)) + 'px'; } }
             });
-            this.image[this.image.length - 1].style.zIndex = 1;
+            this.image[this.count - 1].style.zIndex = 1;
 
             return true;
         }
@@ -93,7 +93,7 @@ class Slider {
     }
 
     render() {
-        this.scroll.x = Math.min(0, Math.max(-this.width.images + this.width.captures, this.scroll.x));
+        this.scroll.x = Math.min(0, Math.max(-this.width.images + this.width.slider, this.scroll.x));
         this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.1);
 
         if (this.update()) {
