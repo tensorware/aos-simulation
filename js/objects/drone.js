@@ -52,6 +52,28 @@ class Drone {
         this.update();
     }
 
+    getView() {
+        // drone position on sky
+        const x = this.drone.position.x;
+        const y = this.drone.position.y;
+        const z = this.drone.position.z;
+
+        // angles from sky to ground
+        const a = this.config.cameraView / 2;
+        const b = 90 - a;
+        const c = y / Math.sin(radian(b));
+
+        // field of view "radius" on ground
+        const r = Math.sqrt(c ** 2 - y ** 2);
+
+        return {
+            x: x,
+            y: y,
+            z: z,
+            r: r
+        };
+    }
+
     click(e) {
         if (e.target.parentElement.id !== 'stage' || e.which != 1) {
             return;

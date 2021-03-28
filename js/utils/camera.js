@@ -5,14 +5,14 @@ class Camera {
         this.scene = drone.scene;
         this.stage = drone.stage;
         this.forest = drone.forest;
-        this.drone = drone.drone;
+        this.drone = drone;
 
         this.rays = [];
         this.captures = [];
 
-        this.lines = [];
+        this.viewLines = [];
         for (let i = 0; i < 4; i++) {
-            this.lines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
+            this.viewLines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
                 new THREE.Vector3(0, this.config.droneHeight, 0),
                 new THREE.Vector3(0, 0, 0)
             ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
@@ -24,13 +24,8 @@ class Camera {
         rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
-        const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
-        const wireMaterial = new THREE.LineBasicMaterial({ color: 0x990000 });
-        const wireFrame = new THREE.LineSegments(wireGeometry, wireMaterial);
-
         this.plane = {
             rectangle: rectangle,
-            wire: wireFrame,
             border: new THREE.BoxHelper(rectangle, 0x990000),
             text: new THREE.Mesh()
         };
@@ -48,31 +43,17 @@ class Camera {
     }
 
     addView() {
-        const lineGroup = new THREE.Group();
-        this.lines.forEach((line) => {
-            lineGroup.add(line);
+        const view = new THREE.Group();
+        this.viewLines.forEach((viewLine) => {
+            view.add(viewLine);
         });
-        this.scene.add(lineGroup);
+        this.scene.add(view);
     }
 
     addPlane() {
         this.scene.add(this.plane.rectangle);
-        // this.scene.add(this.plane.wire);
         this.scene.add(this.plane.border);
         this.scene.add(this.plane.text);
-    }
-
-    getViewParameters(height) {
-        const alpha = this.config.cameraView / 2;
-        const beta = 90 - alpha;
-
-        const hypotenuse = height / Math.sin(radian(beta));
-        const radius = Math.sqrt(hypotenuse ** 2 - height ** 2);
-
-        return {
-            radius: radius,
-            height: height
-        };
     }
 
     update() {
@@ -83,34 +64,31 @@ class Camera {
 
         // log('debug', distance, coverage, overlap, time);
 
-        const viewHeight = this.config.droneHeight;
-        const viewCorners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-        const viewParameters = this.getViewParameters(viewHeight);
+        const view = this.drone.getView();
+        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
 
-        this.lines.forEach((line, index) => {
-            const x = viewParameters.radius * viewCorners[index][0] + this.drone.position.x;
-            const z = viewParameters.radius * viewCorners[index][1] + this.drone.position.z;
+        this.viewLines.forEach((viewLine, i) => {
+            const x = view.r * corners[i][0] + view.x;
+            const z = view.r * corners[i][1] + view.z;
 
-            line.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(this.drone.position.x, viewHeight, this.drone.position.z),
+            viewLine.geometry.copy(new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(view.x, view.y, view.z),
                 new THREE.Vector3(x, 0, z)
             ]));
         });
 
-        const x = this.drone.position.x;
+        const x = view.x;
         const y = 0.05;
-        const z = this.drone.position.z;
+        const z = view.z;
 
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
         rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
-        const wireGeometry = new THREE.WireframeGeometry(rectangleGeometry);
 
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
         const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
         textGeometry.rotateX(-Math.PI / 2);
 
         this.plane.rectangle.geometry.copy(rectangleGeometry);
-        this.plane.wire.geometry.copy(wireGeometry);
         this.plane.text.geometry.copy(textGeometry);
         this.plane.border.update();
 
@@ -140,14 +118,14 @@ class Camera {
         const trees = [];
         const rays = [];
 
-        const viewParameters = this.getViewParameters(this.config.droneHeight);
-        const cornerDistance = Math.sqrt(viewParameters.radius ** 2 + viewParameters.radius ** 2) + 3;
+        const view = this.drone.getView();
+        const cornerDistance = Math.sqrt(view.r ** 2 + view.r ** 2) + 3;
 
         // nearby persons
         this.forest.persons.forEach((person) => {
             if (person) {
-                const start = new THREE.Vector3(this.drone.position.x, 0, this.drone.position.z);
-                const end = new THREE.Vector3(person.position.x, 0, person.position.z);
+                const start = new THREE.Vector3(view.x, 0, view.z);
+                const end = new THREE.Vector3(person.position.x, 0, view.z);
 
                 const personDistance = start.distanceTo(end);
                 if (personDistance <= cornerDistance) {
@@ -159,7 +137,7 @@ class Camera {
         // nearby trees
         this.forest.trees.forEach((tree) => {
             if (tree) {
-                const start = new THREE.Vector3(this.drone.position.x, 0, this.drone.position.z);
+                const start = new THREE.Vector3(view.x, 0, view.z);
                 const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
                 const treeDistance = start.distanceTo(end);
@@ -172,7 +150,7 @@ class Camera {
         });
 
         // raycast persons
-        const cameraVector = new THREE.Vector3(this.drone.position.x, this.config.droneHeight, this.drone.position.z);
+        const cameraVector = new THREE.Vector3(view.x, view.y, view.z);
         persons.forEach((person) => {
 
             // check if person is inside field of view
@@ -217,7 +195,7 @@ class Camera {
         });
 
         // generate image
-        const pixels = this.image(rays, this.lines);
+        const pixels = this.image(rays, this.viewLines);
 
         // TODO integrate pixels
     }
