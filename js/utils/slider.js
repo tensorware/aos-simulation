@@ -7,7 +7,7 @@ class Slider {
         this.previews = root.querySelector('#previews');
 
         this.image = this.images.querySelectorAll('.image');
-        this.preview = this.previews.querySelector('.image');
+        this.preview = this.previews.querySelectorAll('.image');
 
         this.width = { slider: 0, images: 0, image: 0 };
         this.scroll = { start: 0, next: 0, x: 0 };
@@ -22,8 +22,7 @@ class Slider {
         this.images.addEventListener('mouseleave', this.touchEnd.bind(this));
         this.images.addEventListener('mouseup', this.touchEnd.bind(this));
 
-        // TODO stay on current items
-        window.addEventListener('resize', this.update.bind(this));
+        window.addEventListener('resize', this.update.bind(this)); // TODO stay on current items
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -51,17 +50,12 @@ class Slider {
         this.images.classList.remove('dragging');
     }
 
-    append(image) {
-        // TODO integral image
-        if (this.count == 0) {
-            this.previews.appendChild(image.cloneNode(true));
-        }
-
+    addImage(image) {
         // remove first child
         for (let i = 0; i <= this.count - this.config.cameraImages; i++) {
-            const image = this.image[i];
-            image.classList.add('removed');
-            setTimeout(() => { this.images.removeChild(image); }, 0);
+            const img = this.image[i];
+            img.classList.add('removed');
+            setTimeout(() => { this.images.removeChild(img); }, 0);
         }
 
         // append last child
@@ -70,6 +64,18 @@ class Slider {
         // update width and scroll to last child
         this.update();
         this.scroll.x = this.width.slider - this.width.images;
+    }
+
+    addPreview(preview) {
+        // remove first child
+        for (let i = 0; i < this.preview.length; i++) {
+            const img = this.preview[i];
+            img.classList.add('removed');
+            setTimeout(() => { this.previews.removeChild(img); }, 0);
+        }
+
+        // append last child
+        this.previews.appendChild(preview);
     }
 
     animate() {
@@ -110,6 +116,9 @@ class Slider {
 
     update() {
         this.image = this.images.querySelectorAll('.image:not(.removed)');
+        this.preview = this.previews.querySelectorAll('.image:not(.removed)');
+
+        // count images
         this.count = this.image.length;
 
         // update width

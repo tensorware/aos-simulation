@@ -57,6 +57,14 @@ class Camera {
         this.scene.add(this.plane.text);
     }
 
+    getResolution() {
+        return {
+            x: this.config.cameraResolution,
+            y: 0,
+            z: this.config.cameraResolution
+        };
+    }
+
     capturePlane() {
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
@@ -172,8 +180,8 @@ class Camera {
         );
 
         // subtract min point value for each axes
-        const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1]; });
-        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1] });
+        const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
+        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
 
         // get max values for each axes
         const max = new THREE.Vector3(
@@ -183,11 +191,7 @@ class Camera {
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const resolution = {
-            x: this.config.cameraResolution,
-            y: 0,
-            z: this.config.cameraResolution
-        };
+        const resolution = this.getResolution();
         const pixels = rayPointsGround.map((p) => {
             return {
                 x: Math.round(p.x * resolution.x / max.x),
@@ -195,6 +199,7 @@ class Camera {
                 z: Math.round(p.z * resolution.z / max.z)
             };
         });
+        this.images.push(pixels);
 
         // create image canvas
         const container = document.createElement('div');
@@ -218,17 +223,47 @@ class Camera {
 
         // append image
         container.appendChild(canvas);
-        this.slider.append(container);
+        this.slider.addImage(container);
 
-        return pixels;
+        return this.images.slice(Math.max(this.images.length - this.config.cameraImages, 0));
+    }
+
+    integrateImages(images) {
+        const resolution = this.getResolution();
+
+        // create image canvas
+        const container = document.createElement('div');
+        container.className = 'image';
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'canvas';
+        canvas.width = resolution.x;
+        canvas.height = resolution.z;
+
+        // background
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // draw pixels
+        images.forEach((pixels) => {
+            pixels.forEach((p) => { // TODO shift and sum pixels
+                ctx.fillStyle = '#' + this.config.personColor.toString(16);
+                ctx.fillRect(p.x, p.z, 1, 1);
+            });
+        });
+
+        // append image
+        container.appendChild(canvas);
+        this.slider.addPreview(container);
     }
 
     capture() {
         const plane = this.capturePlane();
         const rays = this.captureRays(plane);
-        const pixels = this.captureImage(rays);
+        const images = this.captureImage(rays);
 
-        // TODO integrate pixels
+        this.integrateImages(images);
     }
 
     update() {
