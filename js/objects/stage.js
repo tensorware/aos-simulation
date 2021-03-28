@@ -40,6 +40,7 @@ class Stage {
             requestAnimationFrame(this.animate);
 
             callback(this);
+
         }).bind(this));
     }
 

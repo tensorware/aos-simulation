@@ -45,7 +45,8 @@ const init = () => {
         treeColor: 0x613615,
         twigColor: 0x418c45,
         groundColor: 0x727272,
-        planeColor: 0xededed,
+        planeColor: 0x7d5c5c,
+        personColor: 0xfafafa,
         backgroundColor: 0x8fbde8
     });
 };
@@ -60,30 +61,16 @@ class View {
         this.stage = new Stage(this.root, this.config, () => {
             this.forest = new Forest(this.stage);
             this.drone = new Drone(this.forest);
-            this.addControls();
-        });
 
-        // init canvas/images splitter
-        Split(['#top', '#bottom'], {
-            gutterSize: 4,
-            sizes: [80, 20],
-            minSize: [0, 0],
-            cursor: 'ns-resize',
-            direction: 'vertical',
-            onDrag: () => {
-                this.stage.update();
-            },
-            gutter: () => {
-                const gutter = document.createElement('div');
-                gutter.id = 'gutter';
-                return gutter;
-            }
+            this.controls(this.root.querySelector('#controls'));
+            this.background(this.config.backgroundColor);
+            this.splitter(['#top', '#bottom']);
         });
     }
 
-    addControls() {
+    controls(root) {
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
-        this.root.querySelector('#controls').appendChild(this.gui.domElement);
+        root.appendChild(this.gui.domElement);
 
         // drone folder
         const droneFolder = this.gui.addFolder('drone');
@@ -181,15 +168,33 @@ class View {
         materialsFolder.addColor(this.config, 'treeColor').onChange((v) => this.forest.treeMaterial.color.setHex(v));
         materialsFolder.addColor(this.config, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v));
         materialsFolder.addColor(this.config, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'planeColor').onChange((v) => this.drone.planeMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'backgroundColor').onChange((v) => {
-            this.stage.renderer.setClearColor(v);
-            this.root.parentElement.style.backgroundColor = '#' + v.toString(16);
-        });
-        this.root.parentElement.style.backgroundColor = '#' + this.config.backgroundColor.toString(16);
+        materialsFolder.addColor(this.config, 'planeColor').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
+        materialsFolder.addColor(this.config, 'personColor').onFinishChange(this.reset.bind(this));
+        materialsFolder.addColor(this.config, 'backgroundColor').onChange(this.background.bind(this));
 
         this.gui.add(this, 'reset');
         // this.gui.close();
+    }
+
+    background(color) {
+        this.stage.renderer.setClearColor(color);
+        this.root.parentElement.style.backgroundColor = '#' + color.toString(16);
+    }
+
+    splitter(elements) {
+        Split(elements, {
+            gutterSize: 4,
+            sizes: [80, 20],
+            minSize: [0, 0],
+            cursor: 'ns-resize',
+            direction: 'vertical',
+            onDrag: () => { this.stage.update(); },
+            gutter: () => {
+                const gutter = document.createElement('div');
+                gutter.id = 'gutter';
+                return gutter;
+            }
+        });
     }
 
     reset() {

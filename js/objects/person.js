@@ -15,10 +15,10 @@ class Person {
 
         const planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
         planeGeometry.rotateX(-Math.PI / 2).translate(0, 0.10, 0);
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xd05bf5 });
+        const planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.personColor });
 
         const wireGeometry = new THREE.WireframeGeometry(planeGeometry);
-        const wireMaterial = new THREE.LineBasicMaterial({ color: 0x885b95 });
+        const wireMaterial = new THREE.LineBasicMaterial({ color: this.config.groundColor });
 
         this.wire = new THREE.LineSegments(wireGeometry, wireMaterial);
         this.mesh = new THREE.Mesh(planeGeometry, planeMaterial);

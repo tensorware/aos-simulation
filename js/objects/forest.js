@@ -79,7 +79,7 @@ class Forest {
             workerConfigs.push(this.getTree(i));
         }
 
-        this.workers.forEach((worker) => { worker.terminate() });
+        this.workers.forEach((worker) => { worker.terminate(); });
         this.workers = getWorkers();
 
         splitArray(workerConfigs, this.workers.length).forEach((configs, i) => {
@@ -170,14 +170,10 @@ class Forest {
 
     clear(full) {
         if (full) {
-            this.trees.forEach((tree) => {
-                this.scene.remove(tree);
-            });
+            this.trees.forEach((tree) => { this.scene.remove(tree); });
             this.trees = [];
 
-            this.persons.forEach((person) => {
-                this.scene.remove(person);
-            });
+            this.persons.forEach((person) => { this.scene.remove(person); });
             this.persons = [];
         }
 

@@ -26,10 +26,10 @@ class Drone {
             this.addCamera();
 
             this.animate = this.animate.bind(this);
-            this.click = doubleClick(this.click.bind(this));
+            this.doubleClick = doubleClick(this.doubleClick.bind(this));
 
-            window.addEventListener('pointerdown', this.click);
-            window.addEventListener('pointerup', this.click);
+            window.addEventListener('pointerdown', this.doubleClick);
+            window.addEventListener('pointerup', this.doubleClick);
 
         }).bind(this));
     }
@@ -74,7 +74,7 @@ class Drone {
         };
     }
 
-    click(e) {
+    doubleClick(e) {
         if (e.target.parentElement.id !== 'stage' || e.which != 1) {
             return;
         }

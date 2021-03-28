@@ -8,7 +8,8 @@ class Camera {
         this.drone = drone;
 
         this.rays = [];
-        this.captures = [];
+        this.planes = [];
+        this.images = [];
 
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
@@ -56,49 +57,7 @@ class Camera {
         this.scene.add(this.plane.text);
     }
 
-    update() {
-        const distance = this.config.droneSpeed * this.config.processingSpeed;
-        const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
-        const overlap = coverage / distance;
-        const time = coverage / this.config.droneSpeed;
-
-        // log('debug', distance, coverage, overlap, time);
-
-        const view = this.drone.getView();
-        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-
-        this.viewLines.forEach((viewLine, i) => {
-            const x = view.r * corners[i][0] + view.x;
-            const z = view.r * corners[i][1] + view.z;
-
-            viewLine.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(view.x, view.y, view.z),
-                new THREE.Vector3(x, 0, z)
-            ]));
-        });
-
-        const x = view.x;
-        const y = 0.05;
-        const z = view.z;
-
-        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
-
-        const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
-        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
-        textGeometry.rotateX(-Math.PI / 2);
-
-        this.plane.rectangle.geometry.copy(rectangleGeometry);
-        this.plane.text.geometry.copy(textGeometry);
-        this.plane.border.update();
-
-        const textSize = new THREE.Vector3();
-        new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
-        textGeometry.translate(x - textSize.x / 2, y, z + textSize.z / 2);
-        this.plane.text.geometry.copy(textGeometry);
-    }
-
-    capture() {
+    capturePlane() {
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
         rectangle.geometry = this.plane.rectangle.geometry.clone();
@@ -112,8 +71,12 @@ class Camera {
         plane.add(border);
 
         this.scene.add(plane);
-        this.captures.push(plane);
+        this.planes.push(plane);
 
+        return rectangle;
+    }
+
+    captureRays(plane) {
         const persons = [];
         const trees = [];
         const rays = [];
@@ -156,7 +119,7 @@ class Camera {
             // check if person is inside field of view
             getPoints(person).forEach((personVector) => {
                 const groundVector = new THREE.Vector3(personVector.x, 0, personVector.z);
-                if (rayCast(cameraVector, groundVector, rectangle).length) {
+                if (rayCast(cameraVector, groundVector, plane).length) {
 
                     // obstacles near the person 
                     const obstacles = trees.filter((tree) => {
@@ -183,7 +146,7 @@ class Camera {
                     const intersectVector = new THREE.Vector3(personVector.x, personVector.y, personVector.z);
                     if (!rayCast(cameraVector, intersectVector, obstacles).length) {
                         const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
-                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: 0xd05bf5 }));
+                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: this.config.personColor }));
 
                         // append ray lines
                         rays.push(intersectLine);
@@ -194,32 +157,29 @@ class Camera {
             });
         });
 
-        // generate image
-        const pixels = this.image(rays, this.viewLines);
-
-        // TODO integrate pixels
+        return rays;
     }
 
-    image(rays, border) {
+    captureImage(rays) {
         const rayPoints = rays.map(getPoints);
-        const borderPoints = border.map(getPoints);
+        const borderPoints = this.viewLines.map(getPoints);
 
         // get min values for each axes
         const min = new THREE.Vector3(
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].x })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].y })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].z }))
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].x; })),
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].y; })),
+            Math.min.apply(Math, borderPoints.map((p) => { return p[1].z; }))
         );
 
         // subtract min point value for each axes
-        const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1] });
-        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1] });
+        const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min) })[1]; });
+        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1] });
 
         // get max values for each axes
         const max = new THREE.Vector3(
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.x })),
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.y })),
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.z }))
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.x; })),
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.y; })),
+            Math.max.apply(Math, borderPointsGround.map((p) => { return p.z; }))
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
@@ -252,7 +212,7 @@ class Camera {
 
         // draw pixels
         pixels.forEach((p) => {
-            ctx.fillStyle = '#FFFFFF';
+            ctx.fillStyle = '#' + this.config.personColor.toString(16);
             ctx.fillRect(p.x, p.z, 1, 1);
         });
 
@@ -263,17 +223,64 @@ class Camera {
         return pixels;
     }
 
-    clear() {
-        this.captures.forEach((capture) => {
-            this.scene.remove(capture);
-        });
-        this.captures = [];
+    capture() {
+        const plane = this.capturePlane();
+        const rays = this.captureRays(plane);
+        const pixels = this.captureImage(rays);
 
-        this.rays.forEach((ray) => {
-            this.scene.remove(ray);
+        // TODO integrate pixels
+    }
+
+    update() {
+        const distance = this.config.droneSpeed * this.config.processingSpeed;
+        const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
+        const overlap = coverage / distance;
+        const time = coverage / this.config.droneSpeed;
+
+        // log('debug', distance, coverage, overlap, time);
+
+        const view = this.drone.getView();
+        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+
+        this.viewLines.forEach((viewLine, i) => {
+            const x = view.r * corners[i][0] + view.x;
+            const z = view.r * corners[i][1] + view.z;
+
+            viewLine.geometry.copy(new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(view.x, view.y, view.z),
+                new THREE.Vector3(x, 0, z)
+            ]));
         });
+
+        const x = view.x;
+        const y = 0.05;
+        const z = view.z;
+
+        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
+
+        const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
+        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
+        textGeometry.rotateX(-Math.PI / 2);
+
+        this.plane.rectangle.geometry.copy(rectangleGeometry);
+        this.plane.text.geometry.copy(textGeometry);
+        this.plane.border.update();
+
+        const textSize = new THREE.Vector3();
+        new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
+        textGeometry.translate(x - textSize.x / 2, y, z + textSize.z / 2);
+        this.plane.text.geometry.copy(textGeometry);
+    }
+
+    clear() {
+        this.planes.forEach((capture) => { this.scene.remove(capture); });
+        this.planes = [];
+
+        this.rays.forEach((ray) => { this.scene.remove(ray); });
         this.rays = [];
 
+        this.images = [];
         this.slider.clear();
     }
 

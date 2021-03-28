@@ -52,7 +52,7 @@ class Slider {
     }
 
     append(image) {
-        // TEST
+        // TODO integral image
         if (this.count == 0) {
             this.previews.appendChild(image.cloneNode(true));
         }
