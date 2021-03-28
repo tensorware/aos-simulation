@@ -1,7 +1,7 @@
 class Slider {
-    constructor(root, size) {
+    constructor(root, config) {
         this.root = root;
-        this.size = size;
+        this.config = config;
 
         this.images = root.querySelector('#images');
         this.previews = root.querySelector('#previews');
@@ -57,57 +57,68 @@ class Slider {
             this.previews.appendChild(image.cloneNode(true));
         }
 
-        if (this.count >= this.size) {
-            const image = this.image[0];
+        // remove first child
+        for (let i = 0; i <= this.count - this.config.cameraImages; i++) {
+            const image = this.image[i];
             image.classList.add('removed');
             setTimeout(() => { this.images.removeChild(image); }, 0);
         }
+
+        // append last child
         this.images.appendChild(image);
+
+        // update width and scroll to last child
+        this.update();
+        this.scroll.x = this.width.slider - this.width.images;
     }
 
     clear() {
         this.images.textContent = '';
+        this.previews.textContent = '';
     }
 
     update() {
         this.image = this.images.querySelectorAll('.image:not(.removed)');
         this.count = this.image.length;
 
+        // update width
         if (this.count) {
             this.width = {
                 slider: this.images.clientWidth - this.previews.clientWidth,
                 images: this.count * this.width.image,
                 image: this.image[0].clientWidth
             };
+        }
 
+        return this.count > 0;
+    }
+
+    render() {
+        // calculate scroll
+        this.scroll.x = Math.min(0, Math.max(this.width.slider - this.width.images, this.scroll.x));
+        this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.1);
+
+        if (this.update()) {
+            const delta = this.scroll.next - this.scroll.start;
+
+            // set positions
             gsap.set(this.image, {
                 x: (i) => { return i * this.width.image + this.scroll.next; },
                 modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x)) + 'px'; } }
             });
-            this.image[this.count - 1].style.zIndex = 1;
 
-            return true;
-        }
-
-        return false;
-    }
-
-    render() {
-        this.scroll.x = Math.min(0, Math.max(-this.width.images + this.width.slider, this.scroll.x));
-        this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.1);
-
-        if (this.update()) {
-            const speed = this.scroll.next - this.scroll.start;
+            // animate transitions
+            gsap.to(this.image, {
+                skewX: -delta * 0.2,
+                rotate: delta * 0.01,
+                scale: 1 - Math.min(100, Math.abs(delta)) * 0.003
+            });
 
             this.scroll.start = this.scroll.next;
-
-            gsap.to(this.image, {
-                skewX: -speed * 0.2,
-                rotate: speed * 0.01,
-                scale: 1 - Math.min(100, Math.abs(speed)) * 0.003
-            });
+            this.image[this.count - 1].style.zIndex = 1;
         }
         else {
+            // reset positions
             this.scroll = {
                 start: 0,
                 next: 0,
