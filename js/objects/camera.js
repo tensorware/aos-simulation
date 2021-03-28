@@ -66,18 +66,22 @@ class Camera {
     }
 
     capturePlane() {
+        // rectangle
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
         rectangle.geometry = this.plane.rectangle.geometry.clone();
 
+        // border
         const border = this.plane.border.clone();
         border.material = this.plane.border.material.clone();
         border.geometry = this.plane.border.geometry.clone();
 
+        // plane group
         const plane = new THREE.Group();
         plane.add(rectangle);
         plane.add(border);
 
+        // add to scene
         this.scene.add(plane);
         this.planes.push(plane);
 
@@ -98,6 +102,7 @@ class Camera {
                 const start = new THREE.Vector3(view.x, 0, view.z);
                 const end = new THREE.Vector3(person.position.x, 0, view.z);
 
+                // distance from camera to person
                 const personDistance = start.distanceTo(end);
                 if (personDistance <= cornerDistance) {
                     persons.push(person);
@@ -111,6 +116,7 @@ class Camera {
                 const start = new THREE.Vector3(view.x, 0, view.z);
                 const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
+                // distance from camera to tree
                 const treeDistance = start.distanceTo(end);
                 if (treeDistance <= cornerDistance) {
                     tree.children.every((children) => {
@@ -134,15 +140,17 @@ class Camera {
                         const treeBox = new THREE.BoxHelper(tree, 0xffffff);
                         const treeCenter = getCenter(treeBox);
 
+                        // angle between tree and person
                         const treeAngle = new THREE.Vector3();
                         treeAngle.copy(cameraVector).sub(new THREE.Vector3(treeCenter.x, cameraVector.y, treeCenter.z));
-
                         const personAngle = new THREE.Vector3();
                         personAngle.copy(cameraVector).sub(new THREE.Vector3(personVector.x, cameraVector.y, personVector.z));
 
+                        // distance from camera to tree and person
                         const treeDistance = treeAngle.length();
                         const personDistance = personAngle.length();
 
+                        // filter obstacles by angle and distance
                         const angle = treeAngle.angleTo(personAngle);
                         if (angle < Math.PI / 4 && (treeDistance - 3) < personDistance) {
                             // this.scene.add(treeBox);
@@ -201,16 +209,17 @@ class Camera {
         });
         this.images.push(pixels);
 
-        // create image canvas
+        // canvas container
         const container = document.createElement('div');
         container.className = 'image';
 
+        // canvas image
         const canvas = document.createElement('canvas');
         canvas.className = 'canvas';
         canvas.width = resolution.x;
         canvas.height = resolution.z;
 
-        // background
+        // canvas background
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -231,16 +240,17 @@ class Camera {
     integrateImages(images) {
         const resolution = this.getResolution();
 
-        // create image canvas
+        // canvas container
         const container = document.createElement('div');
         container.className = 'image';
 
+        // canvas image
         const canvas = document.createElement('canvas');
         canvas.className = 'canvas';
         canvas.width = resolution.x;
         canvas.height = resolution.z;
 
-        // background
+        // canvas background
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -253,7 +263,7 @@ class Camera {
             });
         });
 
-        // append image
+        // append preview
         container.appendChild(canvas);
         this.slider.addPreview(container);
     }
@@ -263,10 +273,13 @@ class Camera {
         const rays = this.captureRays(plane);
         const images = this.captureImage(rays);
 
+        // integrate images
         this.integrateImages(images);
     }
 
     update() {
+        const view = this.drone.getView();
+
         const distance = this.config.droneSpeed * this.config.processingSpeed;
         const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
         const overlap = coverage / distance;
@@ -274,9 +287,8 @@ class Camera {
 
         // log('debug', distance, coverage, overlap, time);
 
-        const view = this.drone.getView();
+        // update view lines (camera to corner)
         const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-
         this.viewLines.forEach((viewLine, i) => {
             const x = view.r * corners[i][0] + view.x;
             const z = view.r * corners[i][1] + view.z;
@@ -287,34 +299,35 @@ class Camera {
             ]));
         });
 
-        const x = view.x;
-        const y = 0.05;
-        const z = view.z;
-
+        // update plane
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(view.x, 0.05, view.z);
+        this.plane.rectangle.geometry.copy(rectangleGeometry);
+        this.plane.border.update();
 
+        // update text
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
         const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
         textGeometry.rotateX(-Math.PI / 2);
-
-        this.plane.rectangle.geometry.copy(rectangleGeometry);
         this.plane.text.geometry.copy(textGeometry);
-        this.plane.border.update();
 
+        // update text position
         const textSize = new THREE.Vector3();
         new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
-        textGeometry.translate(x - textSize.x / 2, y, z + textSize.z / 2);
+        textGeometry.translate(view.x - textSize.x / 2, 0.05, view.z + textSize.z / 2);
         this.plane.text.geometry.copy(textGeometry);
     }
 
     clear() {
+        // clear planes
         this.planes.forEach((capture) => { this.scene.remove(capture); });
         this.planes = [];
 
+        // clear rays
         this.rays.forEach((ray) => { this.scene.remove(ray); });
         this.rays = [];
 
+        // clear images
         this.images = [];
         this.slider.clear();
     }
