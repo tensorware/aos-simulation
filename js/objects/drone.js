@@ -23,7 +23,7 @@ class Drone {
             const scale = 0.15;
             const droneMesh = new THREE.Mesh(droneGeometry, droneMaterial);
             droneMesh.scale.set(scale, scale, scale);
-            this.camera = droneMesh;
+            this.drone = droneMesh;
 
             this.lines = [];
             for (let i = 0; i < 4; i++) {
@@ -56,7 +56,7 @@ class Drone {
             this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
             this.update();
-            this.addCamera();
+            this.addDrone();
             this.addPlane();
 
             this.move = this.move.bind(this);
@@ -111,8 +111,8 @@ class Drone {
         }
     }
 
-    addCamera() {
-        this.scene.add(this.camera);
+    addDrone() {
+        this.scene.add(this.drone);
 
         const lineGroup = new THREE.Group();
         this.lines.forEach((line) => {
@@ -143,12 +143,12 @@ class Drone {
     }
 
     setEastWest(ew) {
-        this.camera.position.x = ew;
+        this.drone.position.x = ew;
         this.update();
     }
 
     setNorthSouth(ns) {
-        this.camera.position.z = ns;
+        this.drone.position.z = ns;
         this.update();
     }
 
@@ -167,15 +167,15 @@ class Drone {
 
         const intersects = ray.intersectObjects(this.forest.grounds);
         if (intersects.length) {
-            this.config.droneEastWest = this.camera.position.x;
-            this.config.droneNorthSouth = this.camera.position.z;
+            this.config.droneEastWest = this.drone.position.x;
+            this.config.droneNorthSouth = this.drone.position.z;
             this.goal = intersects[0].point;
             this.move();
         }
     }
 
     update() {
-        this.camera.position.y = this.config.droneHeight;
+        this.drone.position.y = this.config.droneHeight;
 
         const distance = this.config.droneSpeed * this.config.processingSpeed;
         const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
@@ -189,18 +189,18 @@ class Drone {
         const viewParameters = this.getViewParameters(viewHeight);
 
         this.lines.forEach((line, index) => {
-            const x = viewParameters.radius * viewCorners[index][0] + this.camera.position.x;
-            const z = viewParameters.radius * viewCorners[index][1] + this.camera.position.z;
+            const x = viewParameters.radius * viewCorners[index][0] + this.drone.position.x;
+            const z = viewParameters.radius * viewCorners[index][1] + this.drone.position.z;
 
             line.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(this.camera.position.x, viewHeight, this.camera.position.z),
+                new THREE.Vector3(this.drone.position.x, viewHeight, this.drone.position.z),
                 new THREE.Vector3(x, 0, z)
             ]));
         });
 
-        const x = this.camera.position.x;
+        const x = this.drone.position.x;
         const y = 0.05;
-        const z = this.camera.position.z;
+        const z = this.drone.position.z;
 
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
         rectangleGeometry.rotateX(-Math.PI / 2).translate(x, y, z);
@@ -247,7 +247,7 @@ class Drone {
         // nearby persons
         this.forest.persons.forEach((person) => {
             if (person) {
-                const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
+                const start = new THREE.Vector3(this.drone.position.x, 0, this.drone.position.z);
                 const end = new THREE.Vector3(person.position.x, 0, person.position.z);
 
                 const personDistance = start.distanceTo(end);
@@ -260,7 +260,7 @@ class Drone {
         // nearby trees
         this.forest.trees.forEach((tree) => {
             if (tree) {
-                const start = new THREE.Vector3(this.camera.position.x, 0, this.camera.position.z);
+                const start = new THREE.Vector3(this.drone.position.x, 0, this.drone.position.z);
                 const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
                 const treeDistance = start.distanceTo(end);
@@ -273,7 +273,7 @@ class Drone {
         });
 
         // raycast persons
-        const cameraVector = new THREE.Vector3(this.camera.position.x, this.config.droneHeight, this.camera.position.z);
+        const cameraVector = new THREE.Vector3(this.drone.position.x, this.config.droneHeight, this.drone.position.z);
         persons.forEach((person) => {
 
             // check if person is inside field of view
