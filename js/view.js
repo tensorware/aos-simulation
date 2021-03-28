@@ -1,7 +1,7 @@
 Math.seedrandom('AOS-Simulation');
 
 const CONFIG = {
-    droneSpeed: 4,
+    droneSpeed: 10,
     droneHeight: 35.,
     droneEastWest: .0,
     droneNorthSouth: .0,
