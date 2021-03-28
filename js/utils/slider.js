@@ -75,7 +75,7 @@ class Slider {
 
         if (this.count) {
             this.width = {
-                slider: this.images.clientWidth,
+                slider: this.images.clientWidth - this.previews.clientWidth,
                 images: this.count * this.width.image,
                 image: this.image[0].clientWidth
             };
