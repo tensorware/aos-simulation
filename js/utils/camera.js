@@ -4,8 +4,8 @@ class Camera {
         this.config = drone.config;
         this.scene = drone.scene;
         this.stage = drone.stage;
-        this.drone = drone.drone;
         this.forest = drone.forest;
+        this.drone = drone.drone;
 
         this.rays = [];
         this.captures = [];
@@ -40,11 +40,11 @@ class Camera {
         const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
         this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
+        this.slider = new Slider(document.querySelector('#captures'), this.config);
+
         this.update();
         this.addView();
         this.addPlane();
-
-        this.slider = new Slider(document.querySelector('#captures'), this.config);
     }
 
     addView() {
@@ -71,8 +71,7 @@ class Camera {
 
         return {
             radius: radius,
-            height: height,
-            hypotenuse: hypotenuse
+            height: height
         };
     }
 
@@ -218,7 +217,9 @@ class Camera {
         });
 
         // generate image
-        // const image = this.image(rays, this.lines);
+        const pixels = this.image(rays, this.lines);
+
+        // TODO integrate pixels
     }
 
     image(rays, border) {
@@ -280,6 +281,8 @@ class Camera {
         // append image
         container.appendChild(canvas);
         this.slider.append(container);
+
+        return pixels;
     }
 
     clear() {

@@ -3,7 +3,7 @@ class Stage {
         this.root = root;
         this.config = config;
 
-        new THREE.FontLoader().load('fonts/opensans.json', (font) => {
+        new THREE.FontLoader().load('fonts/opensans.json', ((font) => {
             this.font = font;
             this.scene = new THREE.Scene();
 
@@ -33,12 +33,20 @@ class Stage {
             this.root.querySelector('#info').appendChild(this.stats.dom);
             this.root.querySelector('#stage').appendChild(this.renderer.domElement);
 
+            this.update = this.update.bind(this);
+            window.addEventListener('resize', this.update);
+
             this.animate = this.animate.bind(this);
             requestAnimationFrame(this.animate);
 
-            window.addEventListener('resize', this.resize.bind(this));
             callback(this);
-        });
+        }).bind(this));
+    }
+
+    update() {
+        this.camera.aspect = this.root.clientWidth / this.root.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
     }
 
     animate() {
@@ -51,11 +59,5 @@ class Stage {
         this.stats.begin();
         this.renderer.render(this.scene, this.camera);
         this.stats.end();
-    }
-
-    resize() {
-        this.camera.aspect = this.root.clientWidth / this.root.clientHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
     }
 }

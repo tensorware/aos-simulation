@@ -71,7 +71,7 @@ class View {
             cursor: 'ns-resize',
             direction: 'vertical',
             onDrag: () => {
-                this.stage.resize()
+                this.stage.update();
             },
             gutter: () => {
                 const gutter = document.createElement('div');

@@ -25,56 +25,13 @@ class Drone {
             this.addDrone();
             this.addCamera();
 
-            this.move = this.move.bind(this);
+            this.animate = this.animate.bind(this);
             this.click = doubleClick(this.click.bind(this));
 
             window.addEventListener('pointerdown', this.click);
             window.addEventListener('pointerup', this.click);
 
         }).bind(this));
-    }
-
-    move(currentTime) {
-        if (!currentTime) {
-            requestAnimationFrame(this.move);
-            this.startTime = 0;
-            this.lastCapture = 0;
-            return;
-        }
-        else if (!this.startTime) {
-            this.startTime = currentTime;
-        }
-
-        const start = new THREE.Vector3(this.config.droneEastWest, this.config.droneHeight, this.config.droneNorthSouth);
-        const end = new THREE.Vector3(this.goal.x, this.config.droneHeight, this.goal.z);
-
-        const moveDuration = start.distanceTo(end) / this.config.droneSpeed * 1000;
-        const deltaTime = currentTime - this.startTime;
-        const trajectoryTime = deltaTime / moveDuration;
-
-        const currentDistance = deltaTime * this.config.droneSpeed / 1000;
-        const deltaDistance = currentDistance - this.lastCapture;
-
-        // log('debug', moveDuration, deltaTime, start.distanceTo(end), currentDistance);
-
-        if (deltaTime <= moveDuration) {
-            const current = new THREE.Vector3();
-            const trajectory = new THREE.Line3(start, end);
-            trajectory.at(trajectoryTime, current);
-
-            this.setEastWest(current.x);
-            this.setNorthSouth(current.z);
-
-            if (deltaDistance >= this.config.cameraSampling) {
-                this.lastCapture = Math.floor(currentDistance);
-                this.camera.capture();
-            }
-            requestAnimationFrame(this.move);
-        }
-        else {
-            this.config.droneEastWest = this.goal.x;
-            this.config.droneNorthSouth = this.goal.z;
-        }
     }
 
     addDrone() {
@@ -113,7 +70,51 @@ class Drone {
             this.config.droneEastWest = this.drone.position.x;
             this.config.droneNorthSouth = this.drone.position.z;
             this.goal = intersects[0].point;
-            this.move();
+            this.animate();
+        }
+    }
+
+    animate(currentTime) {
+        if (!currentTime) {
+            this.startTime = 0;
+            this.lastCapture = 0;
+            requestAnimationFrame(this.animate);
+            return;
+        }
+        else if (!this.startTime) {
+            this.startTime = currentTime;
+        }
+
+        const start = new THREE.Vector3(this.config.droneEastWest, this.config.droneHeight, this.config.droneNorthSouth);
+        const end = new THREE.Vector3(this.goal.x, this.config.droneHeight, this.goal.z);
+
+        const moveDuration = start.distanceTo(end) / this.config.droneSpeed * 1000;
+        const deltaTime = currentTime - this.startTime;
+        const trajectoryTime = deltaTime / moveDuration;
+
+        const currentDistance = deltaTime * this.config.droneSpeed / 1000;
+        const deltaDistance = currentDistance - this.lastCapture;
+
+        // log('debug', moveDuration, deltaTime, start.distanceTo(end), currentDistance);
+
+        if (deltaTime <= moveDuration) {
+            const current = new THREE.Vector3();
+            const trajectory = new THREE.Line3(start, end);
+            trajectory.at(trajectoryTime, current);
+
+            this.setEastWest(current.x);
+            this.setNorthSouth(current.z);
+
+            if (deltaDistance >= this.config.cameraSampling) {
+                this.lastCapture = Math.floor(currentDistance);
+                this.camera.capture();
+            }
+
+            requestAnimationFrame(this.animate);
+        }
+        else {
+            this.config.droneEastWest = this.goal.x;
+            this.config.droneNorthSouth = this.goal.z;
         }
     }
 

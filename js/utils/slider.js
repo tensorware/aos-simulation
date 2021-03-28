@@ -25,8 +25,8 @@ class Slider {
         // TODO stay on current items
         window.addEventListener('resize', this.update.bind(this));
 
-        this.render = this.render.bind(this);
-        requestAnimationFrame(this.render);
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
     }
 
     scrollWheel(e) {
@@ -72,28 +72,7 @@ class Slider {
         this.scroll.x = this.width.slider - this.width.images;
     }
 
-    clear() {
-        this.images.textContent = '';
-        this.previews.textContent = '';
-    }
-
-    update() {
-        this.image = this.images.querySelectorAll('.image:not(.removed)');
-        this.count = this.image.length;
-
-        // update width
-        if (this.count) {
-            this.width = {
-                slider: this.images.clientWidth - this.previews.clientWidth,
-                images: this.count * this.width.image,
-                image: this.image[0].clientWidth
-            };
-        }
-
-        return this.count > 0;
-    }
-
-    render() {
+    animate() {
         // calculate scroll
         this.scroll.x = Math.min(0, Math.max(this.width.slider - this.width.images, this.scroll.x));
         this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.1);
@@ -126,6 +105,32 @@ class Slider {
             };
         }
 
-        requestAnimationFrame(this.render);
+        requestAnimationFrame(this.animate);
+    }
+
+    update() {
+        this.image = this.images.querySelectorAll('.image:not(.removed)');
+        this.count = this.image.length;
+
+        // update width
+        if (this.count) {
+            this.width = {
+                slider: this.images.clientWidth - this.previews.clientWidth,
+                images: this.count * this.width.image,
+                image: this.image[0].clientWidth
+            };
+        }
+
+        return this.count > 0;
+    }
+
+    clear() {
+        this.images.textContent = '';
+        this.previews.textContent = '';
+    }
+
+    reset() {
+        this.clear();
+        this.update();
     }
 }
