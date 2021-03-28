@@ -6,7 +6,7 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        this.slider = new Slider(document.querySelector('#captures'), 30);
+        this.slider = new Slider(document.querySelector('#captures'), this.config);
 
         new THREE.STLLoader().load('objects/drone.stl', ((droneGeometry) => {
             this.rays = [];
