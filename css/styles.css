@@ -23,6 +23,7 @@ html {
 #main #top #info {
   top: 0;
   left: 0;
+  z-index: 10;
   position: absolute;
 }
 
@@ -39,6 +40,7 @@ html {
 #main #top #controls {
   top: 0;
   right: 0;
+  z-index: 10;
   padding: 3px;
   position: absolute;
 }
