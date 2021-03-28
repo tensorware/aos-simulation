@@ -10,6 +10,7 @@ const CONFIG = {
     cameraImages: 30,
     cameraSampling: 1,
     cameraResolution: 512,
+    cameraType: 'Infrared',
 
     processingSpeed: 0.5,
 
@@ -96,6 +97,7 @@ class View {
         cameraFolder.add(this.config, 'cameraImages', 1, 50, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config, 'cameraSampling', 0.1, 10.0, 0.5).onChange(() => this.drone.update());
         cameraFolder.add(this.config, 'cameraResolution', 128, 1024, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config, 'cameraType', ['Infrared', 'Monochrome', 'Color']).onChange(() => this.drone.update());
 
         // cpu
         const cpuFolder = droneFolder.addFolder('cpu');

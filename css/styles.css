@@ -45,6 +45,20 @@ html {
   position: absolute;
 }
 
+#main #top #controls select {
+  width: 185px;
+  line-height: 20px;
+  margin: 0px 0px 0px -5px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  color: #44abda;
+  background: #303030;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 #main #gutter {
   cursor: ns-resize;
   background: #dddddd;
