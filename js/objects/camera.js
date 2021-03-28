@@ -89,14 +89,12 @@ class Camera {
     }
 
     captureRays(plane) {
-        const persons = [];
-        const trees = [];
-        const rays = [];
-
         const view = this.drone.getView();
+        const cameraVector = new THREE.Vector3(view.x, view.y, view.z);
         const cornerDistance = Math.sqrt(view.r ** 2 + view.r ** 2) + 3;
 
         // nearby persons
+        const persons = [];
         this.forest.persons.forEach((person) => {
             if (person) {
                 const start = new THREE.Vector3(view.x, 0, view.z);
@@ -111,6 +109,7 @@ class Camera {
         });
 
         // nearby trees
+        const trees = [];
         this.forest.trees.forEach((tree) => {
             if (tree) {
                 const start = new THREE.Vector3(view.x, 0, view.z);
@@ -119,18 +118,14 @@ class Camera {
                 // distance from camera to tree
                 const treeDistance = start.distanceTo(end);
                 if (treeDistance <= cornerDistance) {
-                    tree.children.every((children) => {
-                        trees.push(children);
-                    });
+                    tree.children.every((children) => { trees.push(children); });
                 }
             }
         });
 
         // raycast persons
-        const cameraVector = new THREE.Vector3(view.x, view.y, view.z);
+        const rays = [];
         persons.forEach((person) => {
-
-            // check if person is inside field of view
             getPoints(person).forEach((personVector) => {
                 const groundVector = new THREE.Vector3(personVector.x, 0, personVector.z);
                 if (rayCast(cameraVector, groundVector, plane).length) {
@@ -270,11 +265,22 @@ class Camera {
 
     capture() {
         const plane = this.capturePlane();
-        const rays = this.captureRays(plane);
-        const images = this.captureImage(rays);
+        const type = this.config.cameraType;
 
-        // integrate images
-        this.integrateImages(images);
+        if (type === 'infrared') {
+            // infrared images
+            const rays = this.captureRays(plane);
+            const images = this.captureImage(rays);
+
+            // integrate images
+            this.integrateImages(images);
+        }
+        else if (type === 'monochrome') {
+            // TODO monochrome images
+        }
+        else if (type === 'color') {
+            // TODO color images
+        }
     }
 
     update() {
