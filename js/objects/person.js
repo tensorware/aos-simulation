@@ -1,6 +1,10 @@
 class Person {
-    constructor(config) {
-        this.config = config;
+    constructor(forest) {
+        this.root = forest.root;
+        this.config = forest.config;
+        this.scene = forest.scene;
+        this.stage = forest.stage;
+        this.forest = forest;
 
         const width = 1;
         const height = 2;

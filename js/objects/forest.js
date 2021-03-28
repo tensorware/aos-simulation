@@ -61,7 +61,7 @@ class Forest {
     }
 
     getPerson(index) {
-        const person = new Person(this.config).mesh;
+        const person = new Person(this).mesh;
         person.position.x = this.personPositions[index].x;
         person.position.z = this.personPositions[index].z;
         return person;
