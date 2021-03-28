@@ -100,7 +100,7 @@ class View {
         const cameraFolder = droneFolder.addFolder('camera');
         cameraFolder.add(this.config, 'cameraView', 15, 160, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config, 'cameraImages', 1, 50, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config, 'cameraSampling', 0.1, 10.0, 0.5).onChange(() => this.drone.update());
+        cameraFolder.add(this.config, 'cameraSampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
         cameraFolder.add(this.config, 'cameraResolution', 128, 1024, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config, 'cameraType', ['Infrared', 'Monochrome', 'Color']).onChange(() => this.drone.update());
 
@@ -134,7 +134,7 @@ class View {
         const treeFolder = forestFolder.addFolder('tree');
         const treeFolders = [
             treeFolder.add(this.config, 'levels', 0, 10, 1),
-            treeFolder.add(this.config, 'twigScale', 0., 1., 0.05),
+            treeFolder.add(this.config, 'twigScale', 0.0, 1.0, 0.05),
             treeFolder.add(this.config, 'homogeneity', 50, 100, 1)
         ];
 
