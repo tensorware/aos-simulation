@@ -35,7 +35,7 @@ var Tree = function (data) {
 	this.index = data.index;
 	this.properties.rseed = this.properties.seed;
 	this.root = new Branch([0, this.properties.trunkLength, 0]);
-	this.root.length = this.properties.initalBranchLength;
+	this.root.length = this.properties.initialBranchLength;
 	this.verts = [];
 	this.faces = [];
 	this.normals = [];
@@ -68,7 +68,7 @@ Tree.prototype.properties = {
 	segments: 6,
 	levels: 3,
 	sweepAmount: 0,
-	initalBranchLength: 0.85,
+	initialBranchLength: 0.85,
 	trunkLength: 2.5,
 	dropAmount: 0.0,
 	growAmount: 0.0,
