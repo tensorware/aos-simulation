@@ -81,7 +81,7 @@ class Slider {
     animate() {
         // calculate scroll
         this.scroll.x = Math.min(0, Math.max(this.width.slider - this.width.images, this.scroll.x));
-        this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.1);
+        this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.2);
 
         if (this.update()) {
             const delta = this.scroll.next - this.scroll.start;
@@ -94,7 +94,7 @@ class Slider {
 
             // animate transitions
             gsap.to(this.image, {
-                skewX: -delta * 0.2,
+                skewX: -delta * 0.1,
                 rotate: delta * 0.01,
                 scale: 1 - Math.min(100, Math.abs(delta)) * 0.003
             });
