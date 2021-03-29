@@ -2,27 +2,34 @@ const init = () => {
     Math.seedrandom(document.title);
 
     new View(document.querySelector('#top'), {
-        droneSpeed: 10,
-        droneHeight: 35.,
-        droneEastWest: .0,
-        droneNorthSouth: .0,
+        drone: {
+            speed: 10,
+            height: 35.,
+            eastWest: 0.0,
+            northSouth: 0.0
+        },
 
+        // drone.camera
         cameraView: 50,
         cameraImages: 30,
         cameraSampling: 1,
         cameraResolution: 512,
         cameraType: 'infrared',
 
-        processingSpeed: 0.5,
+        // drone.cpu
+        processingSpeed: 0.50,
 
+        // forest
         size: 100,
         trees: 30,
         persons: 3,
 
+        // forest.tree
         levels: 5,
         twigScale: 0.40,
         homogeneity: 80,
 
+        // forest.tree.branching
         initialBranchLength: 0.50,
         lengthFalloffFactor: 0.85,
         lengthFalloffPower: 0.85,
@@ -33,6 +40,7 @@ const init = () => {
         growAmount: 0.25,
         sweepAmount: 0.00,
 
+        // forest.tree.trunk
         maxRadius: 0.10,
         climbRate: 0.60,
         trunkKink: 0.10,
@@ -42,6 +50,7 @@ const init = () => {
         twistRate: 3.00,
         trunkLength: 2.50,
 
+        // materials
         treeColor: 0x613615,
         twigColor: 0x418c45,
         groundColor: 0x727272,
@@ -71,7 +80,7 @@ class View {
     splitter(elements) {
         // init split
         Split(elements, {
-            gutterSize: 4,
+            gutterSize: 5,
             sizes: [80, 20],
             minSize: [0, 0],
             cursor: 'ns-resize',
@@ -94,15 +103,12 @@ class View {
         root.appendChild(this.gui.domElement);
 
         // drone folder
+        const size = this.forest.config.size / 2;
         const droneFolder = this.gui.addFolder('drone');
-        droneFolder.add(this.config, 'droneSpeed', 1, 20, 1).onChange(() => this.drone.update());
-        droneFolder.add(this.config, 'droneHeight', 1, 100, 1).onChange(() => this.drone.update());
-        droneFolder.add(this.config, 'droneEastWest', -this.forest.config.size / 2, this.forest.config.size / 2, 0.5).onChange((v) => {
-            this.drone.setEastWest(v);
-        }).listen();
-        droneFolder.add(this.config, 'droneNorthSouth', -this.forest.config.size / 2, this.forest.config.size / 2, 0.5).onChange((v) => {
-            this.drone.setNorthSouth(v);
-        }).listen();
+        droneFolder.add(this.config.drone, 'speed', 1, 20, 1).onChange(() => this.drone.update());
+        droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update());
+        droneFolder.add(this.config.drone, 'eastWest', -size, size, 0.5).onChange((v) => this.drone.setEastWest(v)).listen();
+        droneFolder.add(this.config.drone, 'northSouth', -size, size, 0.5).onChange((v) => this.drone.setNorthSouth(v)).listen();
 
         // camera folder
         const cameraFolder = droneFolder.addFolder('camera');
@@ -198,7 +204,6 @@ class View {
     }
 
     background(color) {
-        // update background color
         this.stage.renderer.setClearColor(color);
         this.root.parentElement.style.backgroundColor = '#' + color.toString(16);
     }

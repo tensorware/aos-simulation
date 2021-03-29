@@ -14,7 +14,7 @@ class Camera {
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
             this.viewLines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(0, this.config.droneHeight, 0),
+                new THREE.Vector3(0, this.config.drone.height, 0),
                 new THREE.Vector3(0, 0, 0)
             ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
@@ -299,10 +299,10 @@ class Camera {
     update() {
         const view = this.drone.getView();
 
-        const distance = this.config.droneSpeed * this.config.processingSpeed;
-        const coverage = 2 * this.config.droneHeight * Math.tan(radian(this.config.cameraView / 2));
+        const distance = this.config.drone.speed * this.config.processingSpeed;
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.cameraView / 2));
         const overlap = coverage / distance;
-        const time = coverage / this.config.droneSpeed;
+        const time = coverage / this.config.drone.speed;
 
         // log('debug', distance, coverage, overlap, time);
 

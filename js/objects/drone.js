@@ -89,8 +89,8 @@ class Drone {
 
         const intersects = ray.intersectObjects(this.forest.grounds);
         if (intersects.length) {
-            this.config.droneEastWest = this.drone.position.x;
-            this.config.droneNorthSouth = this.drone.position.z;
+            this.config.drone.eastWest = this.drone.position.x;
+            this.config.drone.northSouth = this.drone.position.z;
             this.goal = intersects[0].point;
             this.animate();
         }
@@ -107,14 +107,14 @@ class Drone {
             this.startTime = currentTime;
         }
 
-        const start = new THREE.Vector3(this.config.droneEastWest, this.config.droneHeight, this.config.droneNorthSouth);
-        const end = new THREE.Vector3(this.goal.x, this.config.droneHeight, this.goal.z);
+        const start = new THREE.Vector3(this.config.drone.eastWest, this.config.drone.height, this.config.drone.northSouth);
+        const end = new THREE.Vector3(this.goal.x, this.config.drone.height, this.goal.z);
 
-        const moveDuration = start.distanceTo(end) / this.config.droneSpeed * 1000;
+        const moveDuration = start.distanceTo(end) / this.config.drone.speed * 1000;
         const deltaTime = currentTime - this.startTime;
         const trajectoryTime = deltaTime / moveDuration;
 
-        const currentDistance = deltaTime * this.config.droneSpeed / 1000;
+        const currentDistance = deltaTime * this.config.drone.speed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
 
         // log('debug', moveDuration, deltaTime, start.distanceTo(end), currentDistance);
@@ -135,13 +135,13 @@ class Drone {
             requestAnimationFrame(this.animate);
         }
         else {
-            this.config.droneEastWest = this.goal.x;
-            this.config.droneNorthSouth = this.goal.z;
+            this.config.drone.eastWest = this.goal.x;
+            this.config.drone.northSouth = this.goal.z;
         }
     }
 
     update() {
-        this.drone.position.y = this.config.droneHeight;
+        this.drone.position.y = this.config.drone.height;
 
         if (this.camera) {
             this.camera.update();
