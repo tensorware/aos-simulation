@@ -62,13 +62,34 @@ class View {
             this.forest = new Forest(this.stage);
             this.drone = new Drone(this.forest);
 
+            this.splitter(['#top', '#bottom']);
             this.controls(this.root.querySelector('#controls'));
             this.background(this.config.backgroundColor);
-            this.splitter(['#top', '#bottom']);
         });
     }
 
+    splitter(elements) {
+        // init split
+        Split(elements, {
+            gutterSize: 4,
+            sizes: [80, 20],
+            minSize: [0, 0],
+            cursor: 'ns-resize',
+            direction: 'vertical',
+            onDrag: () => { this.stage.update(); },
+            gutter: () => {
+                const gutter = document.createElement('div');
+                gutter.id = 'gutter';
+                return gutter;
+            }
+        });
+
+        // update stage canvas
+        this.stage.update();
+    }
+
     controls(root) {
+        // init gui
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
         root.appendChild(this.gui.domElement);
 
@@ -177,24 +198,9 @@ class View {
     }
 
     background(color) {
+        // update background color
         this.stage.renderer.setClearColor(color);
         this.root.parentElement.style.backgroundColor = '#' + color.toString(16);
-    }
-
-    splitter(elements) {
-        Split(elements, {
-            gutterSize: 4,
-            sizes: [80, 20],
-            minSize: [0, 0],
-            cursor: 'ns-resize',
-            direction: 'vertical',
-            onDrag: () => { this.stage.update(); },
-            gutter: () => {
-                const gutter = document.createElement('div');
-                gutter.id = 'gutter';
-                return gutter;
-            }
-        });
     }
 
     reset() {
