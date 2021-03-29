@@ -9,7 +9,7 @@ class Person {
         const width = 1;
         const height = 2;
 
-        const segments = 2
+        const segments = 4;
         const widthSegments = width * segments;
         const heightSegments = height * segments;
 
@@ -18,7 +18,7 @@ class Person {
         const planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.personColor });
 
         const wireGeometry = new THREE.WireframeGeometry(planeGeometry);
-        const wireMaterial = new THREE.LineBasicMaterial({ color: this.config.groundColor });
+        const wireMaterial = new THREE.LineBasicMaterial({ color: this.config.personColor });
 
         this.wire = new THREE.LineSegments(wireGeometry, wireMaterial);
         this.mesh = new THREE.Mesh(planeGeometry, planeMaterial);
