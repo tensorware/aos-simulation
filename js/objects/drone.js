@@ -42,13 +42,13 @@ class Drone {
         this.camera = new Camera(this);
     }
 
-    setEastWest(ew) {
-        this.drone.position.x = ew;
+    setEastWest(position) {
+        this.drone.position.x = position;
         this.update();
     }
 
-    setNorthSouth(ns) {
-        this.drone.position.z = ns;
+    setNorthSouth(position) {
+        this.drone.position.z = position;
         this.update();
     }
 

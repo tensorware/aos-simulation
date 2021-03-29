@@ -18,11 +18,11 @@ const init = () => {
         cpu: {
             speed: 0.50
         },
-
-        // forest
-        size: 100,
-        trees: 30,
-        persons: 3,
+        forest: {
+            ground: 100,
+            trees: 30,
+            persons: 3
+        },
 
         // forest.tree
         levels: 5,
@@ -103,7 +103,7 @@ class View {
         root.appendChild(this.gui.domElement);
 
         // drone folder
-        const size = this.forest.config.size / 2;
+        const size = this.forest.config.forest.ground / 2;
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config.drone, 'speed', 1, 20, 1).onChange(() => this.drone.update());
         droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update());
@@ -124,7 +124,7 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config, 'size', 30, 1000, 1).onFinishChange(() => {
+        forestFolder.add(this.config.forest, 'ground', 30, 1000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
 
@@ -132,8 +132,11 @@ class View {
             this.forest.update();
             this.forest.addTrees();
             this.forest.addPersons();
+
+            this.drone.setEastWest(0);
+            this.drone.setNorthSouth(0);
         });
-        forestFolder.add(this.config, 'trees', 1, 1000, 1).onFinishChange(() => {
+        forestFolder.add(this.config.forest, 'trees', 1, 1000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
 
@@ -142,7 +145,7 @@ class View {
             this.forest.addTrees();
             this.forest.addPersons();
         });
-        forestFolder.add(this.config, 'persons', 1, 10, 1).onFinishChange(this.reset.bind(this));
+        forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(this.reset.bind(this));
 
         // tree folder
         const treeFolder = forestFolder.addFolder('tree');
