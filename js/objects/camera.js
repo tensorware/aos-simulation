@@ -19,7 +19,7 @@ class Camera {
             ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
 
-        this.planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.planeColor });
+        this.planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.material.planeColor });
 
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
@@ -154,7 +154,7 @@ class Camera {
                     const intersectVector = new THREE.Vector3(personVector.x, personVector.y, personVector.z);
                     if (!rayCast(cameraVector, intersectVector, obstacles).length) {
                         const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
-                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: this.config.personColor }));
+                        const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: this.config.material.personColor }));
 
                         // append ray lines
                         rays.push(intersectLine);
@@ -226,7 +226,7 @@ class Camera {
 
         // draw pixel points
         image.points.forEach((p) => {
-            ctx.fillStyle = '#' + this.config.personColor.toString(16);
+            ctx.fillStyle = '#' + this.config.material.personColor.toString(16);
             ctx.fillRect(p.x, p.z, 1, 1);
         });
 
@@ -266,7 +266,7 @@ class Camera {
             delta.copy(center).sub(image.center);
 
             image.points.forEach((p) => {
-                ctx.fillStyle = '#' + this.config.personColor.toString(16);
+                ctx.fillStyle = '#' + this.config.material.personColor.toString(16);
                 ctx.fillRect(p.x - delta.x, p.z - delta.z, 1, 1);
             });
         });

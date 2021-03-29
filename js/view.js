@@ -23,40 +23,40 @@ const init = () => {
             trees: 30,
             persons: 3
         },
-
-        // forest.tree
-        levels: 5,
-        twigScale: 0.40,
-        homogeneity: 80,
-
-        // forest.tree.branching
-        initialBranchLength: 0.50,
-        lengthFalloffFactor: 0.85,
-        lengthFalloffPower: 0.85,
-        clumpMax: 0.45,
-        clumpMin: 0.40,
-        branchFactor: 2.45,
-        dropAmount: -0.10,
-        growAmount: 0.25,
-        sweepAmount: 0.00,
-
-        // forest.tree.trunk
-        maxRadius: 0.10,
-        climbRate: 0.60,
-        trunkKink: 0.10,
-        treeSteps: 8.00,
-        taperRate: 0.95,
-        radiusFalloffRate: 0.70,
-        twistRate: 3.00,
-        trunkLength: 2.50,
-
-        // materials
-        treeColor: 0x613615,
-        twigColor: 0x418c45,
-        groundColor: 0x727272,
-        planeColor: 0x7d5c5c,
-        personColor: 0xfafafa,
-        backgroundColor: 0x8fbde8
+        tree: {
+            levels: 5,
+            twigScale: 0.40,
+            homogeneity: 80,
+            branching: {
+                initialBranchLength: 0.50,
+                lengthFalloffFactor: 0.85,
+                lengthFalloffPower: 0.85,
+                clumpMax: 0.45,
+                clumpMin: 0.40,
+                branchFactor: 2.45,
+                dropAmount: -0.10,
+                growAmount: 0.25,
+                sweepAmount: 0.00
+            },
+            trunk: {
+                maxRadius: 0.10,
+                climbRate: 0.60,
+                trunkKink: 0.10,
+                treeSteps: 8.00,
+                taperRate: 0.95,
+                radiusFalloffRate: 0.70,
+                twistRate: 3.00,
+                trunkLength: 2.50
+            }
+        },
+        material: {
+            treeColor: 0x613615,
+            twigColor: 0x418c45,
+            groundColor: 0x727272,
+            planeColor: 0x7d5c5c,
+            personColor: 0xfafafa,
+            backgroundColor: 0x8fbde8
+        }
     });
 };
 
@@ -73,7 +73,7 @@ class View {
 
             this.splitter(['#top', '#bottom']);
             this.controls(this.root.querySelector('#controls'));
-            this.background(this.config.backgroundColor);
+            this.background(this.config.material.backgroundColor);
         });
     }
 
@@ -133,8 +133,8 @@ class View {
             this.forest.addTrees();
             this.forest.addPersons();
 
-            this.drone.setEastWest(0);
-            this.drone.setNorthSouth(0);
+            this.drone.setEastWest(0.0);
+            this.drone.setNorthSouth(0.0);
         });
         forestFolder.add(this.config.forest, 'trees', 1, 1000, 1).onFinishChange(() => {
             this.drone.clear();
@@ -150,36 +150,36 @@ class View {
         // tree folder
         const treeFolder = forestFolder.addFolder('tree');
         const treeFolders = [
-            treeFolder.add(this.config, 'levels', 0, 10, 1),
-            treeFolder.add(this.config, 'twigScale', 0.0, 1.0, 0.05),
-            treeFolder.add(this.config, 'homogeneity', 50, 100, 1)
+            treeFolder.add(this.config.tree, 'levels', 0, 10, 1),
+            treeFolder.add(this.config.tree, 'twigScale', 0.0, 1.0, 0.05),
+            treeFolder.add(this.config.tree, 'homogeneity', 50, 100, 1)
         ];
 
         // branching folder
         const branchingFolder = treeFolder.addFolder('branching');
         const branchingFolders = [
-            branchingFolder.add(this.config, 'initialBranchLength', 0.1, 1.0, 0.05),
-            branchingFolder.add(this.config, 'lengthFalloffFactor', 0.1, 1.0, 0.05),
-            branchingFolder.add(this.config, 'lengthFalloffPower', 0.1, 1.5, 0.05),
-            branchingFolder.add(this.config, 'clumpMax', 0.0, 1.0, 0.05),
-            branchingFolder.add(this.config, 'clumpMin', 0.0, 1.0, 0.05),
-            branchingFolder.add(this.config, 'branchFactor', 2.0, 4.0, 0.05),
-            branchingFolder.add(this.config, 'dropAmount', -1.0, 1.0, 0.05),
-            branchingFolder.add(this.config, 'growAmount', -1.0, 1.0, 0.05),
-            branchingFolder.add(this.config, 'sweepAmount', -1.0, 1.0, 0.05)
+            branchingFolder.add(this.config.tree.branching, 'initialBranchLength', 0.1, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'lengthFalloffFactor', 0.1, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'lengthFalloffPower', 0.1, 1.5, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'clumpMax', 0.0, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'clumpMin', 0.0, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'branchFactor', 2.0, 4.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'dropAmount', -1.0, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'growAmount', -1.0, 1.0, 0.05),
+            branchingFolder.add(this.config.tree.branching, 'sweepAmount', -1.0, 1.0, 0.05)
         ];
 
         // trunk folder
         const trunkFolder = treeFolder.addFolder('trunk');
         const trunkFolders = [
-            trunkFolder.add(this.config, 'maxRadius', 0.05, 0.5, 0.05),
-            trunkFolder.add(this.config, 'climbRate', 0.05, 1.0, 0.05),
-            trunkFolder.add(this.config, 'trunkKink', 0.0, 0.5, 0.05),
-            trunkFolder.add(this.config, 'treeSteps', 0.0, 20.0, 0.05),
-            trunkFolder.add(this.config, 'taperRate', 0.7, 1.0, 0.05),
-            trunkFolder.add(this.config, 'radiusFalloffRate', 0.5, 0.8, 0.05),
-            trunkFolder.add(this.config, 'twistRate', 0.0, 10.0, 1),
-            trunkFolder.add(this.config, 'trunkLength', 0.1, 5.0, 0.05)
+            trunkFolder.add(this.config.tree.trunk, 'maxRadius', 0.05, 0.5, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'climbRate', 0.05, 1.0, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'trunkKink', 0.0, 0.5, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'treeSteps', 0.0, 20.0, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'taperRate', 0.7, 1.0, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'radiusFalloffRate', 0.5, 0.8, 0.05),
+            trunkFolder.add(this.config.tree.trunk, 'twistRate', 0.0, 10.0, 1),
+            trunkFolder.add(this.config.tree.trunk, 'trunkLength', 0.1, 5.0, 0.05)
         ];
 
         // forest folder
@@ -194,13 +194,13 @@ class View {
         });
 
         // materials folder
-        const materialsFolder = this.gui.addFolder('materials');
-        materialsFolder.addColor(this.config, 'treeColor').onChange((v) => this.forest.treeMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'planeColor').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config, 'personColor').onFinishChange(this.reset.bind(this));
-        materialsFolder.addColor(this.config, 'backgroundColor').onChange(this.background.bind(this));
+        const materialsFolder = this.gui.addFolder('material');
+        materialsFolder.addColor(this.config.material, 'treeColor').onChange((v) => this.forest.treeMaterial.color.setHex(v));
+        materialsFolder.addColor(this.config.material, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v));
+        materialsFolder.addColor(this.config.material, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v));
+        materialsFolder.addColor(this.config.material, 'planeColor').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
+        materialsFolder.addColor(this.config.material, 'personColor').onFinishChange(this.reset.bind(this));
+        materialsFolder.addColor(this.config.material, 'backgroundColor').onChange(this.background.bind(this));
 
         this.gui.add(this, 'reset');
         // this.gui.close();

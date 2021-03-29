@@ -15,21 +15,21 @@ class Forest {
         this.workers = getWorkers();
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.groundColor,
+            color: this.config.material.groundColor,
             side: THREE.DoubleSide,
             roughness: 1.0,
             metalness: 0.3
         });
 
         this.treeMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.treeColor,
+            color: this.config.material.treeColor,
             roughness: 1.0,
             metalness: 0.3
         });
 
         this.twigMaterial = new THREE.MeshStandardMaterial({
             map: new THREE.TextureLoader().load('img/leaf.png'),
-            color: this.config.twigColor,
+            color: this.config.material.twigColor,
             roughness: 1.0,
             metalness: 0.3,
             alphaTest: 0.8
@@ -49,14 +49,23 @@ class Forest {
 
     getTree(index) {
         const seed = random(0, 1000, index);
-        const config = { ... this.config };
+
+        const config = {
+            levels: this.config.tree.levels,
+            twigScale: this.config.tree.twigScale,
+            ... this.config.tree.branching,
+            ... this.config.tree.trunk
+        };
+
         for (let key in config) {
             if (random(0, 100, seed) <= 50) {
-                config[key] = config[key] * (random(this.config.homogeneity, 100, seed) / 100);
+                config[key] = config[key] * (random(this.config.tree.homogeneity, 100, seed) / 100);
             }
         }
-        config.seed = seed;
+
         config.index = index;
+        config.seed = seed;
+
         return config;
     }
 

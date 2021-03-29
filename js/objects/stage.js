@@ -14,7 +14,6 @@ class Stage {
             this.renderer = new THREE.WebGLRenderer({ antialias: true });
             this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
             this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.renderer.setClearColor(this.config.backgroundColor);
 
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
             this.controls.minDistance = 1;
