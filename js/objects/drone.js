@@ -59,7 +59,7 @@ class Drone {
         const z = this.drone.position.z;
 
         // angles from sky to ground
-        const a = this.config.cameraView / 2;
+        const a = this.config.camera.view / 2;
         const b = 90 - a;
         const c = y / Math.sin(radian(b));
 
@@ -127,7 +127,7 @@ class Drone {
             this.setEastWest(current.x);
             this.setNorthSouth(current.z);
 
-            if (deltaDistance >= this.config.cameraSampling) {
+            if (deltaDistance >= this.config.camera.sampling) {
                 this.lastCapture = Math.floor(currentDistance);
                 this.camera.capture();
             }

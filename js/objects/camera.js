@@ -58,7 +58,7 @@ class Camera {
     }
 
     getResolution() {
-        return new THREE.Vector3(this.config.cameraResolution, 0, this.config.cameraResolution);
+        return new THREE.Vector3(this.config.camera.resolution, 0, this.config.camera.resolution);
     }
 
     capturePlane() {
@@ -236,7 +236,7 @@ class Camera {
 
         // return last captured images
         this.images.push(image);
-        return this.images.slice(Math.max(this.images.length - this.config.cameraImages, 0));
+        return this.images.slice(Math.max(this.images.length - this.config.camera.images, 0));
     }
 
     integrateImages(images) {
@@ -278,7 +278,7 @@ class Camera {
 
     capture() {
         const plane = this.capturePlane();
-        const type = this.config.cameraType;
+        const type = this.config.camera.type;
 
         if (type === 'infrared') {
             // infrared images
@@ -299,8 +299,8 @@ class Camera {
     update() {
         const view = this.drone.getView();
 
-        const distance = this.config.drone.speed * this.config.processingSpeed;
-        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.cameraView / 2));
+        const distance = this.config.drone.speed * this.config.cpu.speed;
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.camera.view / 2));
         const overlap = coverage / distance;
         const time = coverage / this.config.drone.speed;
 

@@ -8,16 +8,16 @@ const init = () => {
             eastWest: 0.0,
             northSouth: 0.0
         },
-
-        // drone.camera
-        cameraView: 50,
-        cameraImages: 30,
-        cameraSampling: 1,
-        cameraResolution: 512,
-        cameraType: 'infrared',
-
-        // drone.cpu
-        processingSpeed: 0.50,
+        camera: {
+            view: 50,
+            images: 30,
+            sampling: 1,
+            resolution: 512,
+            type: 'infrared'
+        },
+        cpu: {
+            speed: 0.50
+        },
 
         // forest
         size: 100,
@@ -112,15 +112,15 @@ class View {
 
         // camera folder
         const cameraFolder = droneFolder.addFolder('camera');
-        cameraFolder.add(this.config, 'cameraView', 15, 160, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config, 'cameraImages', 1, 50, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config, 'cameraSampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
-        cameraFolder.add(this.config, 'cameraResolution', 128, 1024, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config, 'cameraType', ['infrared', 'monochrome', 'color']).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.camera, 'view', 15, 160, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.camera, 'images', 1, 50, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.camera, 'type', ['infrared', 'monochrome', 'color']).onChange(() => this.drone.update());
 
         // cpu folder
         const cpuFolder = droneFolder.addFolder('cpu');
-        cpuFolder.add(this.config, 'processingSpeed', 0.1, 2.0, 0.1).onChange(() => this.drone.update());
+        cpuFolder.add(this.config.cpu, 'speed', 0.1, 2.0, 0.1).onChange(() => this.drone.update());
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
