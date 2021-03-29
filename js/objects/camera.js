@@ -58,11 +58,7 @@ class Camera {
     }
 
     getResolution() {
-        return {
-            x: this.config.cameraResolution,
-            y: 0,
-            z: this.config.cameraResolution
-        };
+        return new THREE.Vector3(this.config.cameraResolution, 0, this.config.cameraResolution);
     }
 
     capturePlane() {
@@ -90,6 +86,7 @@ class Camera {
 
     captureRays(plane) {
         const view = this.drone.getView();
+
         const cameraVector = new THREE.Vector3(view.x, view.y, view.z);
         const cornerDistance = Math.sqrt(view.r ** 2 + view.r ** 2) + 3;
 
@@ -172,6 +169,9 @@ class Camera {
     }
 
     captureImage(rays) {
+        const view = this.drone.getView();
+        const resolution = this.getResolution();
+
         const rayPoints = rays.map(getPoints);
         const borderPoints = this.viewLines.map(getPoints);
 
@@ -194,15 +194,20 @@ class Camera {
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const resolution = this.getResolution();
-        const pixels = rayPointsGround.map((p) => {
-            return {
-                x: Math.round(p.x * resolution.x / max.x),
-                y: 0,
-                z: Math.round(p.z * resolution.z / max.z)
-            };
-        });
-        this.images.push(pixels);
+        const image = {
+            center: new THREE.Vector3(
+                Math.round(view.x * resolution.x / max.x),
+                0,
+                Math.round(view.z * resolution.z / max.z)
+            ),
+            points: rayPointsGround.map((p) => {
+                return new THREE.Vector3(
+                    Math.round(p.x * resolution.x / max.x),
+                    0,
+                    Math.round(p.z * resolution.z / max.z)
+                );
+            })
+        };
 
         // canvas container
         const container = document.createElement('div');
@@ -219,8 +224,8 @@ class Camera {
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // draw pixels
-        pixels.forEach((p) => {
+        // draw pixel points
+        image.points.forEach((p) => {
             ctx.fillStyle = '#' + this.config.personColor.toString(16);
             ctx.fillRect(p.x, p.z, 1, 1);
         });
@@ -229,6 +234,8 @@ class Camera {
         container.appendChild(canvas);
         this.slider.addImage(container);
 
+        // return last captured images
+        this.images.push(image);
         return this.images.slice(Math.max(this.images.length - this.config.cameraImages, 0));
     }
 
@@ -250,11 +257,17 @@ class Camera {
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // draw pixels
-        images.forEach((pixels) => {
-            pixels.forEach((p) => { // TODO shift and sum pixels
+        // draw pixel points
+        const center = images[images.length - 1].center;
+        images.forEach((image) => {
+
+            // delta from current center to captured images
+            const delta = new THREE.Vector3();
+            delta.copy(center).sub(image.center);
+
+            image.points.forEach((p) => {
                 ctx.fillStyle = '#' + this.config.personColor.toString(16);
-                ctx.fillRect(p.x, p.z, 1, 1);
+                ctx.fillRect(p.x - delta.x, p.z - delta.z, 1, 1);
             });
         });
 
