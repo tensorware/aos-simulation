@@ -110,6 +110,10 @@ function getPoints(mesh) {
     return points;
 }
 
+function hexColor(color) {
+    return '#' + color.toString(16).padStart(6, '0');
+}
+
 function rayCast(from, to, intersects) {
     const rayVector = new THREE.Vector3();
     rayVector.subVectors(to, from);

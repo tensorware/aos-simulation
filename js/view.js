@@ -6,56 +6,58 @@ const init = () => {
             speed: 10,
             height: 35.,
             eastWest: 0.0,
-            northSouth: 0.0
-        },
-        camera: {
-            view: 50,
-            images: 30,
-            sampling: 1,
-            resolution: 512,
-            type: 'infrared'
-        },
-        cpu: {
-            speed: 0.50
+            northSouth: 0.0,
+            camera: {
+                view: 50,
+                images: 30,
+                sampling: 1,
+                resolution: 512,
+                type: 'infrared'
+            },
+            cpu: {
+                speed: 0.50
+            }
         },
         forest: {
+            size: 30,
+            persons: 3,
             ground: 100,
-            trees: 30,
-            persons: 3
-        },
-        tree: {
-            levels: 5,
-            twigScale: 0.40,
-            homogeneity: 80,
-            branching: {
-                initialBranchLength: 0.50,
-                lengthFalloffFactor: 0.85,
-                lengthFalloffPower: 0.85,
-                clumpMax: 0.45,
-                clumpMin: 0.40,
-                branchFactor: 2.45,
-                dropAmount: -0.10,
-                growAmount: 0.25,
-                sweepAmount: 0.00
-            },
-            trunk: {
-                maxRadius: 0.10,
-                climbRate: 0.60,
-                trunkKink: 0.10,
-                treeSteps: 8.00,
-                taperRate: 0.95,
-                radiusFalloffRate: 0.70,
-                twistRate: 3.00,
-                trunkLength: 2.50
+            trees: {
+                levels: 5,
+                twigScale: 0.40,
+                homogeneity: 80,
+                branching: {
+                    initialBranchLength: 0.50,
+                    lengthFalloffFactor: 0.85,
+                    lengthFalloffPower: 0.85,
+                    clumpMax: 0.45,
+                    clumpMin: 0.40,
+                    branchFactor: 2.45,
+                    dropAmount: -0.10,
+                    growAmount: 0.25,
+                    sweepAmount: 0.00
+                },
+                trunk: {
+                    maxRadius: 0.10,
+                    climbRate: 0.60,
+                    trunkKink: 0.10,
+                    treeSteps: 8.00,
+                    taperRate: 0.95,
+                    radiusFalloffRate: 0.70,
+                    twistRate: 3.00,
+                    trunkLength: 2.50
+                }
             }
         },
         material: {
-            treeColor: 0x613615,
-            twigColor: 0x418c45,
-            groundColor: 0x727272,
-            planeColor: 0x7d5c5c,
-            personColor: 0xfafafa,
-            backgroundColor: 0x8fbde8
+            color: {
+                tree: 0x613615,
+                twig: 0x418c45,
+                ground: 0x727272,
+                plane: 0x7d5c5c,
+                person: 0xfafafa,
+                background: 0x8fbde8
+            }
         }
     });
 };
@@ -73,7 +75,7 @@ class View {
 
             this.splitter(['#top', '#bottom']);
             this.controls(this.root.querySelector('#controls'));
-            this.background(this.config.material.backgroundColor);
+            this.background(this.config.material.color.background);
         });
     }
 
@@ -103,7 +105,7 @@ class View {
         root.appendChild(this.gui.domElement);
 
         // drone folder
-        const size = this.forest.config.forest.ground / 2;
+        const size = this.config.forest.ground / 2;
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config.drone, 'speed', 1, 20, 1).onChange(() => this.drone.update());
         droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update());
@@ -112,18 +114,28 @@ class View {
 
         // camera folder
         const cameraFolder = droneFolder.addFolder('camera');
-        cameraFolder.add(this.config.camera, 'view', 15, 160, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.camera, 'images', 1, 50, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.camera, 'type', ['infrared', 'monochrome', 'color']).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'view', 15, 160, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'images', 1, 50, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'type', ['infrared', 'monochrome', 'color']).onChange(() => this.drone.update());
 
         // cpu folder
         const cpuFolder = droneFolder.addFolder('cpu');
-        cpuFolder.add(this.config.cpu, 'speed', 0.1, 2.0, 0.1).onChange(() => this.drone.update());
+        cpuFolder.add(this.config.drone.cpu, 'speed', 0.1, 2.0, 0.1).onChange(() => this.drone.update());
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
+        forestFolder.add(this.config.forest, 'size', 1, 1000, 1).onFinishChange(() => {
+            this.drone.clear();
+            this.drone.update();
+
+            this.forest.clear();
+            this.forest.update();
+            this.forest.addTrees();
+            this.forest.addPersons();
+        });
+        forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(this.reset.bind(this));
         forestFolder.add(this.config.forest, 'ground', 30, 1000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
@@ -136,50 +148,40 @@ class View {
             this.drone.setEastWest(0.0);
             this.drone.setNorthSouth(0.0);
         });
-        forestFolder.add(this.config.forest, 'trees', 1, 1000, 1).onFinishChange(() => {
-            this.drone.clear();
-            this.drone.update();
-
-            this.forest.clear();
-            this.forest.update();
-            this.forest.addTrees();
-            this.forest.addPersons();
-        });
-        forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(this.reset.bind(this));
 
         // tree folder
-        const treeFolder = forestFolder.addFolder('tree');
+        const treeFolder = forestFolder.addFolder('trees');
         const treeFolders = [
-            treeFolder.add(this.config.tree, 'levels', 0, 10, 1),
-            treeFolder.add(this.config.tree, 'twigScale', 0.0, 1.0, 0.05),
-            treeFolder.add(this.config.tree, 'homogeneity', 50, 100, 1)
+            treeFolder.add(this.config.forest.trees, 'levels', 0, 10, 1),
+            treeFolder.add(this.config.forest.trees, 'twigScale', 0.0, 1.0, 0.05),
+            treeFolder.add(this.config.forest.trees, 'homogeneity', 50, 100, 1)
         ];
 
         // branching folder
         const branchingFolder = treeFolder.addFolder('branching');
         const branchingFolders = [
-            branchingFolder.add(this.config.tree.branching, 'initialBranchLength', 0.1, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'lengthFalloffFactor', 0.1, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'lengthFalloffPower', 0.1, 1.5, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'clumpMax', 0.0, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'clumpMin', 0.0, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'branchFactor', 2.0, 4.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'dropAmount', -1.0, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'growAmount', -1.0, 1.0, 0.05),
-            branchingFolder.add(this.config.tree.branching, 'sweepAmount', -1.0, 1.0, 0.05)
+            branchingFolder.add(this.config.forest.trees.branching, 'initialBranchLength', 0.1, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'lengthFalloffFactor', 0.1, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'lengthFalloffPower', 0.1, 1.5, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'clumpMax', 0.0, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'clumpMin', 0.0, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'branchFactor', 2.0, 4.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'dropAmount', -1.0, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'growAmount', -1.0, 1.0, 0.05),
+            branchingFolder.add(this.config.forest.trees.branching, 'sweepAmount', -1.0, 1.0, 0.05)
         ];
 
         // trunk folder
         const trunkFolder = treeFolder.addFolder('trunk');
         const trunkFolders = [
-            trunkFolder.add(this.config.tree.trunk, 'maxRadius', 0.05, 0.5, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'climbRate', 0.05, 1.0, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'trunkKink', 0.0, 0.5, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'treeSteps', 0.0, 20.0, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'taperRate', 0.7, 1.0, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'radiusFalloffRate', 0.5, 0.8, 0.05),
-            trunkFolder.add(this.config.tree.trunk, 'twistRate', 0.0, 10.0, 1),
-            trunkFolder.add(this.config.tree.trunk, 'trunkLength', 0.1, 5.0, 0.05)
+            trunkFolder.add(this.config.forest.trees.trunk, 'maxRadius', 0.05, 0.5, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'climbRate', 0.05, 1.0, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'trunkKink', 0.0, 0.5, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'treeSteps', 0.0, 20.0, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'taperRate', 0.7, 1.0, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'radiusFalloffRate', 0.5, 0.8, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'twistRate', 0.0, 10.0, 1),
+            trunkFolder.add(this.config.forest.trees.trunk, 'trunkLength', 0.1, 5.0, 0.05)
         ];
 
         // forest folder
@@ -195,12 +197,15 @@ class View {
 
         // materials folder
         const materialsFolder = this.gui.addFolder('material');
-        materialsFolder.addColor(this.config.material, 'treeColor').onChange((v) => this.forest.treeMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config.material, 'twigColor').onChange((v) => this.forest.twigMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config.material, 'groundColor').onChange((v) => this.forest.groundMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config.material, 'planeColor').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
-        materialsFolder.addColor(this.config.material, 'personColor').onFinishChange(this.reset.bind(this));
-        materialsFolder.addColor(this.config.material, 'backgroundColor').onChange(this.background.bind(this));
+
+        // color folder
+        const colorFolder = materialsFolder.addFolder('color');
+        colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'person').onFinishChange(this.reset.bind(this));
+        colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         this.gui.add(this, 'reset');
         // this.gui.close();
@@ -208,7 +213,7 @@ class View {
 
     background(color) {
         this.stage.renderer.setClearColor(color);
-        this.root.parentElement.style.backgroundColor = '#' + color.toString(16);
+        this.root.parentElement.style.backgroundColor = hexColor(color);
     }
 
     reset() {

@@ -52,7 +52,7 @@ class Slider {
 
     addImage(image) {
         // remove first child
-        for (let i = 0; i <= this.count - this.config.camera.images; i++) {
+        for (let i = 0; i <= this.count - this.config.drone.camera.images; i++) {
             const img = this.image[i];
             img.classList.add('removed');
             setTimeout(() => { this.images.removeChild(img); }, 0);

@@ -5,7 +5,7 @@ class Forest {
         this.scene = stage.scene;
         this.stage = stage;
 
-        this.trees = [...new Array(this.config.forest.trees)];
+        this.trees = [...new Array(this.config.forest.size)];
         this.persons = [... new Array(this.config.forest.persons)];
 
         this.grounds = [];
@@ -15,21 +15,21 @@ class Forest {
         this.workers = getWorkers();
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.material.groundColor,
+            color: this.config.material.color.ground,
             side: THREE.DoubleSide,
             roughness: 1.0,
             metalness: 0.3
         });
 
         this.treeMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.material.treeColor,
+            color: this.config.material.color.tree,
             roughness: 1.0,
             metalness: 0.3
         });
 
         this.twigMaterial = new THREE.MeshStandardMaterial({
             map: new THREE.TextureLoader().load('img/leaf.png'),
-            color: this.config.material.twigColor,
+            color: this.config.material.color.twig,
             roughness: 1.0,
             metalness: 0.3,
             alphaTest: 0.8
@@ -51,15 +51,15 @@ class Forest {
         const seed = random(0, 1000, index);
 
         const config = {
-            levels: this.config.tree.levels,
-            twigScale: this.config.tree.twigScale,
-            ... this.config.tree.branching,
-            ... this.config.tree.trunk
+            levels: this.config.forest.trees.levels,
+            twigScale: this.config.forest.trees.twigScale,
+            ... this.config.forest.trees.branching,
+            ... this.config.forest.trees.trunk
         };
 
         for (let key in config) {
             if (random(0, 100, seed) <= 50) {
-                config[key] = config[key] * (random(this.config.tree.homogeneity, 100, seed) / 100);
+                config[key] = config[key] * (random(this.config.forest.trees.homogeneity, 100, seed) / 100);
             }
         }
 
@@ -84,7 +84,7 @@ class Forest {
 
     addTrees() {
         const workerConfigs = [];
-        for (let i = 0; i < this.config.forest.trees; i++) {
+        for (let i = 0; i < this.config.forest.size; i++) {
             workerConfigs.push(this.getTree(i));
         }
 
@@ -186,7 +186,7 @@ class Forest {
             this.persons = [];
         }
 
-        for (let i = (this.trees.length - 1); i >= this.config.forest.trees; i--) {
+        for (let i = (this.trees.length - 1); i >= this.config.forest.size; i--) {
             this.scene.remove(this.trees[i]);
             this.trees.splice(i, 1);
         }
@@ -196,7 +196,7 @@ class Forest {
             this.persons.splice(i, 1);
         }
 
-        const appendTrees = this.config.forest.trees - this.trees.length;
+        const appendTrees = this.config.forest.size - this.trees.length;
         if (appendTrees > 0) {
             this.trees.push.apply(this.trees, [...new Array(appendTrees)]);
         }
