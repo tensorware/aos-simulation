@@ -11,36 +11,48 @@ class Camera {
         this.planes = [];
         this.images = [];
 
+        this.slider = new Slider(document.querySelector('#captures'), this.config);
+
+        this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
+        this.camera.layers.enable(0);
+        this.scene.add(this.camera);
+
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
-            this.viewLines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(0, this.config.drone.height, 0),
-                new THREE.Vector3(0, 0, 0)
-            ]), new THREE.LineBasicMaterial({ color: 0x990000 })));
+            const viewLinePoints = [new THREE.Vector3(0, this.config.drone.height, 0), new THREE.Vector3(0, 0, 0)];
+            const viewLineGeometry = new THREE.BufferGeometry().setFromPoints(viewLinePoints);
+            this.viewLines.push(new THREE.Line(viewLineGeometry, new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
 
         this.planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.material.color.plane });
+        this.textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
 
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
+        const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
+        textGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
+        const text = new THREE.Mesh(textGeometry, this.textMaterial);
+
         this.plane = {
             rectangle: rectangle,
             border: new THREE.BoxHelper(rectangle, 0x990000),
-            text: new THREE.Mesh()
+            text: text
         };
 
-        const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
-        const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
-        this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
-
-        this.slider = new Slider(document.querySelector('#captures'), this.config);
+        this.plane.border.layers.set(1);
+        // this.plane.text.layers.set(1);
+        this.viewLines.forEach((viewLine) => {
+            viewLine.layers.set(1);
+        });
 
         this.update();
         this.addView();
         this.addPlane();
+
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
     }
 
     addView() {
@@ -294,6 +306,26 @@ class Camera {
         else if (type === 'color') {
             // TODO color images
         }
+    }
+
+    animate() {
+        const view = this.drone.getView();
+
+        this.camera.fov = this.config.drone.camera.view;
+        this.camera.position.set(view.x, view.y, view.z);
+        this.camera.lookAt(view.x, 0, view.z);
+        this.camera.updateProjectionMatrix();
+
+        // TODO bottom renderer
+        this.stage.renderer.setViewport(
+            this.root.clientWidth / 2,
+            this.root.clientHeight / 2,
+            this.root.clientWidth / 2,
+            this.root.clientHeight
+        );
+        this.stage.renderer.render(this.scene, this.camera);
+
+        requestAnimationFrame(this.animate);
     }
 
     update() {
