@@ -32,7 +32,7 @@ class Camera {
         };
 
         const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(-Math.PI / 2);
+        textGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
         const textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
         this.plane.text = new THREE.Mesh(textGeometry, textMaterial);
 
