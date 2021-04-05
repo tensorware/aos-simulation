@@ -323,7 +323,7 @@ class Camera {
             this.root.clientWidth / 2,
             this.root.clientHeight
         );
-        this.stage.renderer.render(this.scene, this.camera);
+        // this.stage.renderer.render(this.scene, this.camera);
 
         requestAnimationFrame(this.animate);
     }
