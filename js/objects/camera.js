@@ -183,7 +183,7 @@ class Camera {
                         // append ray lines
                         rays.push(intersectLine);
                         this.rays.push(intersectLine);
-                        this.scene.add(intersectLine);
+                        // this.scene.add(intersectLine);
                     }
                 }
             });

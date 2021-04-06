@@ -22,7 +22,8 @@ class Slider {
         this.images.addEventListener('mouseleave', this.touchEnd.bind(this));
         this.images.addEventListener('mouseup', this.touchEnd.bind(this));
 
-        window.addEventListener('resize', this.update.bind(this)); // TODO stay on current items
+        // TODO stay on current items
+        window.addEventListener('resize', this.update.bind(this));
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -104,11 +105,7 @@ class Slider {
         }
         else {
             // reset positions
-            this.scroll = {
-                start: 0,
-                next: 0,
-                x: 0
-            };
+            this.scroll = { start: 0, next: 0, x: 0 };
         }
 
         requestAnimationFrame(this.animate);
@@ -125,8 +122,8 @@ class Slider {
         if (this.count) {
             this.width = {
                 slider: this.images.clientWidth - this.previews.clientWidth,
-                images: this.count * this.width.image,
-                image: this.image[0].clientWidth
+                images: this.count * (this.image[0].firstChild.clientWidth + 4),
+                image: this.image[0].firstChild.clientWidth + 4
             };
         }
 
