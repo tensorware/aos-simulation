@@ -213,7 +213,7 @@ class View {
 
     background(color) {
         this.stage.renderer.setClearColor(color);
-        this.root.parentElement.style.backgroundColor = hexColor(color);
+        document.body.style.backgroundColor = hexColor(color);
     }
 
     reset() {

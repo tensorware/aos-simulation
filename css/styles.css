@@ -12,6 +12,7 @@ html {
 #main {
   width: 100%;
   height: 100%;
+  background: inherit;
 }
 
 #main #top {
@@ -122,12 +123,13 @@ html {
   z-index: 1;
   height: 100%;
   padding: 0px 2px;
+  display: flex;
   position: absolute;
   background: inherit;
 }
 
 #main #bottom #captures #previews .image {
-  float: left;
+  flex: 1;
   height: 100%;
   padding: 4px 2px;
   box-sizing: border-box;
