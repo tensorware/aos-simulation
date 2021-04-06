@@ -98,6 +98,10 @@ html {
   counter-increment: count;
 }
 
+#main #bottom #captures #images .image.removed {
+  z-index: -10;
+}
+
 #main #bottom #captures #images .image:before {
   top: 4px;
   left: 8px;
@@ -123,12 +127,16 @@ html {
 }
 
 #main #bottom #captures #previews .image {
+  float: left;
   height: 100%;
   padding: 4px 2px;
   box-sizing: border-box;
 }
 
+#main #bottom #captures #previews .image.removed {
+  display: none;
+}
+
 #main #bottom #captures #previews .image .canvas {
   height: 100%;
-  background: gray;
 }
