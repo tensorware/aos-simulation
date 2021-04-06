@@ -20,9 +20,7 @@ class Stage {
             this.scene.add(this.camera);
 
             this.renderer = new THREE.WebGLRenderer({ antialias: true });
-            this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
             this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.renderer.autoClear = false;
 
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
             this.controls.minDistance = 0.1;
@@ -32,8 +30,8 @@ class Stage {
             this.controls.enablePan = true;
 
             this.stats = new Stats();
-            this.root.querySelector('#info').appendChild(this.stats.dom);
-            this.root.querySelector('#stage').appendChild(this.renderer.domElement);
+            this.root.querySelector('#info').append(this.stats.dom);
+            this.root.querySelector('#stage').append(this.renderer.domElement);
 
             this.update = this.update.bind(this);
             window.addEventListener('resize', this.update);
@@ -60,11 +58,7 @@ class Stage {
 
     render() {
         this.stats.begin();
-
-        this.renderer.clear();
-        this.renderer.setViewport(0, 0, this.root.clientWidth, this.root.clientHeight);
         this.renderer.render(this.scene, this.camera);
-
         this.stats.end();
     }
 }

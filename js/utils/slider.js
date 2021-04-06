@@ -51,15 +51,15 @@ class Slider {
     }
 
     addImage(image) {
-        // remove first child
+        // remove first childs, ignore up to number of used images
         for (let i = 0; i <= this.count - this.config.drone.camera.images; i++) {
             const img = this.image[i];
             img.classList.add('removed');
             setTimeout(() => { this.images.removeChild(img); }, 0);
         }
 
-        // append last child
-        this.images.appendChild(image);
+        // append child
+        this.images.append(image);
 
         // update width and scroll to last child
         this.update();
@@ -67,15 +67,15 @@ class Slider {
     }
 
     addPreview(preview) {
-        // remove first child
-        for (let i = 0; i < this.preview.length; i++) {
+        // remove first childs, ignore last live preview image
+        for (let i = 0; i < this.preview.length - 1; i++) {
             const img = this.preview[i];
             img.classList.add('removed');
             setTimeout(() => { this.previews.removeChild(img); }, 0);
         }
 
-        // append last child
-        this.previews.appendChild(preview);
+        // prepend child
+        this.previews.prepend(preview);
     }
 
     animate() {
@@ -134,8 +134,15 @@ class Slider {
     }
 
     clear() {
-        this.images.textContent = '';
-        this.previews.textContent = '';
+        // clear images, all of them
+        for (let i = 0; i < this.image.length; i++) {
+            this.images.removeChild(this.image[i]);
+        }
+
+        // clear previews, ignore last live preview
+        for (let i = 0; i < this.preview.length - 1; i++) {
+            this.previews.removeChild(this.preview[i]);
+        }
     }
 
     reset() {

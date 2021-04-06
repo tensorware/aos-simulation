@@ -17,6 +17,9 @@ class Camera {
         this.camera.layers.enable(0);
         this.scene.add(this.camera);
 
+        this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
             const viewLinePoints = [new THREE.Vector3(0, this.config.drone.height, 0), new THREE.Vector3(0, 0, 0)];
@@ -42,7 +45,7 @@ class Camera {
         };
 
         this.plane.border.layers.set(1);
-        // this.plane.text.layers.set(1);
+        this.plane.text.layers.set(1);
         this.viewLines.forEach((viewLine) => {
             viewLine.layers.set(1);
         });
@@ -50,6 +53,7 @@ class Camera {
         this.update();
         this.addView();
         this.addPlane();
+        this.addPreview();
 
         this.animate = this.animate.bind(this);
         requestAnimationFrame(this.animate);
@@ -67,6 +71,14 @@ class Camera {
         this.scene.add(this.plane.rectangle);
         this.scene.add(this.plane.border);
         this.scene.add(this.plane.text);
+    }
+
+    addPreview() {
+        const container = document.createElement('div');
+        container.className = 'image';
+
+        container.append(this.renderer.domElement);
+        this.slider.addPreview(container);
     }
 
     getResolution() {
@@ -227,7 +239,6 @@ class Camera {
 
         // canvas image
         const canvas = document.createElement('canvas');
-        canvas.className = 'canvas';
         canvas.width = resolution.x;
         canvas.height = resolution.z;
 
@@ -243,7 +254,7 @@ class Camera {
         });
 
         // append image
-        container.appendChild(canvas);
+        container.append(canvas);
         this.slider.addImage(container);
 
         // return last captured images
@@ -260,7 +271,6 @@ class Camera {
 
         // canvas image
         const canvas = document.createElement('canvas');
-        canvas.className = 'canvas';
         canvas.width = resolution.x;
         canvas.height = resolution.z;
 
@@ -284,7 +294,7 @@ class Camera {
         });
 
         // append preview
-        container.appendChild(canvas);
+        container.append(canvas);
         this.slider.addPreview(container);
     }
 
@@ -311,19 +321,16 @@ class Camera {
     animate() {
         const view = this.drone.getView();
 
+        // update camera position
         this.camera.fov = this.config.drone.camera.view;
         this.camera.position.set(view.x, view.y, view.z);
         this.camera.lookAt(view.x, 0, view.z);
         this.camera.updateProjectionMatrix();
 
-        // TODO bottom renderer
-        this.stage.renderer.setViewport(
-            this.root.clientWidth / 2,
-            this.root.clientHeight / 2,
-            this.root.clientWidth / 2,
-            this.root.clientHeight
-        );
-        // this.stage.renderer.render(this.scene, this.camera);
+        // render camera preview
+        this.renderer.setSize(this.config.drone.camera.resolution, this.config.drone.camera.resolution);
+        this.renderer.domElement.removeAttribute('style');
+        this.renderer.render(this.scene, this.camera);
 
         requestAnimationFrame(this.animate);
     }

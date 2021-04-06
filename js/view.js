@@ -102,7 +102,7 @@ class View {
     controls(root) {
         // init gui
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
-        root.appendChild(this.gui.domElement);
+        root.append(this.gui.domElement);
 
         // drone folder
         const size = this.config.forest.ground / 2;

@@ -112,7 +112,7 @@ html {
   content: counter(count);
 }
 
-#main #bottom #captures #images .image .canvas {
+#main #bottom #captures #images .image canvas {
   height: 100%;
 }
 
@@ -137,6 +137,6 @@ html {
   display: none;
 }
 
-#main #bottom #captures #previews .image .canvas {
+#main #bottom #captures #previews .image canvas {
   height: 100%;
 }
