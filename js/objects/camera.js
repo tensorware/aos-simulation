@@ -24,11 +24,11 @@ class Camera {
         this.textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
 
         const rectangleGeometry = new THREE.PlaneGeometry();
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
+        rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
         const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(-Math.PI / 2).translate(0, 0.05, 0);
+        textGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
         const text = new THREE.Mesh(textGeometry, this.textMaterial);
 
         this.plane = {
@@ -113,6 +113,7 @@ class Camera {
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
         rectangle.geometry = this.plane.rectangle.geometry.clone();
+        rectangle.translateY(0);
 
         // border
         const border = this.plane.border.clone();
@@ -122,7 +123,7 @@ class Camera {
         // plane group
         const plane = new THREE.Group();
         plane.add(rectangle);
-        plane.add(border);
+        // plane.add(border);
 
         // add to scene
         this.scene.add(plane);
@@ -131,9 +132,7 @@ class Camera {
         return rectangle;
     }
 
-    captureRays(plane) {
-        const view = this.drone.getView();
-
+    captureRays(view, plane) {
         const cameraVector = new THREE.Vector3(view.x, view.y, view.z);
         const cornerDistance = Math.sqrt(view.r ** 2 + view.r ** 2) + 3;
 
@@ -215,10 +214,10 @@ class Camera {
         return rays;
     }
 
-    captureImage(rays) {
-        const view = this.drone.getView();
+    captureImage(view, rays) {
         const resolution = this.getResolution();
 
+        // get ray and border points
         const rayPoints = rays.map(getPoints);
         const borderPoints = this.viewLines.map(getPoints);
 
@@ -322,13 +321,14 @@ class Camera {
     }
 
     capture() {
+        const view = this.drone.getView();
         const plane = this.capturePlane();
         const type = this.config.drone.camera.type;
 
         if (type === 'infrared') {
             // infrared images
-            const rays = this.captureRays(plane);
-            const images = this.captureImage(rays);
+            const rays = this.captureRays(view, plane);
+            const images = this.captureImage(view, rays);
 
             // integrate images
             this.integrateImages(images);
