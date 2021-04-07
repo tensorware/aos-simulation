@@ -14,4 +14,4 @@ Live demo of this repository code can be found [here](https://aos.tensorware.app
 Work in progress, more to come...
 
 ## License
-[MIT](/LICENSE.md)
+[MIT](/LICENSE)
