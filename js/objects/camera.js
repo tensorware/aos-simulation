@@ -13,13 +13,6 @@ class Camera {
 
         this.slider = new Slider(document.querySelector('#captures'), this.config);
 
-        this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
-        this.camera.layers.enable(0);
-        this.scene.add(this.camera);
-
-        this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
             const viewLinePoints = [new THREE.Vector3(0, this.config.drone.height, 0), new THREE.Vector3(0, 0, 0)];
@@ -53,6 +46,7 @@ class Camera {
         this.update();
         this.addView();
         this.addPlane();
+        this.addRenderer();
         this.addPreview();
 
         this.animate = this.animate.bind(this);
@@ -73,12 +67,41 @@ class Camera {
         this.scene.add(this.plane.text);
     }
 
-    addPreview() {
-        const container = document.createElement('div');
-        container.className = 'image';
+    addRenderer() {
+        this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
+        this.camera.layers.enable(0);
+        this.scene.add(this.camera);
 
-        container.append(this.renderer.domElement);
-        this.slider.addPreview(container);
+        this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+    }
+
+    addPreview() {
+        const resolution = this.getResolution();
+
+        // preview container
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'image';
+
+        // preview image
+        const previewCanvas = document.createElement('canvas');
+        previewCanvas.width = resolution.x;
+        previewCanvas.height = resolution.z;
+
+        // preview background
+        const previewContext = previewCanvas.getContext('2d');
+        previewContext.fillStyle = hexColor(this.config.material.color.plane);
+        previewContext.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewContainer.append(previewCanvas);
+
+        // render container
+        const renderContainer = document.createElement('div');
+        renderContainer.className = 'image';
+        renderContainer.append(this.renderer.domElement);
+
+        // append to slider
+        this.slider.previews.append(previewContainer);
+        this.slider.previews.append(renderContainer);
     }
 
     getResolution() {
@@ -276,7 +299,7 @@ class Camera {
 
         // canvas background
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000000';
+        ctx.fillStyle = hexColor(this.config.material.color.plane);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw pixel points
@@ -388,6 +411,9 @@ class Camera {
         // clear images
         this.images = [];
         this.slider.clear();
+
+        // add initial preview
+        this.addPreview();
     }
 
     reset() {

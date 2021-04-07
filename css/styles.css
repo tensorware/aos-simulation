@@ -126,6 +126,7 @@ html {
   display: flex;
   position: absolute;
   background: inherit;
+  border-left: 4px solid #dddddd;
 }
 
 #main #bottom #captures #previews .image {

@@ -42,6 +42,7 @@ class Slider {
         if (!this.images.classList.contains('dragging')) {
             return;
         }
+
         this.touch.x = e.clientX || e.touches && e.touches[0].clientX || this.touch.x;
         this.scroll.x += (this.touch.x - this.touch.start) * 2.5;
         this.touch.start = this.touch.x;
@@ -121,7 +122,7 @@ class Slider {
         // update width
         if (this.count) {
             this.width = {
-                slider: this.images.clientWidth - this.previews.clientWidth,
+                slider: this.images.clientWidth - this.previews.clientWidth - 8,
                 images: this.count * (this.image[0].firstChild.clientWidth + 4),
                 image: this.image[0].firstChild.clientWidth + 4
             };
@@ -137,7 +138,7 @@ class Slider {
         }
 
         // clear previews, ignore last live preview
-        for (let i = 0; i < this.preview.length - 1; i++) {
+        for (let i = 0; i < this.preview.length; i++) {
             this.previews.removeChild(this.preview[i]);
         }
     }
