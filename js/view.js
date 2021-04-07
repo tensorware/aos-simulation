@@ -19,7 +19,7 @@ const init = () => {
             }
         },
         forest: {
-            size: 100,
+            size: 10,
             persons: 3,
             ground: 100,
             trees: {

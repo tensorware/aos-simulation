@@ -111,6 +111,10 @@ class Drone {
         const end = new THREE.Vector3(this.goal.x, this.config.drone.height, this.goal.z);
 
         const moveDuration = start.distanceTo(end) / this.config.drone.speed * 1000;
+        if (moveDuration <= 0) {
+            return;
+        }
+
         const deltaTime = currentTime - this.startTime;
         const trajectoryTime = deltaTime / moveDuration;
 
@@ -128,7 +132,6 @@ class Drone {
 
             this.drone.position.x = current.x;
             this.drone.position.z = current.z;
-
             this.update();
 
             if (deltaDistance >= this.config.drone.camera.sampling) {
@@ -139,6 +142,9 @@ class Drone {
             requestAnimationFrame(this.animate);
         }
         else {
+            this.drone.position.x = this.goal.x;
+            this.drone.position.z = this.goal.z;
+
             this.config.drone.eastWest = this.goal.x;
             this.config.drone.northSouth = this.goal.z;
         }
