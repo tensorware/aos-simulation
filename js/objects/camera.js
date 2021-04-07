@@ -123,6 +123,8 @@ class Camera {
         // plane group
         const plane = new THREE.Group();
         plane.add(rectangle);
+
+        // DEBUG
         // plane.add(border);
 
         // add to scene
@@ -191,6 +193,7 @@ class Camera {
                         // filter obstacles by angle and distance
                         const angle = treeAngle.angleTo(personAngle);
                         if (angle < Math.PI / 4 && (treeDistance - 3) < personDistance) {
+                            // DEBUG
                             // this.scene.add(treeBox);
                             return true;
                         }
@@ -205,6 +208,8 @@ class Camera {
                         // append ray lines
                         rays.push(intersectLine);
                         this.rays.push(intersectLine);
+
+                        // DEBUG
                         // this.scene.add(intersectLine);
                     }
                 }
@@ -366,6 +371,7 @@ class Camera {
         const overlap = coverage / distance;
         const time = coverage / this.config.drone.speed;
 
+        // DEBUG
         // log('debug', distance, coverage, overlap, time);
 
         // update view lines (camera to corner)
