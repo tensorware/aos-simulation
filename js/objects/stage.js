@@ -7,9 +7,11 @@ class Stage {
             this.font = font;
             this.scene = new THREE.Scene();
 
+            this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+
             this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             this.directionalLight.position.set(100, 100, 100);
-            this.ambientLight = new THREE.AmbientLight(0x444444, 2);
+            this.directionalLight.layers.set(1);
 
             this.camera = new THREE.PerspectiveCamera(90, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
             this.camera.layers.enable(0);
