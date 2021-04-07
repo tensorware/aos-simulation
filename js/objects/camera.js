@@ -394,7 +394,7 @@ class Camera {
 
         // update text
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
-        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
+        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.10 });
         textGeometry.rotateX(-Math.PI / 2);
         this.plane.text.geometry.copy(textGeometry);
 
