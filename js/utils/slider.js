@@ -91,7 +91,7 @@ class Slider {
             // set positions
             gsap.set(this.image, {
                 x: (i) => { return i * this.width.image + this.scroll.next; },
-                modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x)) + 'px'; } }
+                modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x, 10)) + 'px'; } }
             });
 
             // animate transitions
