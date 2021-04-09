@@ -1,68 +1,3 @@
-const init = () => {
-    Math.seedrandom(document.title);
-
-    new View(document.querySelector('#top'), {
-        drone: {
-            speed: 10,
-            height: 35.,
-            eastWest: 0.0,
-            northSouth: 0.0,
-            camera: {
-                view: 50,
-                images: 30,
-                sampling: 1,
-                resolution: 512,
-                type: 'infrared'
-            },
-            cpu: {
-                speed: 0.50
-            }
-        },
-        forest: {
-            size: 100,
-            persons: 3,
-            ground: 100,
-            trees: {
-                levels: 5,
-                twigScale: 0.40,
-                homogeneity: 80,
-                branching: {
-                    initialBranchLength: 0.50,
-                    lengthFalloffFactor: 0.85,
-                    lengthFalloffPower: 0.85,
-                    clumpMax: 0.45,
-                    clumpMin: 0.40,
-                    branchFactor: 2.45,
-                    dropAmount: -0.10,
-                    growAmount: 0.25,
-                    sweepAmount: 0.00
-                },
-                trunk: {
-                    maxRadius: 0.10,
-                    climbRate: 0.60,
-                    trunkKink: 0.10,
-                    treeSteps: 8.00,
-                    taperRate: 0.95,
-                    radiusFalloffRate: 0.70,
-                    twistRate: 3.00,
-                    trunkLength: 2.50
-                }
-            }
-        },
-        material: {
-            color: {
-                tree: 0x613615,
-                twig: 0x418c45,
-                ground: 0x727272,
-                plane: 0x7d5c5c,
-                person: 0xfafafa,
-                background: 0x8fbde8
-            }
-        }
-    });
-};
-
-
 class View {
     constructor(root, config) {
         this.root = root;
@@ -222,4 +157,25 @@ class View {
     }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+
+    // fetch config
+    fetch('config/default.json').then((response) => {
+
+        // init random seed
+        Math.seedrandom(document.title);
+
+        // parse config
+        return response.json();
+
+    }).then((config) => {
+
+        // convert hex to int color
+        for (key in config.material.color) {
+            config.material.color[key] = parseInt(config.material.color[key], 16);
+        }
+
+        // init view
+        new View(document.querySelector('#top'), config);
+    });
+});
