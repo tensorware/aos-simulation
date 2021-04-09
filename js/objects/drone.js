@@ -6,7 +6,7 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        new THREE.STLLoader().load('objects/drone.stl', ((droneGeometry) => {
+        new THREE.STLLoader().load('stl/drone.stl', ((droneGeometry) => {
             this.goal = { x: 0, y: 0 };
 
             droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
