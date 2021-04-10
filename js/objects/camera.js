@@ -246,18 +246,18 @@ class Camera {
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
-            center: new THREE.Vector3(
-                Math.round(view.x * resolution.x / max.x),
-                0,
-                Math.round(view.z * resolution.z / max.z)
-            ),
-            points: rayPointsGround.map((p) => {
-                return new THREE.Vector3(
-                    Math.round(p.x * resolution.x / max.x),
-                    0,
-                    Math.round(p.z * resolution.z / max.z)
-                );
-            })
+            rendered: {
+                center: new THREE.Vector3(Math.round(view.x), 0, Math.round(view.z)),
+                points: rayPointsGround.map((p) => {
+                    return new THREE.Vector3(Math.round(p.x), 0, Math.round(p.z));
+                })
+            },
+            processed: {
+                center: new THREE.Vector3(Math.round(view.x * resolution.x / max.x), 0, Math.round(view.z * resolution.z / max.z)),
+                points: rayPointsGround.map((p) => {
+                    return new THREE.Vector3(Math.round(p.x * resolution.x / max.x), 0, Math.round(p.z * resolution.z / max.z));
+                })
+            }
         };
 
         // canvas container
@@ -275,10 +275,14 @@ class Camera {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw pixel points
-        image.points.forEach((p) => {
+        image.processed.points.forEach((p) => {
             ctx.fillStyle = hexColor(this.config.material.color.person);
             ctx.fillRect(p.x, p.z, 1, 1);
         });
+
+        // save base64 image
+        image.rendered.base64 = canvasImage(this.renderer.domElement);
+        image.processed.base64 = canvasImage(canvas);
 
         // append image
         container.append(canvas);
@@ -307,14 +311,14 @@ class Camera {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw pixel points
-        const center = images[images.length - 1].center;
+        const center = images[images.length - 1].processed.center;
         images.forEach((image) => {
 
             // delta from current center to captured images
             const delta = new THREE.Vector3();
-            delta.copy(center).sub(image.center);
+            delta.copy(center).sub(image.processed.center);
 
-            image.points.forEach((p) => {
+            image.processed.points.forEach((p) => {
                 ctx.fillStyle = hexColor(this.config.material.color.person);
                 ctx.fillRect(p.x - delta.x, p.z - delta.z, 1, 1);
             });
@@ -408,8 +412,27 @@ class Camera {
     export(zip) {
         const camera = zip.folder('camera');
 
-        const images = { rays: this.images };
-        camera.file('images.json', JSON.stringify(images, null, 4));
+        const images = { rays: [] };
+        this.images.forEach((image, index) => {
+            const number = index + 1;
+
+            images.rays.push({
+                image: number,
+                rendered: {
+                    center: image.rendered.center,
+                    points: image.rendered.points
+                },
+                processed: {
+                    center: image.processed.center,
+                    points: image.processed.points
+                }
+            });
+
+            camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
+            camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.processed.base64, { base64: true });
+        });
+
+        zip.file('camera.json', JSON.stringify(images, null, 4));
     }
 
     clear() {
