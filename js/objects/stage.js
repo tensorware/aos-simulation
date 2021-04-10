@@ -3,7 +3,7 @@ class Stage {
         this.root = root;
         this.config = config;
 
-        new THREE.FontLoader().load('fonts/opensans.json', ((font) => {
+        new THREE.FontLoader().load('font/opensans.json', ((font) => {
             this.font = font;
             this.scene = new THREE.Scene();
 
