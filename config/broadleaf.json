@@ -16,7 +16,7 @@
         }
     },
     "forest": {
-        "size": 100,
+        "size": 20,
         "persons": 3,
         "ground": 100,
         "trees": {

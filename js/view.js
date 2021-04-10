@@ -164,19 +164,6 @@ class View {
         this.stage.update();
     }
 
-    // TODO remove
-    update(gui) {
-        // update gui
-        for (let key in gui.__controllers) {
-            gui.__controllers[key].updateDisplay();
-        }
-
-        // traverse gui folders
-        for (let key in gui.__folders) {
-            this.update(gui.__folders[key]);
-        }
-    }
-
     export() {
         log('TODO export');
     }
@@ -188,7 +175,6 @@ class View {
 }
 
 const getPreset = async () => {
-
     // load presets from local storage
     let load = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
     if (load.preset) {
