@@ -110,6 +110,14 @@ function getPoints(mesh) {
     return points;
 }
 
+function getLocalStorageKey(key) {
+    return `${document.location.href}.${key}`;
+}
+
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function hexColor(color) {
     return '#' + color.toString(16).padStart(6, '0');
 }

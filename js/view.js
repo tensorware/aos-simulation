@@ -5,38 +5,27 @@ class View {
 
         // init canvas stage
         this.stage = new Stage(this.root, this.config, () => {
+            this.background(this.config.material.color.background);
+            this.controls(this.root.querySelector('#controls'));
+            this.splitter(['#top', '#bottom']);
+
             this.forest = new Forest(this.stage);
             this.drone = new Drone(this.forest);
-
-            this.splitter(['#top', '#bottom']);
-            this.controls(this.root.querySelector('#controls'));
-            this.background(this.config.material.color.background);
         });
     }
 
-    splitter(elements) {
-        // init split
-        Split(elements, {
-            gutterSize: 5,
-            sizes: [80, 20],
-            minSize: [0, 0],
-            cursor: 'ns-resize',
-            direction: 'vertical',
-            onDrag: () => { this.stage.update(); },
-            gutter: () => {
-                const gutter = document.createElement('div');
-                gutter.id = 'gutter';
-                return gutter;
-            }
-        });
+    background(color) {
+        // canvas background
+        this.stage.renderer.setClearColor(color);
 
-        // update stage canvas
-        this.stage.update();
+        // document background
+        document.body.style.backgroundColor = hexColor(color);
     }
 
     controls(root) {
         // init gui
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
+        this.gui.useLocalStorage = true;
         root.append(this.gui.domElement);
 
         // drone folder
@@ -70,7 +59,9 @@ class View {
             this.forest.addTrees();
             this.forest.addPersons();
         });
+
         forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(this.reset.bind(this));
+
         forestFolder.add(this.config.forest, 'ground', 30, 1000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
@@ -121,8 +112,8 @@ class View {
 
         // forest folder
         [treeFolders, branchingFolders, trunkFolders].forEach((folder) => {
-            folder.forEach((value) => {
-                value.onChange(() => {
+            folder.forEach((v) => {
+                v.onChange(() => {
                     this.forest.clear();
                     this.forest.addTrees();
                     this.forest.addPersons();
@@ -142,13 +133,52 @@ class View {
         colorFolder.addColor(this.config.material.color, 'person').onFinishChange(this.reset.bind(this));
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
+        // config preset
+        this.gui.add(this.config, 'preset', ['sparse', 'broadleaf', 'needleleaf']).onChange((v) => {
+            this.gui.load.preset = v;
+            window.location.reload();
+        });
+
+        // simulation data
+        this.gui.add(this, 'export');
         this.gui.add(this, 'reset');
-        // this.gui.close();
     }
 
-    background(color) {
-        this.stage.renderer.setClearColor(color);
-        document.body.style.backgroundColor = hexColor(color);
+    splitter(elements) {
+        // init split
+        Split(elements, {
+            gutterSize: 5,
+            sizes: [80, 20],
+            minSize: [0, 0],
+            cursor: 'ns-resize',
+            direction: 'vertical',
+            onDrag: () => { this.stage.update(); },
+            gutter: () => {
+                const gutter = document.createElement('div');
+                gutter.id = 'gutter';
+                return gutter;
+            }
+        });
+
+        // update stage canvas
+        this.stage.update();
+    }
+
+    // TODO remove
+    update(gui) {
+        // update gui
+        for (let key in gui.__controllers) {
+            gui.__controllers[key].updateDisplay();
+        }
+
+        // traverse gui folders
+        for (let key in gui.__folders) {
+            this.update(gui.__folders[key]);
+        }
+    }
+
+    export() {
+        log('TODO export');
     }
 
     reset() {
@@ -157,25 +187,89 @@ class View {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+const getPreset = async () => {
 
-    // fetch config
-    fetch('config/default.json').then((response) => {
+    // load presets from local storage
+    let load = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+    if (load.preset) {
+        return load.preset;
+    }
 
-        // init random seed
-        Math.seedrandom(document.title);
+    // load presets from json
+    const presets = (configRoot, config, guiRoot, gui) => {
+        for (let key in config) {
+            if (!config.hasOwnProperty(key)) {
+                continue;
+            }
 
-        // parse config
-        return response.json();
+            if (typeof config[key] == 'object') {
+                // get config subfolder
+                presets(configRoot, config[key], guiRoot, gui.addFolder(key));
+            }
+            else {
+                // get config parent keys
+                let guiParent = gui;
+                let configParents = [];
+                while (guiParent.parent) {
+                    configParents.unshift(guiParent.name);
+                    guiParent = guiParent.parent;
+                }
 
-    }).then((config) => {
+                // set config target
+                let configTarget = configRoot;
+                let configSource = clone(configRoot);
+                configParents.forEach((key) => {
+                    configTarget = configTarget[key];
+                    configSource = configSource[key];
+                });
 
-        // convert hex to int color
-        for (key in config.material.color) {
-            config.material.color[key] = parseInt(config.material.color[key], 16);
+                // add config properties
+                if (configParents.includes('color')) {
+                    gui.addColor(configTarget, key);
+                }
+                else {
+                    gui.add(configTarget, key);
+                }
+
+                // remember config value
+                Object.assign(configTarget, configSource);
+                guiRoot.remember(configTarget);
+            }
         }
+    };
 
-        // init view
-        new View(document.querySelector('#top'), config);
+    await Promise.all(['needleleaf', 'broadleaf', 'sparse'].map(getConfig)).then((configs) => {
+        configs.forEach((config) => {
+            const gui = new dat.GUI({ autoPlace: false });
+            gui.useLocalStorage = true;
+
+            // generate and save presets
+            presets(config, config, gui, gui);
+            gui.saveAs(config.preset);
+            gui.destroy();
+        });
     });
+
+    return JSON.parse(localStorage.getItem(getLocalStorageKey('gui'))).preset;
+}
+
+const getConfig = async (preset) => {
+    return new Promise((resolve) => {
+        fetch(`config/${preset}.json`).then((response) => { return response.json(); }).then((config) => {
+            config.preset = preset;
+            for (key in config.material.color) {
+                config.material.color[key] = parseInt(config.material.color[key], 16);
+            }
+            resolve(config);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    Math.seedrandom(document.title);
+
+    const preset = await getPreset();
+    const config = await getConfig(preset);
+
+    new View(document.querySelector('#top'), config);
 });
