@@ -121,11 +121,13 @@ class Forest {
                     const scale = 3;
                     treeGroup.scale.set(scale, scale, scale);
                     treeGroup.position.x = this.treePositions[tree.index].x;
+                    treeGroup.position.y = this.treePositions[tree.index].y;
                     treeGroup.position.z = this.treePositions[tree.index].z;
 
                     if (tree.index < this.trees.length) {
                         if (this.trees[tree.index]) {
                             treeGroup.position.x = this.trees[tree.index].position.x;
+                            treeGroup.position.y = this.trees[tree.index].position.y;
                             treeGroup.position.z = this.trees[tree.index].position.z;
                             this.scene.remove(this.trees[tree.index]);
                         }
@@ -157,6 +159,7 @@ class Forest {
         for (let i = 0; i <= 100000; i++) {
             this.treePositions.push({
                 x: random(-this.config.forest.ground / 2 + treeMargin, this.config.forest.ground / 2 - treeMargin),
+                y: 0,
                 z: random(-this.config.forest.ground / 2 + treeMargin, this.config.forest.ground / 2 - treeMargin)
             });
         }
@@ -166,6 +169,7 @@ class Forest {
         for (let i = 0; i <= 100000; i++) {
             this.personPositions.push({
                 x: random(-this.config.forest.ground / 2 + personMargin, this.config.forest.ground / 2 - personMargin),
+                y: 0,
                 z: random(-this.config.forest.ground / 2 + personMargin, this.config.forest.ground / 2 - personMargin)
             });
         }
