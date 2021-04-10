@@ -21,6 +21,10 @@ class Drone {
             droneMesh.scale.set(scale, scale, scale);
             this.drone = droneMesh;
 
+            this.drone.position.x = this.config.drone.eastWest;
+            this.drone.position.y = this.config.drone.height;
+            this.drone.position.z = this.config.drone.northSouth;
+
             this.update();
             this.addDrone();
             this.addCamera();
