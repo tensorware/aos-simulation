@@ -345,9 +345,6 @@ class Camera {
         else if (type === 'monochrome') {
             // TODO monochrome images
         }
-        else if (type === 'color') {
-            // TODO color images
-        }
     }
 
     animate() {
@@ -418,14 +415,8 @@ class Camera {
 
             images.rays.push({
                 image: number,
-                rendered: {
-                    center: image.rendered.center,
-                    points: image.rendered.points
-                },
-                processed: {
-                    center: image.processed.center,
-                    points: image.processed.points
-                }
+                center: image.rendered.center,
+                points: image.rendered.points
             });
 
             camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });

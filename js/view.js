@@ -42,7 +42,7 @@ class View {
         cameraFolder.add(this.config.drone.camera, 'images', 1, 50, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.drone.camera, 'type', ['infrared', 'monochrome', 'color']).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'type', ['infrared', 'monochrome']).onChange(() => this.drone.update());
 
         // cpu folder
         const cpuFolder = droneFolder.addFolder('cpu');
