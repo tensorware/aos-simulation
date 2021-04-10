@@ -165,7 +165,18 @@ class View {
     }
 
     export() {
-        log('TODO export');
+        const zip = new JSZip();
+        this.stage.export(zip);
+        this.forest.export(zip);
+        this.drone.export(zip);
+
+        // add config file
+        zip.file('config.json', JSON.stringify(this.config, null, 4));
+
+        // generate zip
+        zip.generateAsync({ type: 'blob' }).then((data) => {
+            saveAs(data, `${document.title}-${new Date().yyyymmddhhmm()}.zip`);
+        });
     }
 
     reset() {

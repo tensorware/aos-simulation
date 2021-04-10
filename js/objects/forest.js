@@ -177,6 +177,22 @@ class Forest {
         });
     }
 
+    export(zip) {
+        const forest = zip.folder('forest');
+
+        const trees = { positions: [] };
+        for (let i = 0; i < this.trees.length; i++) {
+            trees.positions.push(this.treePositions[i]);
+        }
+        forest.file('trees.json', JSON.stringify(trees, null, 4));
+
+        const persons = { positions: [] };
+        for (let i = 0; i < this.persons.length; i++) {
+            persons.positions.push(this.personPositions[i]);
+        }
+        forest.file('persons.json', JSON.stringify(persons, null, 4));
+    }
+
     clear(full) {
         if (full) {
             this.trees.forEach((tree) => { this.scene.remove(tree); });

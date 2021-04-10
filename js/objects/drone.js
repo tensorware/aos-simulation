@@ -160,6 +160,14 @@ class Drone {
         }
     }
 
+    export(zip) {
+        const drone = zip.folder('drone');
+
+        if (this.camera) {
+            this.camera.export(drone);
+        }
+    }
+
     clear() {
         if (this.camera) {
             this.camera.clear();

@@ -405,6 +405,13 @@ class Camera {
         this.plane.text.geometry.copy(textGeometry);
     }
 
+    export(zip) {
+        const camera = zip.folder('camera');
+
+        const images = { rays: this.images };
+        camera.file('images.json', JSON.stringify(images, null, 4));
+    }
+
     clear() {
         // clear planes
         this.planes.forEach((capture) => { this.scene.remove(capture); });

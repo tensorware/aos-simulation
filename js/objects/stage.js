@@ -21,7 +21,7 @@ class Stage {
             this.camera.add(this.ambientLight);
             this.scene.add(this.camera);
 
-            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
             this.renderer.setPixelRatio(window.devicePixelRatio);
 
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
@@ -52,15 +52,49 @@ class Stage {
         this.render();
     }
 
+    render() {
+        this.stats.begin();
+        this.renderer.render(this.scene, this.camera);
+        this.stats.end();
+    }
+
     update() {
         this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
         this.camera.aspect = this.root.clientWidth / this.root.clientHeight;
         this.camera.updateProjectionMatrix();
     }
 
-    render() {
-        this.stats.begin();
-        this.renderer.render(this.scene, this.camera);
-        this.stats.end();
+    export(zip) {
+        const stage = zip.folder('stage');
+
+        const browser = {};
+        for (let key in window.navigator) {
+            if (['string', 'array', 'number'].includes(getType(window.navigator[key]))) {
+                browser[key] = window.navigator[key];
+            }
+        }
+
+        const client = {
+            stage: {
+                clientWidth: this.root.clientWidth,
+                clientHeight: this.root.clientHeight
+            },
+            screen: {
+                width: window.screen.width,
+                height: window.screen.height,
+                availWidth: window.screen.availWidth,
+                availHeight: window.screen.availHeight,
+                devicePixelRatio: window.devicePixelRatio
+            },
+            intl: {
+                dateTimeFormat: Intl.DateTimeFormat().resolvedOptions(),
+                numberFormat: Intl.NumberFormat().resolvedOptions()
+            },
+            browser: browser
+        };
+        stage.file('client.json', JSON.stringify(client, null, 4));
+
+        const image = canvasImage(this.renderer.domElement);
+        stage.file('capture.png', image, { base64: true });
     }
 }

@@ -118,8 +118,23 @@ function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
+function getType(obj) {
+    if (typeof obj == 'undefined') return 'undefined';
+    if (typeof obj == 'object') return 'object';
+    if (typeof obj == 'string') return 'string';
+    if (Array.isArray(obj)) return 'array';
+    if (!isNaN(obj - 0)) return 'number';
+    if (obj == null) return 'null';
+    return 'other';
+}
+
 function hexColor(color) {
     return '#' + color.toString(16).padStart(6, '0');
+}
+
+function canvasImage(canvas) {
+    const dataUrl = canvas.toDataURL('image/png');
+    return dataUrl.substr(dataUrl.indexOf(',') + 1);
 }
 
 function rayCast(from, to, intersects) {
@@ -160,4 +175,13 @@ function log(level) {
         default:
             console.log.apply(console, args);
     }
+}
+
+Date.prototype.yyyymmddhhmm = function () {
+    const yyyy = this.getFullYear();
+    const mm = this.getMonth() < 9 ? '0' + (this.getMonth() + 1) : (this.getMonth() + 1);
+    const dd = this.getDate() < 10 ? '0' + this.getDate() : this.getDate();
+    const hh = this.getHours() < 10 ? '0' + this.getHours() : this.getHours();
+    const min = this.getMinutes() < 10 ? '0' + this.getMinutes() : this.getMinutes();
+    return yyyy + '-' + mm + '-' + dd + '-' + hh + '-' + min;
 }
