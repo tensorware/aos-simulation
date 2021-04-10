@@ -95,6 +95,6 @@ class Stage {
         stage.file('client.json', JSON.stringify(client, null, 4));
 
         const image = canvasImage(this.renderer.domElement);
-        stage.file('capture.png', image, { base64: true });
+        stage.file('image.png', image, { base64: true });
     }
 }
