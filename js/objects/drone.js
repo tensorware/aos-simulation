@@ -25,9 +25,9 @@ class Drone {
             this.drone.position.y = this.config.drone.height;
             this.drone.position.z = this.config.drone.northSouth;
 
-            this.update();
             this.addDrone();
             this.addCamera();
+            this.update();
 
             this.animate = this.animate.bind(this);
             this.doubleClick = doubleClick(this.doubleClick.bind(this));

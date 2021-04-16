@@ -11,6 +11,7 @@ class View {
 
             this.forest = new Forest(this.stage);
             this.drone = new Drone(this.forest);
+            this.forest.onUpdate(this.drone.update.bind(this.drone));
         });
     }
 

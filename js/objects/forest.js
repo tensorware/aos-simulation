@@ -13,6 +13,7 @@ class Forest {
         this.personPositions = [];
 
         this.workers = getWorkers();
+        this.workersUpdate = [];
 
         this.groundMaterial = new THREE.MeshStandardMaterial({
             color: this.config.material.color.ground,
@@ -137,6 +138,8 @@ class Forest {
                     }
                     this.scene.add(treeGroup);
                 });
+
+                this.workersUpdate.forEach((cb) => { cb(); });
             }).bind(this);
         });
     }
@@ -151,6 +154,10 @@ class Forest {
             this.persons[i] = person;
             this.scene.add(person);
         });
+    }
+
+    onUpdate(cb) {
+        this.workersUpdate.push(cb);
     }
 
     update() {

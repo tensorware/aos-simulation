@@ -43,14 +43,11 @@ class Camera {
             viewLine.layers.set(1);
         });
 
-        this.update();
         this.addView();
         this.addPlane();
         this.addRenderer();
         this.addPreview();
-
-        this.animate = this.animate.bind(this);
-        requestAnimationFrame(this.animate);
+        this.update();
     }
 
     addView() {
@@ -347,23 +344,6 @@ class Camera {
         }
     }
 
-    animate() {
-        const view = this.drone.getView();
-
-        // update camera position
-        this.camera.fov = this.config.drone.camera.view;
-        this.camera.position.set(view.x, view.y, view.z);
-        this.camera.lookAt(view.x, 0, view.z);
-        this.camera.updateProjectionMatrix();
-
-        // render camera preview
-        this.renderer.setSize(this.config.drone.camera.resolution, this.config.drone.camera.resolution);
-        this.renderer.domElement.removeAttribute('style');
-        this.renderer.render(this.scene, this.camera);
-
-        requestAnimationFrame(this.animate);
-    }
-
     update() {
         const view = this.drone.getView();
 
@@ -404,6 +384,17 @@ class Camera {
         new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
         textGeometry.translate(view.x - textSize.x / 2, 0.05, view.z + textSize.z / 2);
         this.plane.text.geometry.copy(textGeometry);
+
+        // update camera position
+        this.camera.fov = this.config.drone.camera.view;
+        this.camera.position.set(view.x, view.y, view.z);
+        this.camera.lookAt(view.x, 0, view.z);
+        this.camera.updateProjectionMatrix();
+
+        // render camera preview
+        this.renderer.setSize(this.config.drone.camera.resolution, this.config.drone.camera.resolution);
+        this.renderer.domElement.removeAttribute('style');
+        this.renderer.render(this.scene, this.camera);
     }
 
     export(zip) {
