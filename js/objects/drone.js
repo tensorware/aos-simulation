@@ -153,10 +153,12 @@ class Drone {
     }
 
     update() {
-        this.drone.position.y = this.config.drone.height;
+        if (this.drone) {
+            this.drone.position.y = this.config.drone.height;
 
-        if (this.camera) {
-            this.camera.update();
+            if (this.camera) {
+                this.camera.update();
+            }
         }
     }
 
