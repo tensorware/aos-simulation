@@ -16,17 +16,17 @@ class Image {
         this.rendering = cloneCanvas(this.camera.renderer.domElement);
     }
 
-    async capture(integrate) {
+    async capture(preview) {
         if (this.type === 'infrared') {
-            return this.captureInfraredImage().then((images) => {
-                if (integrate) {
+            return this.captureInfraredImage(preview).then((images) => {
+                if (preview) {
                     return this.integrateInfraredImages(images);
                 }
             });
         }
         else if (this.type === 'monochrome') {
-            return this.captureMonochromeImage().then((images) => {
-                if (integrate) {
+            return this.captureMonochromeImage(preview).then((images) => {
+                if (preview) {
                     return this.integrateMonochromeImages(images);
                 }
             });
@@ -118,7 +118,7 @@ class Image {
         return rays;
     }
 
-    async captureInfraredImage() {
+    async captureInfraredImage(preview) {
         // get ray and border points
         const rayPoints = (await this.getRays()).map(getPoints);
 
@@ -174,10 +174,6 @@ class Image {
             }
         };
 
-        // canvas container
-        const container = document.createElement('div');
-        container.className = 'image';
-
         // canvas image
         const canvas = document.createElement('canvas');
         canvas.width = this.resolution.x;
@@ -198,9 +194,15 @@ class Image {
         image.rendered.base64 = canvasImage(this.rendering);
         image.processed.base64 = canvasImage(canvas);
 
-        // append image
-        container.append(canvas);
-        this.camera.slider.addImage(container);
+        if (preview) {
+            // canvas container
+            const container = document.createElement('div');
+            container.className = 'image';
+
+            // append image
+            container.append(canvas);
+            this.camera.slider.addImage(container);
+        }
 
         // return last captured images
         this.camera.images.push(image);
@@ -208,10 +210,6 @@ class Image {
     }
 
     async integrateInfraredImages(images) {
-        // canvas container
-        const container = document.createElement('div');
-        container.className = 'image';
-
         // canvas image
         const canvas = document.createElement('canvas');
         canvas.width = this.resolution.x;
@@ -235,6 +233,10 @@ class Image {
                 ctx.fillRect(p.x - delta.x, p.z - delta.z, 1, 1);
             });
         });
+
+        // canvas container
+        const container = document.createElement('div');
+        container.className = 'image';
 
         // append preview
         container.append(canvas);
@@ -275,7 +277,7 @@ class Image {
         return visiblePixels;
     }
 
-    async captureMonochromeImage() {
+    async captureMonochromeImage(preview) {
         // get visible and border points
         const visiblePoints = await this.getPixels();
 
@@ -322,10 +324,6 @@ class Image {
             }
         };
 
-        // canvas container
-        const container = document.createElement('div');
-        container.className = 'image';
-
         // canvas image
         const canvas = grayscaleCanvas(this.rendering);
 
@@ -333,9 +331,15 @@ class Image {
         image.rendered.base64 = canvasImage(this.rendering);
         image.processed.base64 = canvasImage(canvas);
 
-        // append image
-        container.append(canvas);
-        this.camera.slider.addImage(container);
+        if (preview) {
+            // canvas container
+            const container = document.createElement('div');
+            container.className = 'image';
+
+            // append image
+            container.append(canvas);
+            this.camera.slider.addImage(container);
+        }
 
         // return last captured images
         this.camera.images.push(image);
@@ -343,10 +347,6 @@ class Image {
     }
 
     async integrateMonochromeImages(images) {
-        // canvas container
-        const container = document.createElement('div');
-        container.className = 'image';
-
         // canvas image
         const canvas = grayscaleCanvas(this.rendering);
         const ctx = canvas.getContext('2d');
@@ -364,6 +364,10 @@ class Image {
                 ctx.fillRect(p.x - delta.x, p.z - delta.z, 1, 1);
             });
         });
+
+        // canvas container
+        const container = document.createElement('div');
+        container.className = 'image';
 
         // append preview
         container.append(canvas);

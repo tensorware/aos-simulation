@@ -132,9 +132,9 @@ class Camera {
         return rectangle;
     }
 
-    capture(integrate) {
+    capture(preview) {
         const image = new Image(this);
-        return image.capture(integrate);
+        return image.capture(preview);
     }
 
     update() {

@@ -166,47 +166,35 @@ class Drone {
 
     capture() {
         if (this.camera) {
-            const start = {
-                x: -this.config.forest.ground / 2,
-                y: 0,
-                z: -this.config.forest.ground / 2
-            };
+            return new Promise(async (resolve) => {
+                const view = this.getView();
+                const start = { x: -this.config.forest.ground / 2 + view.r, y: 0, z: -this.config.forest.ground / 2 + view.r };
+                const end = { x: this.config.forest.ground / 2 - view.r, y: 0, z: this.config.forest.ground / 2 - view.r };
+                const step = { x: this.config.drone.camera.sampling, y: 0, z: this.config.drone.camera.sampling };
 
-            const end = {
-                x: this.config.forest.ground / 2,
-                y: 0,
-                z: this.config.forest.ground / 2
-            };
-
-            const step = {
-                x: this.config.drone.camera.sampling,
-                y: 0,
-                z: this.config.drone.camera.sampling
-            };
-
-            // TODO temporary test
-            const sleep = async (t) => {
-                return new Promise(r => { setTimeout(r, t); });
-            };
-
-            (async () => {
                 // update drone position
+                let dir = 1;
                 for (let z = start.z; z <= end.z; z = z + step.z) {
                     this.setNorthSouth(z);
+
                     for (let x = start.x; x <= end.x; x = x + step.x) {
-                        this.setEastWest(x);
+                        this.setEastWest(x * dir);
+
+                        // capture image
                         await this.camera.capture(false);
-                        await sleep(1);
+                        await new Promise((resolve) => { setTimeout(resolve, 10); });
                     }
 
-                    // TODO remove
-                    break;
+                    // swap direction
+                    dir = dir * -1;
                 }
 
                 // update config position
                 this.config.drone.eastWest = this.drone.position.x;
                 this.config.drone.northSouth = this.drone.position.z;
-            })();
+
+                resolve();
+            });
         }
     }
 

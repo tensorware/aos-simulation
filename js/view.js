@@ -169,8 +169,12 @@ class View {
     }
 
     capture() {
-        // capture images
-        this.drone.capture();
+        this.reset();
+
+        // capture images and export
+        this.drone.capture().then(() => {
+            this.export();
+        });
     }
 
     export() {
