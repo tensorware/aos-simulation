@@ -43,7 +43,7 @@ class View {
         cameraFolder.add(this.config.drone.camera, 'images', 1, 50, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
-        cameraFolder.add(this.config.drone.camera, 'type', ['infrared', 'monochrome']).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'type', ['infrared', 'monochrome']).onChange(() => this.drone.reset());
 
         // cpu folder
         const cpuFolder = droneFolder.addFolder('cpu');
@@ -61,7 +61,9 @@ class View {
             this.forest.addPersons();
         });
 
-        forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(this.reset.bind(this));
+        forestFolder.add(this.config.forest, 'persons', 1, 20, 1).onFinishChange(() => {
+            this.reset();
+        });
 
         forestFolder.add(this.config.forest, 'ground', 30, 1000, 1).onFinishChange(() => {
             this.drone.clear();
