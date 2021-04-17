@@ -9,16 +9,16 @@
             "images": 30,
             "sampling": 1,
             "resolution": 512,
-            "type": "infrared"
+            "type": "monochrome"
         },
         "cpu": {
             "speed": 0.50
         }
     },
     "forest": {
-        "size": 30,
-        "persons": 3,
-        "ground": 100,
+        "size": 200,
+        "persons": 0,
+        "ground": 66,
         "trees": {
             "levels": 5,
             "twigScale": 0.40,
@@ -51,7 +51,7 @@
             "tree": "0x613615",
             "twig": "0x418c45",
             "ground": "0x727272",
-            "plane": "0x7d5c5c",
+            "plane": "0xffffff",
             "person": "0xfafafa",
             "background": "0x8fbde8"
         }

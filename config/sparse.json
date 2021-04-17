@@ -18,7 +18,7 @@
     "forest": {
         "size": 10,
         "persons": 3,
-        "ground": 100,
+        "ground": 66,
         "trees": {
             "levels": 5,
             "twigScale": 0.40,
