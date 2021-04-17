@@ -192,11 +192,11 @@ class Camera {
     export(zip) {
         const camera = zip.folder('camera');
 
-        const images = { rays: [] };
+        const images = { captures: [] };
         this.images.forEach((image, index) => {
             const number = index + 1;
 
-            images.rays.push({
+            images.captures.push({
                 image: number,
                 center: image.rendered.center,
                 points: image.rendered.points
@@ -206,7 +206,7 @@ class Camera {
             camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.processed.base64, { base64: true });
         });
 
-        zip.file('camera.json', JSON.stringify(images, null, 4));
+        camera.file('camera.json', JSON.stringify(images, null, 4));
     }
 
     clear() {
