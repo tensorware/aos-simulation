@@ -244,9 +244,9 @@ class Camera {
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
             rendered: {
-                center: new THREE.Vector3(Math.round(view.x), 0, Math.round(view.z)),
+                center: new THREE.Vector3(view.x, 0, view.z),
                 points: rayPointsGround.map((p) => {
-                    return new THREE.Vector3(Math.round(p.x), 0, Math.round(p.z));
+                    return new THREE.Vector3(p.x, 0, p.z);
                 })
             },
             processed: {
