@@ -10,16 +10,23 @@ class Image {
 
         this.view = this.drone.getView();
         this.plane = this.camera.capturePlane();
+        this.type = this.config.drone.camera.type;
         this.resolution = this.camera.getResolution();
         this.rendering = cloneCanvas(this.camera.renderer.domElement);
     }
 
-    capture(type) {
-        if (type === 'infrared') {
-            this.integrateInfraredImages(this.captureInfraredImage());
+    capture(integrate) {
+        if (this.type === 'infrared') {
+            const images = this.captureInfraredImage();
+            if (integrate) {
+                this.integrateInfraredImages(images);
+            }
         }
-        else if (type === 'monochrome') {
-            this.integrateMonochromeImages(this.captureMonochromeImage());
+        else if (this.type === 'monochrome') {
+            const images = this.captureMonochromeImage();
+            if (integrate) {
+                this.integrateMonochromeImages(images);
+            }
         }
     }
 

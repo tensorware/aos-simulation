@@ -131,9 +131,9 @@ class Camera {
         return rectangle;
     }
 
-    capture() {
+    capture(integrate) {
         const image = new Image(this);
-        return image.capture(this.config.drone.camera.type);
+        return image.capture(integrate);
     }
 
     update() {
