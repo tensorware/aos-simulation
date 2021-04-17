@@ -82,9 +82,9 @@ function doubleClick(callback) {
     }
 }
 
-function getWorkers() {
+function getWorkers(size) {
     const workers = [];
-    for (let i = 0; i < navigator.hardwareConcurrency; i++) {
+    for (let i = 0; i < (size || navigator.hardwareConcurrency); i++) {
         workers.push(new Worker('js/utils/worker.js'));
     }
     return workers;

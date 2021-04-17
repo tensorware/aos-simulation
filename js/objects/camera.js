@@ -11,6 +11,7 @@ class Camera {
         this.planes = [];
         this.images = [];
 
+        this.worker = getWorkers(1)[0];
         this.slider = new Slider(document.querySelector('#captures'), this.config);
 
         this.viewLines = [];
