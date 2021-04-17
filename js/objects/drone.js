@@ -165,6 +165,9 @@ class Drone {
     export(zip) {
         const drone = zip.folder('drone');
 
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+        drone.file('drone.json', JSON.stringify({ height: this.config.drone.height, coverage: coverage }, null, 4));
+
         if (this.camera) {
             this.camera.export(drone);
         }
