@@ -132,9 +132,41 @@ function hexColor(color) {
     return '#' + color.toString(16).padStart(6, '0');
 }
 
+function colorMatch(c1, c2, range) {
+    let match = true;
+    ['r', 'g', 'b'].forEach((k) => {
+        match = match && c1[k] <= (c2[k] + range) && c1[k] >= (c2[k] - range);
+    });
+    return match;
+}
+
 function canvasImage(canvas) {
     const dataUrl = canvas.toDataURL('image/png');
     return dataUrl.substr(dataUrl.indexOf(',') + 1);
+}
+
+function cloneCanvas(canvas) {
+    const cloned = document.createElement('canvas');
+    cloned.width = canvas.width;
+    cloned.height = canvas.height;
+    const ctx = cloned.getContext('2d');
+    ctx.drawImage(canvas, 0, 0);
+    return cloned;
+}
+
+function grayscaleCanvas(canvas) {
+    const cloned = cloneCanvas(canvas);
+    const ctx = cloned.getContext('2d');
+    const data = ctx.getImageData(0, 0, cloned.width, cloned.height);
+    const pixels = data.data;
+    for (let i = 0; i < pixels.length; i += 4) {
+        const lightness = parseInt((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3);
+        pixels[i] = lightness;
+        pixels[i + 1] = lightness;
+        pixels[i + 2] = lightness;
+    }
+    ctx.putImageData(data, 0, 0);
+    return cloned;
 }
 
 function rayCast(from, to, intersects) {
