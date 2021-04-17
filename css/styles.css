@@ -107,7 +107,7 @@ html {
   top: 4px;
   left: 8px;
   font-size: 20px;
-  color: #ffffff;
+  color: #990000;
   position: absolute;
   display: inline-block;
   content: counter(count);
