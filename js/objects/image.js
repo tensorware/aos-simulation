@@ -12,25 +12,28 @@ class Image {
         this.plane = this.camera.capturePlane();
         this.type = this.config.drone.camera.type;
         this.resolution = this.camera.getResolution();
+        this.borderPoints = this.camera.viewLines.map(getPoints);
         this.rendering = cloneCanvas(this.camera.renderer.domElement);
     }
 
-    capture(integrate) {
+    async capture(integrate) {
         if (this.type === 'infrared') {
-            const images = this.captureInfraredImage();
-            if (integrate) {
-                this.integrateInfraredImages(images);
-            }
+            return this.captureInfraredImage().then((images) => {
+                if (integrate) {
+                    return this.integrateInfraredImages(images);
+                }
+            });
         }
         else if (this.type === 'monochrome') {
-            const images = this.captureMonochromeImage();
-            if (integrate) {
-                this.integrateMonochromeImages(images);
-            }
+            return this.captureMonochromeImage().then((images) => {
+                if (integrate) {
+                    return this.integrateMonochromeImages(images);
+                }
+            });
         }
     }
 
-    getRays() {
+    async getRays() {
         const cameraVector = new THREE.Vector3(this.view.x, this.view.y, this.view.z);
         const cornerDistance = Math.sqrt(this.view.r ** 2 + this.view.r ** 2) + 3;
 
@@ -115,20 +118,19 @@ class Image {
         return rays;
     }
 
-    captureInfraredImage() {
+    async captureInfraredImage() {
         // get ray and border points
-        const rayPoints = this.getRays().map(getPoints);
-        const borderPoints = this.camera.viewLines.map(getPoints);
+        const rayPoints = (await this.getRays()).map(getPoints);
 
         // get min values for each axes
         const min = new THREE.Vector3(
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].x; })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].y; })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].z; }))
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].x; })),
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].y; })),
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].z; }))
         );
 
         // subtract min point value for each border points axes
-        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
+        const borderPointsGround = this.borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
 
         // get max values for each axes
         const max = new THREE.Vector3(
@@ -205,7 +207,7 @@ class Image {
         return this.camera.images.slice(Math.max(this.camera.images.length - this.config.drone.camera.images, 0));
     }
 
-    integrateInfraredImages(images) {
+    async integrateInfraredImages(images) {
         // canvas container
         const container = document.createElement('div');
         container.className = 'image';
@@ -237,9 +239,12 @@ class Image {
         // append preview
         container.append(canvas);
         this.camera.slider.addPreview(container);
+
+        // return image index
+        return images.length - 1;
     }
 
-    getPixels() {
+    async getPixels() {
         // get person pixel color
         const color = {
             r: (this.config.material.color.person & 0xff0000) >> 16,
@@ -270,20 +275,19 @@ class Image {
         return visiblePixels;
     }
 
-    captureMonochromeImage() {
+    async captureMonochromeImage() {
         // get visible and border points
-        const visiblePoints = this.getPixels();
-        const borderPoints = this.camera.viewLines.map(getPoints);
+        const visiblePoints = await this.getPixels();
 
         // get min values for each axes
         const min = new THREE.Vector3(
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].x; })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].y; })),
-            Math.min.apply(Math, borderPoints.map((p) => { return p[1].z; }))
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].x; })),
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].y; })),
+            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].z; }))
         );
 
         // subtract min point value for each border points axes
-        const borderPointsGround = borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
+        const borderPointsGround = this.borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
 
         // get max values for each axes
         const max = new THREE.Vector3(
@@ -338,7 +342,7 @@ class Image {
         return this.camera.images.slice(Math.max(this.camera.images.length - this.config.drone.camera.images, 0));
     }
 
-    integrateMonochromeImages(images) {
+    async integrateMonochromeImages(images) {
         // canvas container
         const container = document.createElement('div');
         container.className = 'image';
@@ -364,5 +368,8 @@ class Image {
         // append preview
         container.append(canvas);
         this.camera.slider.addPreview(container);
+
+        // return image index
+        return images.length - 1;
     }
 }

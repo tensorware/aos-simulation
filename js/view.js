@@ -143,6 +143,7 @@ class View {
         });
 
         // simulation data
+        this.gui.add(this, 'capture');
         this.gui.add(this, 'export');
         this.gui.add(this, 'reset');
     }
@@ -167,8 +168,15 @@ class View {
         this.stage.update();
     }
 
+    capture() {
+        // capture images
+        this.drone.capture();
+    }
+
     export() {
         const zip = new JSZip();
+
+        // add folders
         this.stage.export(zip);
         this.forest.export(zip);
         this.drone.export(zip);

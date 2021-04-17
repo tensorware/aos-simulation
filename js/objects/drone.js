@@ -30,10 +30,10 @@ class Drone {
             this.update();
 
             this.animate = this.animate.bind(this);
-            this.doubleClick = doubleClick(this.doubleClick.bind(this));
+            this.click = doubleClick(this.click.bind(this));
 
-            window.addEventListener('pointerdown', this.doubleClick);
-            window.addEventListener('pointerup', this.doubleClick);
+            window.addEventListener('pointerdown', this.click);
+            window.addEventListener('pointerup', this.click);
 
         }).bind(this));
     }
@@ -78,24 +78,31 @@ class Drone {
         };
     }
 
-    doubleClick(e) {
+    click(e) {
         if (e.target.parentElement.id !== 'stage' || e.which != 1) {
             return;
         }
 
+        // mouse click coordinates
         const mouse = {
             x: (e.clientX / this.root.clientWidth) * 2 - 1,
             y: (e.clientY / this.root.clientHeight) * -2 + 1
         };
 
+        // raycast target
         const ray = new THREE.Raycaster();
         ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
 
         const intersects = ray.intersectObjects(this.forest.grounds);
         if (intersects.length) {
+            // set goal position
+            this.goal = intersects[0].point;
+
+            // update config position
             this.config.drone.eastWest = this.drone.position.x;
             this.config.drone.northSouth = this.drone.position.z;
-            this.goal = intersects[0].point;
+
+            // animate movement
             this.animate();
         }
     }
@@ -111,6 +118,7 @@ class Drone {
             this.startTime = currentTime;
         }
 
+        // trajectory coordinates
         const start = new THREE.Vector3(this.config.drone.eastWest, this.config.drone.height, this.config.drone.northSouth);
         const end = new THREE.Vector3(this.goal.x, this.config.drone.height, this.goal.z);
 
@@ -119,9 +127,11 @@ class Drone {
             return;
         }
 
+        // calculate time
         const deltaTime = currentTime - this.startTime;
         const trajectoryTime = deltaTime / moveDuration;
 
+        // calculate distance
         const currentDistance = deltaTime * this.config.drone.speed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
 
@@ -134,11 +144,12 @@ class Drone {
             const trajectory = new THREE.Line3(start, end);
             trajectory.at(trajectoryTime, current);
 
+            // update drone position
             this.drone.position.x = current.x;
             this.drone.position.z = current.z;
-
             this.update();
 
+            // capture image
             if (deltaDistance >= this.config.drone.camera.sampling) {
                 this.lastCapture = Math.floor(currentDistance);
                 this.camera.capture(true);
@@ -147,8 +158,55 @@ class Drone {
             requestAnimationFrame(this.animate);
         }
         else {
+            // goal reached
             this.config.drone.eastWest = this.goal.x;
             this.config.drone.northSouth = this.goal.z;
+        }
+    }
+
+    capture() {
+        if (this.camera) {
+            const start = {
+                x: -this.config.forest.ground / 2,
+                y: 0,
+                z: -this.config.forest.ground / 2
+            };
+
+            const end = {
+                x: this.config.forest.ground / 2,
+                y: 0,
+                z: this.config.forest.ground / 2
+            };
+
+            const step = {
+                x: this.config.drone.camera.sampling,
+                y: 0,
+                z: this.config.drone.camera.sampling
+            };
+
+            // TODO temporary test
+            const sleep = async (t) => {
+                return new Promise(r => { setTimeout(r, t); });
+            };
+
+            (async () => {
+                // update drone position
+                for (let z = start.z; z <= end.z; z = z + step.z) {
+                    this.setNorthSouth(z);
+                    for (let x = start.x; x <= end.x; x = x + step.x) {
+                        this.setEastWest(x);
+                        await this.camera.capture(false);
+                        await sleep(1);
+                    }
+
+                    // TODO remove
+                    break;
+                }
+
+                // update config position
+                this.config.drone.eastWest = this.drone.position.x;
+                this.config.drone.northSouth = this.drone.position.z;
+            })();
         }
     }
 
@@ -165,9 +223,11 @@ class Drone {
     export(zip) {
         const drone = zip.folder('drone');
 
+        // export drone
         const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
         drone.file('drone.json', JSON.stringify({ height: this.config.drone.height, coverage: coverage }, null, 4));
 
+        // export camera
         if (this.camera) {
             this.camera.export(drone);
         }
