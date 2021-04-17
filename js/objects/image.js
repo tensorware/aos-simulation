@@ -252,11 +252,11 @@ class Image {
 
             // check if person color matches canvas pixel color 
             if (colorMatch(color, pixelColor, 1)) {
-                visiblePixels.push({
-                    x: (i / 4) % this.rendering.width,
-                    y: 0,
-                    z: Math.floor((i / 4) / this.rendering.height)
-                });
+                visiblePixels.push(new THREE.Vector3(
+                    (i / 4) % this.rendering.width,
+                    0,
+                    Math.floor((i / 4) / this.rendering.height)
+                ));
             }
         }
 
@@ -285,15 +285,6 @@ class Image {
             Math.max.apply(Math, borderPointsGround.map((p) => { return p.z; }))
         );
 
-        // convert image coordinates for each visible points axes
-        const visiblePointsGround = visiblePoints.map((p) => {
-            return {
-                x: p.x * max.x / this.resolution.x,
-                y: 0,
-                z: p.z * max.z / this.resolution.z
-            };
-        });
-
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
             rendered: {
@@ -302,11 +293,11 @@ class Image {
                     0,
                     this.view.z
                 ),
-                points: visiblePointsGround.map((p) => {
+                points: visiblePoints.map((p) => {
                     return new THREE.Vector3(
-                        p.x,
+                        p.x * max.x / this.resolution.x,
                         0,
-                        p.z
+                        p.z * max.z / this.resolution.z
                     );
                 })
             },
@@ -316,13 +307,7 @@ class Image {
                     0,
                     Math.round(this.view.z * this.resolution.z / max.z)
                 ),
-                points: visiblePointsGround.map((p) => {
-                    return new THREE.Vector3(
-                        Math.round(p.x * this.resolution.x / max.x),
-                        0,
-                        Math.round(p.z * this.resolution.z / max.z)
-                    );
-                })
+                points: visiblePoints
             }
         };
 
