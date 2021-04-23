@@ -76,13 +76,15 @@ class Stage {
     export(zip) {
         const stage = zip.folder('stage');
 
-        const browser = {};
+        // navigator
+        const navigator = {};
         for (let key in window.navigator) {
             if (['string', 'array', 'number'].includes(getType(window.navigator[key]))) {
-                browser[key] = window.navigator[key];
+                navigator[key] = window.navigator[key];
             }
         }
 
+        // client
         const client = {
             stage: {
                 clientWidth: this.root.clientWidth,
@@ -99,10 +101,14 @@ class Stage {
                 dateTimeFormat: Intl.DateTimeFormat().resolvedOptions(),
                 numberFormat: Intl.NumberFormat().resolvedOptions()
             },
-            browser: browser
+            location: window.location,
+            navigator: navigator
         };
+
+        // export config
         stage.file('client.json', JSON.stringify(client, null, 4));
 
+        // export image
         const image = canvasImage(this.renderer.domElement);
         stage.file('image.png', image, { base64: true });
     }
