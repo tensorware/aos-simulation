@@ -251,7 +251,7 @@ const getPreset = async (files) => {
         }
     };
 
-    await Promise.all(files.map(getConfig)).then((configs) => {
+    await Promise.all(files.reverse().map(getConfig)).then((configs) => {
         configs.forEach((config) => {
             const gui = new dat.GUI({ autoPlace: false });
             gui.useLocalStorage = true;
@@ -285,7 +285,7 @@ const getConfig = async (preset) => {
 document.addEventListener('DOMContentLoaded', async () => {
     Math.seedrandom(document.title);
 
-    const files = ['demo', 'broadleaf', 'needleleaf'];
+    const files = ['demo', 'simu-01', 'simu-02', 'simu-03', 'simu-04', 'simu-05', 'simu-06'];
     const preset = await getPreset(files);
     const config = await getConfig(preset);
 
