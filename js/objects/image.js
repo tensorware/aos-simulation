@@ -78,6 +78,7 @@ class Image {
                     const obstacles = trees.filter((tree) => {
                         const treeBox = new THREE.BoxHelper(tree, 0xffffff);
                         const treeCenter = getCenter(treeBox);
+                        treeBox.layers.set(1);
 
                         // angle between tree and person
                         const treeAngle = new THREE.Vector3();
@@ -92,8 +93,11 @@ class Image {
                         // filter obstacles by angle and distance
                         const angle = treeAngle.angleTo(personAngle);
                         if (angle < Math.PI / 4 && (treeDistance - 3) < personDistance) {
+                            // append boxes
+                            this.camera.boxes.push(treeBox);
+
                             // DEBUG
-                            // this.scene.add(treeBox);
+                            this.scene.add(treeBox);
                             return true;
                         }
                     });
@@ -103,13 +107,14 @@ class Image {
                     if (!rayCast(cameraVector, intersectVector, obstacles).length) {
                         const intersectGeometry = new THREE.BufferGeometry().setFromPoints([cameraVector, intersectVector]);
                         const intersectLine = new THREE.Line(intersectGeometry, new THREE.LineBasicMaterial({ color: this.config.material.color.person }));
+                        intersectLine.layers.set(1);
 
                         // append ray lines
                         rays.push(intersectLine);
                         this.camera.rays.push(intersectLine);
 
                         // DEBUG
-                        // this.scene.add(intersectLine);
+                        this.scene.add(intersectLine);
                     }
                 }
             });

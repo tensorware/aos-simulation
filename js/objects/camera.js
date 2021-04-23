@@ -8,6 +8,8 @@ class Camera {
         this.drone = drone;
 
         this.rays = [];
+        this.boxes = [];
+
         this.planes = [];
         this.images = [];
 
@@ -220,6 +222,10 @@ class Camera {
         // clear rays
         this.rays.forEach((ray) => { this.scene.remove(ray); });
         this.rays = [];
+
+        // clear boxes
+        this.boxes.forEach((ray) => { this.scene.remove(ray); });
+        this.boxes = [];
 
         // clear images
         this.images = [];
