@@ -1,7 +1,8 @@
 class View {
-    constructor(root, config) {
+    constructor(root, config, files) {
         this.root = root;
         this.config = config;
+        this.files = files;
 
         // init canvas stage
         this.stage = new Stage(this.root, this.config, () => {
@@ -137,7 +138,7 @@ class View {
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
-        this.gui.add(this.config, 'preset', ['sparse', 'broadleaf', 'needleleaf']).onChange((v) => {
+        this.gui.add(this.config, 'preset', this.files).onChange((v) => {
             this.gui.load.preset = v;
             window.location.reload();
         });
@@ -200,7 +201,7 @@ class View {
     }
 }
 
-const getPreset = async () => {
+const getPreset = async (files) => {
     // load presets from local storage
     let load = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
     if (load.preset) {
@@ -250,7 +251,7 @@ const getPreset = async () => {
         }
     };
 
-    await Promise.all(['needleleaf', 'broadleaf', 'sparse'].map(getConfig)).then((configs) => {
+    await Promise.all(files.map(getConfig)).then((configs) => {
         configs.forEach((config) => {
             const gui = new dat.GUI({ autoPlace: false });
             gui.useLocalStorage = true;
@@ -267,12 +268,16 @@ const getPreset = async () => {
 
 const getConfig = async (preset) => {
     return new Promise((resolve) => {
-        fetch(`config/${preset}.json`).then((response) => { return response.json(); }).then((config) => {
+        fetch(`config/${preset}.json`).then((response) => {
+            return response.json();
+        }).then((config) => {
             config.preset = preset;
             for (key in config.material.color) {
                 config.material.color[key] = parseInt(config.material.color[key], 16);
             }
             resolve(config);
+        }).catch(async () => {
+            return resolve(await getConfig('demo'));
         });
     });
 }
@@ -280,8 +285,9 @@ const getConfig = async (preset) => {
 document.addEventListener('DOMContentLoaded', async () => {
     Math.seedrandom(document.title);
 
-    const preset = await getPreset();
+    const files = ['demo', 'broadleaf', 'needleleaf'];
+    const preset = await getPreset(files);
     const config = await getConfig(preset);
 
-    new View(document.querySelector('#top'), config);
+    new View(document.querySelector('#top'), config, files);
 });
