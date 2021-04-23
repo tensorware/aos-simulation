@@ -199,8 +199,10 @@ class Camera {
 
             images.captures.push({
                 image: number,
-                center: image.rendered.center,
-                // points: image.rendered.points
+                center: {
+                    rendered: image.rendered.center,
+                    processed: image.processed.center
+                }
             });
 
             camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
