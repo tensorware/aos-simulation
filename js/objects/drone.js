@@ -168,9 +168,24 @@ class Drone {
         if (this.camera) {
             return new Promise(async (resolve) => {
                 const view = this.getView();
-                const start = { x: -this.config.forest.ground / 2 + view.r, y: 0, z: -this.config.forest.ground / 2 + view.r };
-                const end = { x: this.config.forest.ground / 2 - view.r, y: 0, z: this.config.forest.ground / 2 - view.r };
-                const step = { x: this.config.drone.camera.sampling, y: 0, z: this.config.drone.camera.sampling };
+
+                const start = {
+                    x: Math.round(-this.config.forest.ground / 2 + view.r),
+                    y: 0,
+                    z: Math.round(-this.config.forest.ground / 2 + view.r)
+                };
+
+                const end = {
+                    x: Math.round(this.config.forest.ground / 2 - view.r),
+                    y: 0,
+                    z: Math.round(this.config.forest.ground / 2 - view.r)
+                };
+
+                const step = {
+                    x: this.config.drone.camera.sampling,
+                    y: 0,
+                    z: this.config.drone.camera.sampling
+                };
 
                 // update drone position
                 let dir = 1;
