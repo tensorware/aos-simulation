@@ -20,7 +20,7 @@ class Stage {
             this.camera = new THREE.PerspectiveCamera(view, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
             this.camera.layers.enable(0);
             this.camera.layers.enable(1);
-            this.camera.position.set(0, height * 1.5, 0);
+            this.camera.position.set(0, height * 1.8, 0);
             this.camera.add(this.directionalLight);
             this.camera.add(this.ambientLight);
             this.scene.add(this.camera);
