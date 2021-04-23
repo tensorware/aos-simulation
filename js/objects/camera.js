@@ -207,10 +207,12 @@ class Camera {
                 }
             });
 
+            // export images
             camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
             camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.processed.base64, { base64: true });
         });
 
+        // export config
         camera.file('camera.json', JSON.stringify(images, null, 4));
     }
 

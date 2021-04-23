@@ -161,6 +161,7 @@ class Forest {
     }
 
     update() {
+        // update trees
         const treeMargin = 1;
         this.treePositions = [];
         for (let i = 0; i <= 100000; i++) {
@@ -171,6 +172,7 @@ class Forest {
             });
         }
 
+        // update grounds
         const personMargin = 2;
         this.personPositions = [];
         for (let i = 0; i <= 100000; i++) {
@@ -181,6 +183,7 @@ class Forest {
             });
         }
 
+        // update grounds
         const planeGeometry = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
         planeGeometry.rotateX(Math.PI / 2).translate(0, 0, 0);
         this.grounds.forEach((ground) => {
@@ -191,12 +194,14 @@ class Forest {
     export(zip) {
         const forest = zip.folder('forest');
 
+        // export trees
         const trees = { positions: [] };
         for (let i = 0; i < this.trees.length; i++) {
             trees.positions.push(this.treePositions[i]);
         }
         forest.file('trees.json', JSON.stringify(trees, null, 4));
 
+        // export persons
         const persons = { positions: [] };
         for (let i = 0; i < this.persons.length; i++) {
             persons.positions.push(this.personPositions[i]);

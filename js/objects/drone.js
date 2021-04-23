@@ -202,6 +202,7 @@ class Drone {
         if (this.drone) {
             this.drone.position.y = this.config.drone.height;
 
+            // update camera
             if (this.camera) {
                 this.camera.update();
             }
