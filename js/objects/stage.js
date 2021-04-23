@@ -7,23 +7,29 @@ class Stage {
             this.font = font;
             this.scene = new THREE.Scene();
 
-            this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+            const view = 60
+            const height = this.config.forest.ground / (2 * Math.tan(radian(view / 2)));
 
+            // light
+            this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
             this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             this.directionalLight.position.set(100, 100, 100);
             this.directionalLight.layers.set(1);
 
-            this.camera = new THREE.PerspectiveCamera(90, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
+            // camera            
+            this.camera = new THREE.PerspectiveCamera(view, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
             this.camera.layers.enable(0);
             this.camera.layers.enable(1);
-            this.camera.position.set(0, 45, 65);
+            this.camera.position.set(0, height * 1.5, 0);
             this.camera.add(this.directionalLight);
             this.camera.add(this.ambientLight);
             this.scene.add(this.camera);
 
+            // renderer
             this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
             this.renderer.setPixelRatio(window.devicePixelRatio);
 
+            // controls
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
             this.controls.minDistance = 0.1;
             this.controls.maxDistance = 500;
@@ -31,13 +37,16 @@ class Stage {
             this.controls.autoRotate = false;
             this.controls.enablePan = true;
 
+            // user interface
             this.stats = new Stats();
             this.root.querySelector('#info').append(this.stats.dom);
             this.root.querySelector('#stage').append(this.renderer.domElement);
 
+            // events
             this.update = this.update.bind(this);
             window.addEventListener('resize', this.update);
 
+            // animations
             this.animate = this.animate.bind(this);
             requestAnimationFrame(this.animate);
 
