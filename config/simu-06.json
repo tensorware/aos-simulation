@@ -6,7 +6,7 @@
         "northSouth": 0.0,
         "camera": {
             "view": 40,
-            "images": 5,
+            "images": 1,
             "sampling": 1,
             "resolution": 512,
             "type": "monochrome"
@@ -16,9 +16,9 @@
         }
     },
     "forest": {
-        "size": 500,
+        "size": 1000,
         "persons": 0,
-        "ground": 100,
+        "ground": 200,
         "trees": {
             "levels": 5,
             "twigScale": 0.40,
