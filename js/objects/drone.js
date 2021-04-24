@@ -7,6 +7,7 @@ class Drone {
         this.forest = forest;
 
         new THREE.STLLoader().load('stl/drone.stl', ((droneGeometry) => {
+            this.flying = false;
             this.goal = { x: 0, y: 0 };
 
             droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
@@ -102,6 +103,9 @@ class Drone {
             this.config.drone.eastWest = this.drone.position.x;
             this.config.drone.northSouth = this.drone.position.z;
 
+            // set flying
+            this.flying = true;
+
             // animate movement
             this.animate();
         }
@@ -155,12 +159,18 @@ class Drone {
                 this.camera.capture(true);
             }
 
-            requestAnimationFrame(this.animate);
+            // next animation
+            if (this.flying) {
+                requestAnimationFrame(this.animate);
+            }
         }
         else {
             // goal reached
             this.config.drone.eastWest = this.goal.x;
             this.config.drone.northSouth = this.goal.z;
+
+            // reset flying
+            this.flying = false;
         }
     }
 
@@ -187,17 +197,20 @@ class Drone {
                     z: view.r * 2
                 };
 
+                // set flying
+                this.flying = true;
+
                 // update drone position
                 let dir = 1;
-                for (let z = start.z; z <= end.z; z = z + step.z) {
+                for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
                     this.setNorthSouth(z);
 
-                    for (let x = start.x; x <= end.x; x = x + step.x) {
+                    for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
                         this.setEastWest(x * dir);
 
                         // capture image
                         await this.camera.capture(false);
-                        await new Promise((resolve) => { setTimeout(resolve, 10); });
+                        await new Promise((r) => { setTimeout(r, 10); });
                     }
 
                     // swap direction
@@ -207,6 +220,9 @@ class Drone {
                 // update config position
                 this.config.drone.eastWest = this.drone.position.x;
                 this.config.drone.northSouth = this.drone.position.z;
+
+                // reset flying
+                this.flying = false;
 
                 resolve();
             });
@@ -240,6 +256,8 @@ class Drone {
     }
 
     clear() {
+        this.flying = false;
+
         if (this.camera) {
             this.camera.clear();
         }
