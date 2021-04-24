@@ -184,7 +184,7 @@ class Drone {
                 const step = {
                     x: this.config.drone.camera.sampling,
                     y: 0,
-                    z: this.config.drone.camera.sampling
+                    z: view.r * 2
                 };
 
                 // update drone position
