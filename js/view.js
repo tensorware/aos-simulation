@@ -52,7 +52,7 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config.forest, 'size', 1, 1000, 1).onFinishChange(() => {
+        forestFolder.add(this.config.forest, 'size', 1, 2000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
 
@@ -66,7 +66,7 @@ class View {
             this.reset();
         });
 
-        forestFolder.add(this.config.forest, 'ground', 30, 1000, 1).onFinishChange(() => {
+        forestFolder.add(this.config.forest, 'ground', 30, 500, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
 
