@@ -125,7 +125,7 @@ class Image {
 
     async captureInfraredImage(preview) {
         // get ray and border points
-        const rayPoints = (await this.getRays()).map(getPoints);
+        const rayPoints = preview ? (await this.getRays()).map(getPoints) : [];
 
         // get min values for each axes
         const min = new THREE.Vector3(
@@ -284,7 +284,7 @@ class Image {
 
     async captureMonochromeImage(preview) {
         // get visible and border points
-        const visiblePoints = await this.getPixels();
+        const visiblePoints = preview ? await this.getPixels() : [];
 
         // get min values for each axes
         const min = new THREE.Vector3(
