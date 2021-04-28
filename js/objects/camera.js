@@ -214,7 +214,7 @@ class Camera {
             });
 
             // export images
-            camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
+            // camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
             camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.processed.base64, { base64: true });
         });
 
