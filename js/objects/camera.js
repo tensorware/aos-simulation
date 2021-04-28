@@ -23,8 +23,14 @@ class Camera {
             this.viewLines.push(new THREE.Line(viewLineGeometry, new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
 
-        this.planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.material.color.plane });
-        this.textMaterial = new THREE.MeshPhongMaterial({ color: 0x990000, specular: 0xff2222 });
+        this.planeMaterial = new THREE.MeshStandardMaterial({
+            color: this.config.material.color.plane,
+            side: THREE.DoubleSide
+        });
+        this.textMaterial = new THREE.MeshPhongMaterial({
+            color: 0x990000,
+            specular: 0xff2222
+        });
 
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
