@@ -180,15 +180,15 @@ class Drone {
                 const view = this.getView();
 
                 const start = {
-                    x: Math.round(-this.config.forest.ground / 2 + view.r),
+                    x: Math.round(-this.config.forest.ground / 2 - view.r),
                     y: 0,
                     z: Math.round(-this.config.forest.ground / 2 + view.r)
                 };
 
                 const end = {
-                    x: Math.round(this.config.forest.ground / 2 - view.r),
+                    x: Math.round(this.config.forest.ground / 2 + view.r),
                     y: 0,
-                    z: Math.round(this.config.forest.ground / 2 - view.r)
+                    z: Math.round(this.config.forest.ground / 2 + view.r)
                 };
 
                 const step = {
@@ -217,12 +217,17 @@ class Drone {
                     dir = dir * -1;
                 }
 
-                // update config position
+                // reset drone position
+                this.drone.position.x = 0.0;
+                this.drone.position.z = 0.0;
+
+                // reset config position
                 this.config.drone.eastWest = this.drone.position.x;
                 this.config.drone.northSouth = this.drone.position.z;
 
                 // reset flying
                 this.flying = false;
+                this.update();
 
                 resolve();
             });

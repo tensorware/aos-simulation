@@ -67,6 +67,8 @@ class View {
         });
 
         forestFolder.add(this.config.forest, 'ground', 30, 500, 1).onFinishChange(() => {
+            this.stage.reset();
+
             this.drone.clear();
             this.drone.update();
 
@@ -174,6 +176,7 @@ class View {
 
         // capture images and export
         this.drone.capture().then(() => {
+            this.stage.reset();
             this.export();
         });
     }
