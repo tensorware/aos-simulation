@@ -17,9 +17,7 @@ class Forest {
 
         this.groundMaterial = new THREE.MeshLambertMaterial({
             color: this.config.material.color.ground,
-            side: THREE.DoubleSide,
-            roughness: 1.0,
-            metalness: 0.3
+            side: THREE.DoubleSide
         });
 
         this.treeMaterial = new THREE.MeshStandardMaterial({
