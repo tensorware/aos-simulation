@@ -102,6 +102,7 @@ class Forest {
             workerConfigs.push(this.getTree(i));
         }
 
+        // init workers
         this.workers.forEach((worker) => { worker.terminate(); });
         this.workers = getWorkers();
 
@@ -116,22 +117,26 @@ class Forest {
 
             this.workers[i].onmessage = ((e) => {
                 e.data.forEach((tree) => {
+                    // tree trunk
                     const treeGeometry = new THREE.BufferGeometry();
                     treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
                     treeGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normals, 3)));
                     treeGeometry.setAttribute('uv', createFloatAttribute(tree.UV, 2));
                     treeGeometry.setIndex(createIntAttribute(tree.faces, 1));
 
+                    // tree twigs
                     const twigGeometry = new THREE.BufferGeometry();
                     twigGeometry.setAttribute('position', createFloatAttribute(tree.vertsTwig, 3));
                     twigGeometry.setAttribute('normal', normalizeAttribute(createFloatAttribute(tree.normalsTwig, 3)));
                     twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
                     twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
+                    // tree trunk and twigs
                     const treeGroup = new THREE.Group();
                     treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
                     treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
 
+                    // tree position
                     const scale = 3;
                     treeGroup.scale.set(scale, scale, scale);
                     treeGroup.position.x = this.treePositions[tree.index].x;
@@ -139,6 +144,7 @@ class Forest {
                     treeGroup.position.z = this.treePositions[tree.index].z;
 
                     if (tree.index < this.trees.length) {
+                        // update tree
                         if (this.trees[tree.index]) {
                             treeGroup.position.x = this.trees[tree.index].position.x;
                             treeGroup.position.y = this.trees[tree.index].position.y;
@@ -147,6 +153,7 @@ class Forest {
                         }
                         this.trees[tree.index] = treeGroup;
                     } else {
+                        // append tree
                         this.trees.push(treeGroup);
                     }
                     this.scene.add(treeGroup);
@@ -163,6 +170,7 @@ class Forest {
             persons.push(this.getPerson(i));
         }
 
+        // append persons
         persons.forEach((person, i) => {
             this.persons[i] = person;
             this.scene.add(person);
@@ -180,8 +188,8 @@ class Forest {
 
         // update trees
         const treeMargin = 1;
-        const treePositionMin = -sizeOuter / 2 + treeMargin;
-        const treePositionMax = sizeOuter / 2 - treeMargin;
+        const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
+        const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
 
         this.treePositions = [];
         for (let i = 0; i <= 100000; i++) {
@@ -203,8 +211,8 @@ class Forest {
 
         // update persons
         const personMargin = 2;
-        const personPositionMin = -sizeOuter / 2 + personMargin;
-        const personPositionMax = sizeOuter / 2 - personMargin;
+        const personPositionMin = -sizeInner / 2 + personMargin;
+        const personPositionMax = sizeInner / 2 - personMargin;
 
         this.personPositions = [];
         for (let i = 0; i <= 100000; i++) {
@@ -224,7 +232,6 @@ class Forest {
             }
         });
 
-        // update grounds
         if (this.grounds.length == 2) {
             // inner ground
             const planeGeometryInner = new THREE.PlaneGeometry(sizeInner, sizeInner);
@@ -258,18 +265,22 @@ class Forest {
 
     clear(full) {
         if (full) {
+            // remove all trees
             this.trees.forEach((tree) => { this.scene.remove(tree); });
             this.trees = [];
 
+            // remove all persons
             this.persons.forEach((person) => { this.scene.remove(person); });
             this.persons = [];
         }
 
+        // remove trees
         for (let i = (this.trees.length - 1); i >= this.config.forest.size; i--) {
             this.scene.remove(this.trees[i]);
             this.trees.splice(i, 1);
         }
 
+        // remove persons
         for (let i = (this.persons.length - 1); i >= 0; i--) {
             this.scene.remove(this.persons[i]);
             this.persons.splice(i, 1);
@@ -285,7 +296,6 @@ class Forest {
         this.clear();
         this.update();
 
-        // this.addTrees();
         this.addPersons();
     }
 }
