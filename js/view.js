@@ -138,7 +138,7 @@ class View {
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
-        this.gui.add(this.config, 'preset', this.files.reverse()).onChange((v) => {
+        this.gui.add(this.config, 'preset', this.files).onChange((v) => {
             this.gui.load.preset = v;
             window.location.reload();
         });
@@ -253,7 +253,7 @@ const getPreset = async (files) => {
         }
     };
 
-    await Promise.all(files.reverse().map(getConfig)).then((configs) => {
+    await Promise.all([...files].reverse().map(getConfig)).then((configs) => {
         configs.forEach((config) => {
             const gui = new dat.GUI({ autoPlace: false });
             gui.useLocalStorage = true;
