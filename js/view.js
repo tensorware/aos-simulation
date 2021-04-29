@@ -181,6 +181,7 @@ class View {
 
     export() {
         const zip = new JSZip();
+        const name = `${document.title}-${new Date().yyyymmddhhmm()}.zip`;
 
         // add folders
         this.stage.export(zip);
@@ -192,7 +193,7 @@ class View {
 
         // generate zip
         zip.generateAsync({ type: 'blob' }).then((data) => {
-            saveAs(data, `${document.title}-${new Date().yyyymmddhhmm()}.zip`);
+            saveAs(data, name);
         });
     }
 
