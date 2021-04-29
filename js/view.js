@@ -138,7 +138,7 @@ class View {
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
-        this.gui.add(this.config, 'preset', this.files).onChange((v) => {
+        this.gui.add(this.config, 'preset', this.files.reverse()).onChange((v) => {
             this.gui.load.preset = v;
             window.location.reload();
         });
@@ -287,7 +287,7 @@ const getConfig = async (preset) => {
 document.addEventListener('DOMContentLoaded', async () => {
     Math.seedrandom(document.title);
 
-    const files = ['demo', 'forest-01', 'forest-02', 'forest-03'];
+    const files = ['demo', 'forest-01', 'forest-02', 'forest-03', 'forest-04'];
     const preset = await getPreset(files);
     const config = await getConfig(preset);
 
