@@ -114,9 +114,12 @@ class Stage {
     }
 
     reset() {
+        const size = this.config.forest.ground;
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.fov / 2));
+        const height = (size + 2 * coverage) / (2 * Math.tan(radian(this.fov / 2)));
+
         // reset camera position
-        const height = this.config.forest.ground / (2 * Math.tan(radian(this.fov / 2)));
-        this.camera.position.set(0.0, height * 1.8, 0.0);
+        this.camera.position.set(0.0, height * 1.1, 0.0);
         this.controls.target.set(0.0, 0.0, 0.0);
         this.controls.update();
         this.update();
