@@ -40,7 +40,7 @@ class Image {
         // nearby persons
         const persons = [];
         this.forest.persons.forEach((person) => {
-            if (person) {
+            if (person && person.visible) {
                 const start = new THREE.Vector3(this.view.x, 0, this.view.z);
                 const end = new THREE.Vector3(person.position.x, 0, this.view.z);
 
@@ -55,7 +55,7 @@ class Image {
         // nearby trees
         const trees = [];
         this.forest.trees.forEach((tree) => {
-            if (tree) {
+            if (tree && tree.visible) {
                 const start = new THREE.Vector3(this.view.x, 0, this.view.z);
                 const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
