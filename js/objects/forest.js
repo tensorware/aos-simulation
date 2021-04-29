@@ -15,7 +15,7 @@ class Forest {
         this.workers = getWorkers();
         this.workersUpdate = [];
 
-        this.groundMaterial = new THREE.MeshStandardMaterial({
+        this.groundMaterial = new THREE.MeshLambertMaterial({
             color: this.config.material.color.ground,
             side: THREE.DoubleSide,
             roughness: 1.0,
@@ -42,8 +42,8 @@ class Forest {
         this.addPersons();
     }
 
-    getGround() {
-        const geometry = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
+    getGround(size) {
+        const geometry = new THREE.PlaneGeometry(size, size);
         geometry.rotateX(Math.PI / 2).translate(0, 0, 0);
         return new THREE.Mesh(geometry, this.groundMaterial);
     }
@@ -78,9 +78,22 @@ class Forest {
     }
 
     addGround() {
-        const ground = this.getGround();
-        this.grounds.push(ground);
-        this.scene.add(ground);
+        const size = this.config.forest.ground;
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+
+        // inner ground
+        const inner = this.getGround(size);
+        this.grounds.push(inner);
+        this.scene.add(inner);
+
+        // outer ground
+        const outer = this.getGround(size + 2 * coverage);
+        outer.material.transparent = true;
+        outer.material.opacity = 0.7;
+        outer.position.y = -0.05
+
+        this.grounds.push(outer);
+        this.scene.add(outer);
     }
 
     addTrees() {
@@ -161,34 +174,68 @@ class Forest {
     }
 
     update() {
+        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+        const sizeOuter = this.config.forest.ground + 2 * coverage;
+        const sizeInner = this.config.forest.ground;
+
         // update trees
         const treeMargin = 1;
+        const treePositionMin = -sizeOuter / 2 + treeMargin;
+        const treePositionMax = sizeOuter / 2 - treeMargin;
+
         this.treePositions = [];
         for (let i = 0; i <= 100000; i++) {
             this.treePositions.push({
-                x: random(-this.config.forest.ground / 2 + treeMargin, this.config.forest.ground / 2 - treeMargin),
+                x: random(treePositionMin, treePositionMax),
                 y: 0,
-                z: random(-this.config.forest.ground / 2 + treeMargin, this.config.forest.ground / 2 - treeMargin)
+                z: random(treePositionMin, treePositionMax)
             });
         }
 
-        // update grounds
+        // hide trees
+        this.trees.forEach((tree) => {
+            if (tree) {
+                const treeInsideX = tree.position.x > treePositionMin && tree.position.x < treePositionMax;
+                const treeInsideY = tree.position.z > treePositionMin && tree.position.z < treePositionMax;
+                tree.visible = treeInsideX && treeInsideY;
+            }
+        });
+
+        // update persons
         const personMargin = 2;
+        const personPositionMin = -sizeOuter / 2 + personMargin;
+        const personPositionMax = sizeOuter / 2 - personMargin;
+
         this.personPositions = [];
         for (let i = 0; i <= 100000; i++) {
             this.personPositions.push({
-                x: random(-this.config.forest.ground / 2 + personMargin, this.config.forest.ground / 2 - personMargin),
+                x: random(personPositionMin, personPositionMax),
                 y: 0,
-                z: random(-this.config.forest.ground / 2 + personMargin, this.config.forest.ground / 2 - personMargin)
+                z: random(personPositionMin, personPositionMax)
             });
         }
 
-        // update grounds
-        const planeGeometry = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
-        planeGeometry.rotateX(Math.PI / 2).translate(0, 0, 0);
-        this.grounds.forEach((ground) => {
-            ground.geometry.copy(planeGeometry);
+        // hide persons
+        this.persons.forEach((person) => {
+            if (person) {
+                const personInsideX = person.position.x > personPositionMin && person.position.x < personPositionMax;
+                const personInsideY = person.position.z > personPositionMin && person.position.z < personPositionMax;
+                person.visible = personInsideX && personInsideY;
+            }
         });
+
+        // update grounds
+        if (this.grounds.length == 2) {
+            // inner ground
+            const planeGeometryInner = new THREE.PlaneGeometry(sizeInner, sizeInner);
+            planeGeometryInner.rotateX(Math.PI / 2).translate(0, 0, 0);
+            this.grounds[0].geometry.copy(planeGeometryInner);
+
+            // outer ground
+            const planeGeometryOuter = new THREE.PlaneGeometry(sizeOuter, sizeOuter);
+            planeGeometryOuter.rotateX(Math.PI / 2).translate(0, -0.05, 0);
+            this.grounds[1].geometry.copy(planeGeometryOuter);
+        }
     }
 
     export(zip) {

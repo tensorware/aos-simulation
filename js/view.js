@@ -34,13 +34,13 @@ class View {
         const size = this.config.forest.ground / 2;
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config.drone, 'speed', 1, 20, 1).onChange(() => this.drone.update());
-        droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update());
+        droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update()).onFinishChange(() => this.forest.update());
         droneFolder.add(this.config.drone, 'eastWest', -size, size, 0.5).onChange((v) => this.drone.setEastWest(v)).listen();
         droneFolder.add(this.config.drone, 'northSouth', -size, size, 0.5).onChange((v) => this.drone.setNorthSouth(v)).listen();
 
         // camera folder
         const cameraFolder = droneFolder.addFolder('camera');
-        cameraFolder.add(this.config.drone.camera, 'view', 15, 160, 1).onChange(() => this.drone.update());
+        cameraFolder.add(this.config.drone.camera, 'view', 15, 160, 1).onChange(() => this.drone.update()).onFinishChange(() => this.forest.update());
         cameraFolder.add(this.config.drone.camera, 'images', 1, 60, 1).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'sampling', 0.5, 10.0, 0.5).onChange(() => this.drone.update());
         cameraFolder.add(this.config.drone.camera, 'resolution', 128, 1024, 1).onChange(() => this.drone.update());
@@ -67,8 +67,6 @@ class View {
         });
 
         forestFolder.add(this.config.forest, 'ground', 30, 500, 1).onFinishChange(() => {
-            this.stage.reset();
-
             this.drone.clear();
             this.drone.update();
 
