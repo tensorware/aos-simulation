@@ -286,7 +286,7 @@ const getConfig = async (preset) => {
 document.addEventListener('DOMContentLoaded', async () => {
     Math.seedrandom(document.title);
 
-    const files = ['demo', 'simu-01', 'simu-02', 'simu-03', 'simu-04', 'simu-05', 'simu-06'];
+    const files = ['demo', 'forest-01', 'forest-02', 'forest-03'];
     const preset = await getPreset(files);
     const config = await getConfig(preset);
 

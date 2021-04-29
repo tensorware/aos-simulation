@@ -16,13 +16,13 @@
         }
     },
     "forest": {
-        "size": 10,
+        "size": 100,
         "persons": 1,
-        "ground": 40,
+        "ground": 50,
         "trees": {
             "levels": 5,
             "twigScale": 0.40,
-            "homogeneity": 80,
+            "homogeneity": 90,
             "branching": {
                 "initialBranchLength": 0.50,
                 "lengthFalloffFactor": 0.85,
@@ -50,10 +50,10 @@
         "color": {
             "tree": "0x613615",
             "twig": "0x418c45",
-            "ground": "0x727272",
-            "plane": "0x7d5c5c",
-            "person": "0xfafafa",
-            "background": "0x8fbde8"
+            "ground": "0x010101",
+            "plane": "0xffffff",
+            "person": "0x660000",
+            "background": "0x87ceeb"
         }
     }
 }
