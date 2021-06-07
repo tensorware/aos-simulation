@@ -27,12 +27,16 @@ class Forest {
         });
 
         this.twigMaterial = new THREE.MeshStandardMaterial({
-            map: new THREE.TextureLoader().load('img/leaf.png'),
             color: this.config.material.color.twig,
             roughness: 1.0,
             metalness: 0.3,
             alphaTest: 0.8
         });
+
+        this.twigLeafTexture = {
+            'needle-leaf': new THREE.TextureLoader().load('img/needle-leaf.png'),
+            'broad-leaf': new THREE.TextureLoader().load(`img/broad-leaf.png`)
+        };
 
         this.update();
         this.addGround();
@@ -47,7 +51,7 @@ class Forest {
     }
 
     getTree(index) {
-        const seed = random(0, 1000, index);
+        const seed = random(0, this.config.forest.trees.homogeneity * 10, index);
 
         const config = {
             levels: this.config.forest.trees.levels,
@@ -58,7 +62,7 @@ class Forest {
 
         for (let key in config) {
             if (random(0, 100, seed) <= 50) {
-                config[key] = config[key] * (random(this.config.forest.trees.homogeneity, 100, seed) / 100);
+                config[key] = config[key] * random(this.config.forest.trees.homogeneity, 100, seed) / 100;
             }
         }
 
@@ -129,10 +133,18 @@ class Forest {
                     twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
                     twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
+                    // tree twigs material
+                    const twigMaterial = new THREE.MeshStandardMaterial().copy(this.twigMaterial);
+                    let twigLeafType = this.config.forest.trees.type;
+                    if (twigLeafType == 'mixed-leaf') {
+                        twigLeafType = ['needle-leaf', 'broad-leaf'][random(0, 1, tree.index)];
+                    }
+                    twigMaterial.map = this.twigLeafTexture[twigLeafType];
+
                     // tree trunk and twigs
                     const treeGroup = new THREE.Group();
                     treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
-                    treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterial));
+                    treeGroup.add(new THREE.Mesh(twigGeometry, twigMaterial));
 
                     // tree position
                     const scale = 3;
@@ -140,6 +152,7 @@ class Forest {
                     treeGroup.position.x = this.treePositions[tree.index].x;
                     treeGroup.position.y = this.treePositions[tree.index].y;
                     treeGroup.position.z = this.treePositions[tree.index].z;
+                    treeGroup.rotateY(2 * Math.PI * random(0, 100, tree.index) / 100);
 
                     if (tree.index < this.trees.length) {
                         // update tree
@@ -192,9 +205,9 @@ class Forest {
         this.treePositions = [];
         for (let i = 0; i <= 100000; i++) {
             this.treePositions.push({
-                x: random(treePositionMin, treePositionMax),
+                x: random(treePositionMin, treePositionMax, -i),
                 y: 0,
-                z: random(treePositionMin, treePositionMax)
+                z: random(treePositionMin, treePositionMax, i)
             });
         }
 
