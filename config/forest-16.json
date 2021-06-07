@@ -16,34 +16,34 @@
         }
     },
     "forest": {
-        "size": 900,
-        "persons": 0,
-        "ground": 70,
+        "size": 1800,
+        "persons": 1,
+        "ground": 35,
         "trees": {
-            "levels": 5,
+            "levels": 6,
             "twigScale": 0.40,
-            "homogeneity": 90,
-            "type": "broad-leaf",
+            "homogeneity": 95,
+            "type": "needle-leaf",
             "branching": {
-                "initialBranchLength": 0.50,
-                "lengthFalloffFactor": 0.85,
-                "lengthFalloffPower": 0.85,
+                "initialBranchLength": 0.70,
+                "lengthFalloffFactor": 0.65,
+                "lengthFalloffPower": 0.75,
                 "clumpMax": 0.45,
                 "clumpMin": 0.40,
                 "branchFactor": 2.45,
-                "dropAmount": -0.10,
-                "growAmount": 0.25,
+                "dropAmount": 0.00,
+                "growAmount": 0.40,
                 "sweepAmount": 0.00
             },
             "trunk": {
                 "maxRadius": 0.10,
-                "climbRate": 0.60,
-                "trunkKink": 0.10,
-                "treeSteps": 8.00,
-                "taperRate": 0.95,
+                "climbRate": 0.55,
+                "trunkKink": 0.05,
+                "treeSteps": 10.00,
+                "taperRate": 0.80,
                 "radiusFalloffRate": 0.70,
-                "twistRate": 3.00,
-                "trunkLength": 2.50
+                "twistRate": 7.00,
+                "trunkLength": 1.0
             }
         }
     },

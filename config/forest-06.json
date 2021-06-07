@@ -23,6 +23,7 @@
             "levels": 5,
             "twigScale": 0.40,
             "homogeneity": 90,
+            "type": "broad-leaf",
             "branching": {
                 "initialBranchLength": 0.50,
                 "lengthFalloffFactor": 0.85,
@@ -49,7 +50,7 @@
     "material": {
         "color": {
             "tree": "0x613615",
-            "twig": "0x418c45",
+            "twig": "0x0c500e",
             "ground": "0x010101",
             "plane": "0xffffff",
             "person": "0x660000",
