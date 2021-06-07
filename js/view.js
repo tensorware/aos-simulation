@@ -84,7 +84,8 @@ class View {
         const treeFolders = [
             treeFolder.add(this.config.forest.trees, 'levels', 0, 10, 1),
             treeFolder.add(this.config.forest.trees, 'twigScale', 0.0, 1.0, 0.05),
-            treeFolder.add(this.config.forest.trees, 'homogeneity', 50, 100, 1)
+            treeFolder.add(this.config.forest.trees, 'homogeneity', 50, 100, 1),
+            treeFolder.add(this.config.forest.trees, 'type', ['needle-leaf', 'broad-leaf', 'mixed-leaf'])
         ];
 
         // branching folder
@@ -105,12 +106,12 @@ class View {
         const trunkFolder = treeFolder.addFolder('trunk');
         const trunkFolders = [
             trunkFolder.add(this.config.forest.trees.trunk, 'maxRadius', 0.05, 0.5, 0.05),
-            trunkFolder.add(this.config.forest.trees.trunk, 'climbRate', 0.05, 1.0, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'climbRate', 0.05, 2.0, 0.05),
             trunkFolder.add(this.config.forest.trees.trunk, 'trunkKink', 0.0, 0.5, 0.05),
             trunkFolder.add(this.config.forest.trees.trunk, 'treeSteps', 0.0, 20.0, 0.05),
             trunkFolder.add(this.config.forest.trees.trunk, 'taperRate', 0.7, 1.0, 0.05),
-            trunkFolder.add(this.config.forest.trees.trunk, 'radiusFalloffRate', 0.5, 0.8, 0.05),
-            trunkFolder.add(this.config.forest.trees.trunk, 'twistRate', 0.0, 10.0, 1),
+            trunkFolder.add(this.config.forest.trees.trunk, 'radiusFalloffRate', 0.5, 0.9, 0.05),
+            trunkFolder.add(this.config.forest.trees.trunk, 'twistRate', 0.0, 20.0, 1),
             trunkFolder.add(this.config.forest.trees.trunk, 'trunkLength', 0.1, 5.0, 0.05)
         ];
 
@@ -287,7 +288,21 @@ const getConfig = async (preset) => {
 document.addEventListener('DOMContentLoaded', async () => {
     Math.seedrandom(document.title);
 
-    const files = ['demo', 'forest-01', 'forest-02', 'forest-03', 'forest-04', 'forest-05', 'forest-06'];
+    const files = [
+        'demo',
+        'forest-01',
+        'forest-02',
+        'forest-03',
+        'forest-04',
+        'forest-05',
+        'forest-06',
+        'forest-11',
+        'forest-12',
+        'forest-13',
+        'forest-14',
+        'forest-15',
+        'forest-16'
+    ];
     const preset = await getPreset(files);
     const config = await getConfig(preset);
 
