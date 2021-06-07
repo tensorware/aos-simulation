@@ -182,7 +182,7 @@ function interpolate(v0, v1, t) {
 
 function random(min, max, seed) {
     const rng = seed === void (0) ? Math.random : new Math.seedrandom(seed);
-    return Math.floor(rng() * (max - min) + min);
+    return Math.round(rng() * (max - min) + min);
 }
 
 function radian(degree) {
