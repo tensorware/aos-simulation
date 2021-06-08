@@ -51,7 +51,7 @@ class Forest {
     }
 
     getTree(index) {
-        const seed = random(0, this.config.forest.trees.homogeneity * 10, index);
+        const seed = randomInt(0, this.config.forest.trees.homogeneity * 100, index);
 
         const config = {
             levels: this.config.forest.trees.levels,
@@ -61,8 +61,8 @@ class Forest {
         };
 
         for (let key in config) {
-            if (random(0, 100, seed) <= 50) {
-                config[key] = config[key] * random(this.config.forest.trees.homogeneity, 100, seed) / 100;
+            if (randomFloat(0.0, 1.0, seed) < 0.5) {
+                config[key] = config[key] * randomFloat(this.config.forest.trees.homogeneity / 100, 1.0, seed);
             }
         }
 
@@ -137,7 +137,7 @@ class Forest {
                     const twigMaterial = new THREE.MeshStandardMaterial().copy(this.twigMaterial);
                     let twigLeafType = this.config.forest.trees.type;
                     if (twigLeafType == 'mixed-leaf') {
-                        twigLeafType = ['needle-leaf', 'broad-leaf'][random(0, 1, tree.index)];
+                        twigLeafType = ['needle-leaf', 'broad-leaf'][randomInt(0, 1, tree.index)];
                     }
                     twigMaterial.map = this.twigLeafTexture[twigLeafType];
 
@@ -152,7 +152,7 @@ class Forest {
                     treeGroup.position.x = this.treePositions[tree.index].x;
                     treeGroup.position.y = this.treePositions[tree.index].y;
                     treeGroup.position.z = this.treePositions[tree.index].z;
-                    treeGroup.rotateY(2 * Math.PI * random(0, 100, tree.index) / 100);
+                    treeGroup.rotateY(2 * Math.PI * randomFloat(0.0, 1.0, tree.index));
 
                     if (tree.index < this.trees.length) {
                         // update tree
@@ -202,20 +202,40 @@ class Forest {
         const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
         const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
 
+        // divide ground into grids
+        const gridCount = Math.ceil(Math.sqrt(this.config.forest.size));
+        const gridSize = sizeOuter / gridCount - 2 * treeMargin;
+
+        // calculate tree positions
         this.treePositions = [];
-        for (let i = 0; i <= 100000; i++) {
-            this.treePositions.push({
-                x: random(treePositionMin, treePositionMax, -i),
-                y: 0,
-                z: random(treePositionMin, treePositionMax, i)
-            });
+        for (let k = 0; k <= 2; k++) {
+            const treePositions = [];
+            for (let i = 0; i < gridCount - 1; i++) {
+                for (let j = 0; j < gridCount - 1; j++) {
+                    // calculate min and max values within grid
+                    const gridPositionMinX = treePositionMin + j * gridSize;
+                    const gridPositionMaxX = treePositionMin + (j + 1) * gridSize;
+                    const gridPositionMinZ = treePositionMin + i * gridSize;
+                    const gridPositionMaxZ = treePositionMin + (i + 1) * gridSize;
+
+                    // apply random position within grid
+                    treePositions.push({
+                        x: randomFloat(gridPositionMinX, gridPositionMaxX),
+                        y: 0,
+                        z: randomFloat(gridPositionMinZ, gridPositionMaxZ)
+                    });
+                }
+            }
+
+            // shuffle grid positions and append to existing
+            this.treePositions = this.treePositions.concat(shuffle(treePositions, k));
         }
 
         // hide trees
         this.trees.forEach((tree) => {
             if (tree) {
-                const treeInsideX = tree.position.x > treePositionMin && tree.position.x < treePositionMax;
-                const treeInsideY = tree.position.z > treePositionMin && tree.position.z < treePositionMax;
+                const treeInsideX = tree.position.x >= treePositionMin && tree.position.x <= treePositionMax;
+                const treeInsideY = tree.position.z >= treePositionMin && tree.position.z <= treePositionMax;
                 tree.visible = treeInsideX && treeInsideY;
             }
         });
@@ -225,12 +245,13 @@ class Forest {
         const personPositionMin = -sizeInner / 2 + personMargin;
         const personPositionMax = sizeInner / 2 - personMargin;
 
+        // calculate person positions
         this.personPositions = [];
-        for (let i = 0; i <= 100000; i++) {
+        for (let i = 0; i <= 1000; i++) {
             this.personPositions.push({
-                x: random(personPositionMin, personPositionMax),
+                x: randomFloat(personPositionMin, personPositionMax),
                 y: 0,
-                z: random(personPositionMin, personPositionMax)
+                z: randomFloat(personPositionMin, personPositionMax)
             });
         }
 
