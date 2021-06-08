@@ -180,9 +180,23 @@ function interpolate(v0, v1, t) {
     return v0 * (1 - t) + v1 * t;
 }
 
-function random(min, max, seed) {
-    const rng = seed === void (0) ? Math.random : new Math.seedrandom(seed);
-    return Math.round(rng() * (max - min) + min);
+function randomGenerator(seed) {
+    return seed === void (0) ? Math.random : new Math.seedrandom(seed);
+}
+
+function randomFloat(min, max, seed) {
+    const rng = randomGenerator(seed);
+    return rng() * (max - min) + min;
+}
+
+function randomInt(min, max, seed) {
+    const rng = randomGenerator(seed);
+    return Math.floor(rng() * (1 + max - min) + min);
+}
+
+function shuffle(array, seed) {
+    const rng = randomGenerator(seed);
+    return array.sort(() => rng() - 0.5);
 }
 
 function radian(degree) {
