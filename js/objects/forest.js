@@ -203,15 +203,15 @@ class Forest {
         const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
 
         // divide ground into grids
-        const gridCount = Math.ceil(Math.sqrt(this.config.forest.size));
-        const gridSize = sizeOuter / gridCount - 2 * treeMargin;
+        const gridCount = Math.floor(Math.sqrt(this.config.forest.size));
+        const gridSize = 2 * treePositionMax / gridCount;
 
         // calculate tree positions
         this.treePositions = [];
         for (let k = 0; k <= 2; k++) {
             const treePositions = [];
-            for (let i = 0; i < gridCount - 1; i++) {
-                for (let j = 0; j < gridCount - 1; j++) {
+            for (let i = 0; i < gridCount; i++) {
+                for (let j = 0; j < gridCount; j++) {
                     // calculate min and max values within grid
                     const gridPositionMinX = treePositionMin + j * gridSize;
                     const gridPositionMaxX = treePositionMin + (j + 1) * gridSize;
