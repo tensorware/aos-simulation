@@ -123,5 +123,6 @@ class Stage {
         this.controls.target.set(0.0, 0.0, 0.0);
         this.controls.update();
         this.update();
+        this.render();
     }
 }
