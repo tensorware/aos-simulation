@@ -23,7 +23,7 @@ class Stage {
             this.scene.add(this.camera);
 
             // renderer
-            this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
+            this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
             this.renderer.setPixelRatio(window.devicePixelRatio);
 
             // controls
