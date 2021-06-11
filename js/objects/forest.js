@@ -30,7 +30,7 @@ class Forest {
             color: this.config.material.color.twig,
             roughness: 1.0,
             metalness: 0.3,
-            alphaTest: 0.2
+            alphaTest: 0.1
         });
 
         this.twigLeafTexture = {
