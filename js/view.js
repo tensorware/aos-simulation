@@ -296,18 +296,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         'forest-04',
         'forest-05',
         'forest-06',
-        'forest-11',
         'forest-12',
         'forest-13',
         'forest-14',
-        'forest-15',
-        'forest-16',
         'forest-21',
         'forest-22',
         'forest-23',
-        'forest-24',
-        'forest-25',
-        'forest-26'
+        'forest-31',
+        'forest-32',
+        'forest-33'
     ];
     const preset = await getPreset(files);
     const config = await getConfig(preset);
