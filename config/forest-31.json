@@ -16,12 +16,12 @@
         }
     },
     "forest": {
-        "size": 300,
+        "size": 450,
         "persons": 0,
         "ground": 70,
         "trees": {
             "levels": 6,
-            "twigScale": 0.40,
+            "twigScale": 0.20,
             "homogeneity": 95,
             "type": "needle-leaf",
             "branching": {
@@ -42,15 +42,15 @@
                 "treeSteps": 10.00,
                 "taperRate": 0.80,
                 "radiusFalloffRate": 0.70,
-                "twistRate": 7.00,
-                "trunkLength": 1.0
+                "twistRate": 8.00,
+                "trunkLength": 1.00
             }
         }
     },
     "material": {
         "color": {
             "tree": "0x613615",
-            "twig": "0x0c500e",
+            "twig": "0x557755",
             "ground": "0x010101",
             "plane": "0xffffff",
             "person": "0x660000",
