@@ -286,8 +286,11 @@ const getConfig = async (preset) => {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // make Math.random() predictable globally
     Math.seedrandom(document.title);
 
+    // define preset files
     const files = [
         'demo',
         'forest-01',
@@ -304,10 +307,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         'forest-23',
         'forest-31',
         'forest-32',
-        'forest-33'
+        'forest-33',
+        'forest-41',
+        'forest-42',
+        'forest-43'
     ];
+
+    // load preset and config
     const preset = await getPreset(files);
     const config = await getConfig(preset);
 
+    // init view
     new View(document.querySelector('#top'), config, files);
 });
