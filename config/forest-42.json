@@ -5,8 +5,8 @@
         "eastWest": 0.0,
         "northSouth": 0.0,
         "camera": {
-            "view": 50,
-            "images": 30,
+            "view": 90,
+            "images": 0,
             "sampling": 1,
             "resolution": 512,
             "type": "monochrome"
@@ -16,19 +16,19 @@
         }
     },
     "forest": {
-        "size": 100,
+        "size": 525,
         "persons": 0,
         "ground": 70,
         "trees": {
             "levels": 6,
             "twigScale": 0.20,
             "homogeneity": 95,
-            "type": "needle-leaf",
+            "type": "broad-leaf",
             "branching": {
                 "initialBranchLength": 0.70,
                 "lengthFalloffFactor": 0.65,
                 "lengthFalloffPower": 0.75,
-                "clumpMax": 0.45,
+                "clumpMax": 0.40,
                 "clumpMin": 0.40,
                 "branchFactor": 2.45,
                 "dropAmount": 0.00,
@@ -37,13 +37,13 @@
             },
             "trunk": {
                 "maxRadius": 0.10,
-                "climbRate": 0.55,
-                "trunkKink": 0.05,
+                "climbRate": 0.60,
+                "trunkKink": 0.10,
                 "treeSteps": 10.00,
                 "taperRate": 0.80,
                 "radiusFalloffRate": 0.70,
-                "twistRate": 8.00,
-                "trunkLength": 1.00
+                "twistRate": 6.00,
+                "trunkLength": 0.70
             }
         }
     },
