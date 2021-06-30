@@ -6,7 +6,7 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        new THREE.STLLoader().load('stl/drone.stl', ((droneGeometry) => {
+        new THREE.STLLoader().load('models/drone.stl', ((droneGeometry) => {
             this.flying = false;
             this.goal = { x: 0, y: 0 };
 
@@ -243,6 +243,9 @@ class Drone {
                 this.camera.update();
             }
         }
+
+        // render
+        this.stage.render();
     }
 
     export(zip) {
