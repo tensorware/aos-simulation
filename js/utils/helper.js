@@ -227,8 +227,14 @@ const radian = (degree) => {
     return degree * Math.PI / 180;
 }
 
-const log = (level) => {
-    const args = Array.from(arguments);
+const log = (...arguments) => {
+    let level = 'log';
+    let args = Array.from(arguments);
+    if (args.length > 0 && getType(args[0]) === 'string') {
+        if (['debug', 'info', 'warn', 'error'].includes(args[0])) {
+            level = args.shift();
+        }
+    }
     switch (level) {
         case 'debug':
             console.debug.apply(console, args);
