@@ -96,7 +96,7 @@ class Image {
 
                         // filter obstacles by angle and distance
                         const angle = treeAngle.angleTo(personAngle);
-                        if (angle < Math.PI / 4 && (treeDistance - 3) < personDistance) {
+                        if (angle < rad(45) && (treeDistance - 3) < personDistance) {
                             // append boxes
                             this.camera.boxes.push(treeBox);
 

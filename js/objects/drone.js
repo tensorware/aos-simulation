@@ -11,7 +11,7 @@ class Drone {
                 this.flying = false;
                 this.goal = { x: 0, y: 0 };
 
-                droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
+                droneGeometry.rotateX(rad(-90)).rotateY(rad(-90)).translate(0, 0, 0);
                 const droneMaterial = new THREE.MeshStandardMaterial({
                     color: 0x666666,
                     roughness: 0.8,
@@ -69,7 +69,7 @@ class Drone {
         // angles from sky to ground
         const a = this.config.drone.camera.view / 2;
         const b = 90 - a;
-        const c = y / Math.sin(radian(b));
+        const c = y / Math.sin(rad(b));
 
         // field of view "radius" on ground
         const r = Math.sqrt(c ** 2 - y ** 2);
@@ -257,7 +257,7 @@ class Drone {
         // export drone
         const speed = this.config.drone.speed;
         const height = this.config.drone.height;
-        const coverage = 2 * height * Math.tan(radian(this.config.drone.camera.view / 2));
+        const coverage = 2 * height * Math.tan(rad(this.config.drone.camera.view / 2));
         drone.file('drone.json', JSON.stringify({ speed: speed, height: height, coverage: coverage }, null, 4));
 
         // export camera

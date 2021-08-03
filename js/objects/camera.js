@@ -32,11 +32,11 @@ class Camera {
         });
 
         const rectangleGeometry = new THREE.PlaneGeometry();
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
+        rectangleGeometry.rotateX(rad(-90)).translate(0, 0, 0);
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
         const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(-Math.PI / 2).translate(0, 0, 0);
+        textGeometry.rotateX(rad(-90)).translate(0, 0, 0);
         const text = new THREE.Mesh(textGeometry, this.textMaterial);
 
         this.plane = {
@@ -152,7 +152,7 @@ class Camera {
         const view = this.drone.getView();
 
         const distance = this.config.drone.speed * this.config.drone.cpu.speed;
-        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const overlap = coverage / distance;
         const time = coverage / this.config.drone.speed;
 
@@ -173,14 +173,14 @@ class Camera {
 
         // update plane
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(-Math.PI / 2).translate(view.x, 0.05, view.z);
+        rectangleGeometry.rotateX(rad(-90)).translate(view.x, 0.05, view.z);
         this.plane.rectangle.geometry.copy(rectangleGeometry);
         this.plane.border.update();
 
         // update text
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
         const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.10 });
-        textGeometry.rotateX(-Math.PI / 2);
+        textGeometry.rotateX(rad(-90));
         this.plane.text.geometry.copy(textGeometry);
 
         // update text position

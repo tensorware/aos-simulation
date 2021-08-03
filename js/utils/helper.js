@@ -213,8 +213,8 @@ const shuffle = (array, seed) => {
     return array.sort(() => rng() - 0.5);
 };
 
-const radian = (degree) => {
-    return degree * Math.PI / 180;
+const rad = (deg) => {
+    return deg * Math.PI / 180;
 };
 
 const clone = (obj) => {
