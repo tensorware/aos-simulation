@@ -34,10 +34,12 @@ class Camera {
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(rad(-90)).translate(0, 0, 0);
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
+        rectangle.receiveShadow = true;
 
         const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
         textGeometry.rotateX(rad(-90)).translate(0, 0, 0);
         const text = new THREE.Mesh(textGeometry, this.textMaterial);
+        text.receiveShadow = true;
 
         this.plane = {
             rectangle: rectangle,
@@ -173,20 +175,20 @@ class Camera {
 
         // update plane
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(rad(-90)).translate(view.x, 0.05, view.z);
+        rectangleGeometry.rotateX(rad(-90)).translate(view.x, 0.01, view.z);
         this.plane.rectangle.geometry.copy(rectangleGeometry);
         this.plane.border.update();
 
         // update text
         const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
-        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.02 });
+        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
         textGeometry.rotateX(rad(-90));
         this.plane.text.geometry.copy(textGeometry);
 
         // update text position
         const textSize = new THREE.Vector3();
         new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
-        textGeometry.translate(view.x - textSize.x / 2, 0.04, view.z + textSize.z / 2);
+        textGeometry.translate(view.x - textSize.x / 2, 0.005, view.z + textSize.z / 2);
         this.plane.text.geometry.copy(textGeometry);
 
         // update camera position

@@ -9,11 +9,15 @@ class Stage {
                 this.font = font;
                 this.scene = new THREE.Scene();
 
-                // light
-                this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                // directional light
                 this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                this.directionalLight.castShadow = true;
                 this.directionalLight.position.set(100, 100, 100);
                 this.directionalLight.layers.set(1);
+
+                // ambient light
+                this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                this.ambientLight.castShadow = true;
 
                 // camera 
                 this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
@@ -121,7 +125,10 @@ class Stage {
 
         // reset camera position
         this.camera.position.set(0.0, height * 1.1, 0.0);
-        this.camera.position.set(0.0, 10.0, 10.0); // TEMP
+
+        // TEMP
+        this.camera.position.set(0.0, 20.0, 20.0);
+
         this.controls.target.set(0.0, 0.0, 0.0);
         this.controls.update();
         this.update();
