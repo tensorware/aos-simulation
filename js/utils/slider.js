@@ -147,4 +147,4 @@ class Slider {
         this.clear();
         this.update();
     }
-}
+};

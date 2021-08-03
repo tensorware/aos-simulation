@@ -14,7 +14,7 @@ const getTrees = (configs, chunks) => {
     });
 
     self.postMessage(trees);
-}
+};
 
 self.onmessage = (e) => {
     const method = e.data.method;
@@ -24,4 +24,4 @@ self.onmessage = (e) => {
     if (method === 'getTrees') {
         getTrees(params.configs || [], params.chunks);
     }
-}
+};

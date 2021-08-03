@@ -1,12 +1,12 @@
 const createFloatAttribute = (array, itemSize) => {
     const typedArray = new Float32Array(flattenArray(array));
     return new THREE.BufferAttribute(typedArray, itemSize);
-}
+};
 
 const createIntAttribute = (array, itemSize) => {
     const typedArray = new Uint16Array(flattenArray(array));
     return new THREE.BufferAttribute(typedArray, itemSize);
-}
+};
 
 const normalizeAttribute = (attribute) => {
     const v = new THREE.Vector3();
@@ -16,7 +16,14 @@ const normalizeAttribute = (attribute) => {
         attribute.setXYZ(i, v.x, v.y, v.z);
     }
     return attribute;
-}
+};
+
+const rayCast = (from, to, intersects) => {
+    const rayVector = new THREE.Vector3();
+    rayVector.subVectors(to, from);
+    const ray = new THREE.Raycaster(from, rayVector.normalize());
+    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
+};
 
 const flattenArray = (input) => {
     const result = [];
@@ -26,7 +33,7 @@ const flattenArray = (input) => {
         }
     }
     return result;
-}
+};
 
 const splitArray = (items, chunks) => {
     const result = [];
@@ -42,33 +49,27 @@ const splitArray = (items, chunks) => {
         }
     }
     return result;
-}
+};
 
 const doubleClick = (callback) => {
-    let click = false;
-    let which = -1;
-    let state = 0;
-
-    const reset = () => {
+    let states = ['pointerdown', 'pointerup', 'pointerdown', 'pointerup'];
+    let click, which, state;
+    let reset = () => {
         click = false;
         which = -1;
         state = 0;
     };
-
-    let states = ['pointerdown', 'pointerup', 'pointerdown', 'pointerup'];
-
+    reset()
     return (e) => {
         if (state === 0) {
             which = e.which;
         }
-
         if (e.type === states[state] && which === e.which) {
             state = state < 3 ? state + 1 : 0;
         }
         else {
             reset();
         }
-
         if (states[state] === 'pointerup') {
             if (!click) {
                 click = true;
@@ -80,7 +81,7 @@ const doubleClick = (callback) => {
             }
         }
     }
-}
+};
 
 const getWorkers = (size) => {
     const workers = [];
@@ -88,7 +89,7 @@ const getWorkers = (size) => {
         workers.push(new Worker('js/utils/worker.js'));
     }
     return workers;
-}
+};
 
 const getCenter = (mesh) => {
     const center = new THREE.Vector3();
@@ -96,7 +97,7 @@ const getCenter = (mesh) => {
     mesh.geometry.boundingBox.getCenter(center);
     mesh.localToWorld(center);
     return center;
-}
+};
 
 const getPoints = (mesh) => {
     const points = [];
@@ -108,17 +109,27 @@ const getPoints = (mesh) => {
         points.push(new THREE.Vector3().copy(vector));
     }
     return points;
-}
+};
 
 const getLocalStorageKey = (key) => {
     return `${document.location.href}.${key}`;
-}
+};
 
 const getHash = (key) => {
     const query = new URL(window.location.href.replace(/#/g, '?'));
     const params = Object.fromEntries(query.searchParams);
     return key ? params[key] : params;
-}
+};
+
+const getType = (obj) => {
+    if (typeof obj == 'undefined') return 'undefined';
+    if (typeof obj == 'object') return 'object';
+    if (typeof obj == 'string') return 'string';
+    if (Array.isArray(obj)) return 'array';
+    if (!isNaN(obj - 0)) return 'number';
+    if (obj == null) return 'null';
+    return 'other';
+};
 
 const setProperty = (object, path, value) => {
     if (path.length === 1) {
@@ -136,25 +147,11 @@ const setProperty = (object, path, value) => {
             return setProperty(object[path[0]], path.slice(1), value);
         }
     }
-}
-
-const clone = (obj) => {
-    return JSON.parse(JSON.stringify(obj));
-}
-
-const getType = (obj) => {
-    if (typeof obj == 'undefined') return 'undefined';
-    if (typeof obj == 'object') return 'object';
-    if (typeof obj == 'string') return 'string';
-    if (Array.isArray(obj)) return 'array';
-    if (!isNaN(obj - 0)) return 'number';
-    if (obj == null) return 'null';
-    return 'other';
-}
+};
 
 const hexColor = (color) => {
     return '#' + color.toString(16).padStart(6, '0');
-}
+};
 
 const colorMatch = (c1, c2, range) => {
     let match = true;
@@ -162,12 +159,12 @@ const colorMatch = (c1, c2, range) => {
         match = match && c1[k] <= (c2[k] + range) && c1[k] >= (c2[k] - range);
     });
     return match;
-}
+};
 
 const canvasImage = (canvas) => {
     const dataUrl = canvas.toDataURL('image/png');
     return dataUrl.substr(dataUrl.indexOf(',') + 1);
-}
+};
 
 const cloneCanvas = (canvas) => {
     const cloned = document.createElement('canvas');
@@ -176,7 +173,7 @@ const cloneCanvas = (canvas) => {
     const ctx = cloned.getContext('2d');
     ctx.drawImage(canvas, 0, 0);
     return cloned;
-}
+};
 
 const grayscaleCanvas = (canvas) => {
     const cloned = cloneCanvas(canvas);
@@ -191,41 +188,38 @@ const grayscaleCanvas = (canvas) => {
     }
     ctx.putImageData(data, 0, 0);
     return cloned;
-}
-
-const rayCast = (from, to, intersects) => {
-    const rayVector = new THREE.Vector3();
-    rayVector.subVectors(to, from);
-    const ray = new THREE.Raycaster(from, rayVector.normalize());
-    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
-}
+};
 
 const interpolate = (v0, v1, t) => {
     return v0 * (1 - t) + v1 * t;
-}
+};
 
 const randomGenerator = (seed) => {
     return seed === void (0) ? Math.random : new Math.seedrandom(seed);
-}
+};
 
 const randomFloat = (min, max, seed) => {
     const rng = randomGenerator(seed);
     return rng() * (max - min) + min;
-}
+};
 
 const randomInt = (min, max, seed) => {
     const rng = randomGenerator(seed);
     return Math.floor(rng() * (1 + max - min) + min);
-}
+};
 
 const shuffle = (array, seed) => {
     const rng = randomGenerator(seed);
     return array.sort(() => rng() - 0.5);
-}
+};
 
 const radian = (degree) => {
     return degree * Math.PI / 180;
-}
+};
+
+const clone = (obj) => {
+    return JSON.parse(JSON.stringify(obj));
+};
 
 const log = (...arguments) => {
     let level = 'log';
@@ -251,13 +245,13 @@ const log = (...arguments) => {
         default:
             console.log.apply(console, args);
     }
-}
+};
 
-Date.prototype.yyyymmddhhmm = () => {
+Date.prototype.yyyymmddhhmm = function () {
     const yyyy = this.getFullYear();
     const mm = this.getMonth() < 9 ? '0' + (this.getMonth() + 1) : (this.getMonth() + 1);
     const dd = this.getDate() < 10 ? '0' + this.getDate() : this.getDate();
     const hh = this.getHours() < 10 ? '0' + this.getHours() : this.getHours();
     const min = this.getMinutes() < 10 ? '0' + this.getMinutes() : this.getMinutes();
     return yyyy + '-' + mm + '-' + dd + '-' + hh + '-' + min;
-}
+};

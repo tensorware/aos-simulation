@@ -78,7 +78,7 @@ const loadPreset = async (configs) => {
     });
 
     return JSON.parse(localStorage.getItem(getLocalStorageKey('gui'))).preset;
-}
+};
 
 const getPreset = async (configs) => {
 
@@ -96,7 +96,7 @@ const getPreset = async (configs) => {
 
     // load preset from json
     return loadPreset(configs);
-}
+};
 
 const getConfig = async (preset) => {
     return new Promise((resolve) => {
@@ -121,7 +121,7 @@ const getConfig = async (preset) => {
             return resolve(await getConfig('demo'));
         });
     });
-}
+};
 
 const setConfig = async (config, objects) => {
     for (const key in objects) {
@@ -130,4 +130,4 @@ const setConfig = async (config, objects) => {
             setProperty(config, key.split('.'), value);
         }
     }
-}
+};
