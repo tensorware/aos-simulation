@@ -139,7 +139,10 @@ class View {
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        personsFolder.add(this.config.forest.persons, 'count', 1, 20, 1).onChange(() => { });
+        personsFolder.add(this.config.forest.persons, 'count', 1, 20, 1).onChange(() => { /* TODO */ });
+        Object.keys(this.config.forest.persons.activities).forEach((k) => {
+            personsFolder.add(this.config.forest.persons.activities, k).onChange(() => { /* TODO */ });
+        })
 
         // materials folder
         const materialsFolder = this.gui.addFolder('material');

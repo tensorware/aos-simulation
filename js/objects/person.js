@@ -94,7 +94,7 @@ class Person {
             this.animate();
 
             let currentAction = this.baseActions['idle'].action;
-            let newAction = this.baseActions['walk'].action;
+            let newAction = this.baseActions[this.getAction()].action;
 
             this.prepareCrossFade(currentAction, newAction, 0.35)
 
@@ -103,6 +103,34 @@ class Person {
 
     addPerson() {
         this.scene.add(this.person);
+    }
+
+    getAction() {
+        const activityMapping = {
+            'lying': 'idle',
+            'sitting': 'idle',
+            'standing': 'idle',
+            'waving': 'idle',
+            'injured': 'idle',
+            'walking': 'walk',
+            'running': 'run'
+        };
+
+        // get active activities
+        let activeActivities = [];
+        let activeSeed = this.config.forest.persons.count;
+        Object.entries(this.config.forest.persons.activities).forEach(([activity, active]) => {
+            if (active) {
+                activeSeed += activity;
+                activeActivities.push(activityMapping[activity]);
+            }
+        });
+
+        // choose random activity from active activities
+        const randomIndex = randomInt(0, activeActivities.length - 1, activeSeed);
+        const randomActivity = activeActivities[randomIndex];
+
+        return randomActivity || 'idle';
     }
 
     activateAction(action) {
@@ -129,7 +157,7 @@ class Person {
             this.currentBaseAction = clip.name;
         }
         else {
-            this.currentBaseAction = 'None';
+            this.currentBaseAction = 'idle';
         }
     }
 
