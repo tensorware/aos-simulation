@@ -14,7 +14,7 @@ class Person {
         const heightSegments = height * segments;
 
         const planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
-        planeGeometry.rotateX(-Math.PI / 2).translate(0, 0.10, 0);
+        planeGeometry.rotateX(rad(-90)).translate(0, 0.10, 0);
         const planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.material.color.person });
 
         const wireGeometry = new THREE.WireframeGeometry(planeGeometry);
@@ -24,9 +24,10 @@ class Person {
         this.mesh = new THREE.Mesh(planeGeometry, planeMaterial);
         this.mesh.add(this.wire);
 
-
         // ###############################################
 
+        this.position = new THREE.Vector3();
+        this.direction = 90;
 
         this.currentBaseAction = 'idle';
 
@@ -46,59 +47,55 @@ class Person {
 
         this.clock = new THREE.Clock();
 
-        new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
-            this.person = gltf.scene;
-            this.person.traverse((object) => {
-                if (object.isMesh) {
-                    object.castShadow = true;
-                }
-            });
-
-            this.skeleton = new THREE.SkeletonHelper(this.person);
-            this.skeleton.visible = false;
-            this.scene.add(this.skeleton);
-
-            this.animations = gltf.animations;
-            this.mixer = new THREE.AnimationMixer(this.person);
-
-            this.numAnimations = this.animations.length;
-            for (let i = 0; i !== this.numAnimations; ++i) {
-
-                let clip = this.animations[i];
-
-                const name = clip.name;
-
-                if (this.baseActions[name]) {
-                    const action = this.mixer.clipAction(clip);
-                    this.activateAction(action);
-                    this.baseActions[name].action = action;
-                    this.allActions.push(action);
-                }
-                else if (this.additiveActions[name]) {
-                    THREE.AnimationUtils.makeClipAdditive(clip);
-                    if (clip.name.endsWith('_pose')) {
-                        clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30);
+        this.loaded = new Promise(function (resolve) {
+            new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
+                this.person = gltf.scene;
+                this.person.traverse((obj) => {
+                    if (obj.isMesh) {
+                        obj.castShadow = true;
                     }
+                });
 
-                    const action = this.mixer.clipAction(clip);
-                    this.activateAction(action);
-                    this.additiveActions[name].action = action;
-                    this.allActions.push(action);
+                this.animations = gltf.animations;
+                this.mixer = new THREE.AnimationMixer(this.person);
+
+                this.numAnimations = this.animations.length;
+                for (let i = 0; i !== this.numAnimations; ++i) {
+                    let clip = this.animations[i];
+
+                    const name = clip.name;
+                    if (this.baseActions[name]) {
+                        const action = this.mixer.clipAction(clip);
+                        this.activateAction(action);
+                        this.baseActions[name].action = action;
+                        this.allActions.push(action);
+                    }
+                    else if (this.additiveActions[name]) {
+                        THREE.AnimationUtils.makeClipAdditive(clip);
+                        if (clip.name.endsWith('_pose')) {
+                            clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30);
+                        }
+
+                        const action = this.mixer.clipAction(clip);
+                        this.activateAction(action);
+                        this.additiveActions[name].action = action;
+                        this.allActions.push(action);
+                    }
                 }
-            }
 
-            this.addPerson();
-            this.update();
+                this.addPerson();
+                this.update();
 
-            this.animate = this.animate.bind(this);
-            this.animate();
+                let startAction = this.baseActions['idle'].action;
+                let endAction = this.baseActions[this.getAction()].action;
+                this.prepareCrossFade(startAction, endAction, 0.35);
 
-            let currentAction = this.baseActions['idle'].action;
-            let newAction = this.baseActions[this.getAction()].action;
+                this.animate = this.animate.bind(this);
+                requestAnimationFrame(this.animate);
 
-            this.prepareCrossFade(currentAction, newAction, 0.35)
-
-        }).bind(this));
+                resolve(this);
+            }).bind(this));
+        }.bind(this));
     }
 
     addPerson() {
@@ -140,8 +137,29 @@ class Person {
         action.play();
     }
 
-    modifyTimeScale(speed) {
+    setWeight(action, weight) {
+        action.enabled = true;
+        action.setEffectiveTimeScale(1);
+        action.setEffectiveWeight(weight);
+    }
+
+    setSpeed(speed) {
         this.mixer.timeScale = speed;
+    }
+
+    setPosition(position, direction) {
+        // initial position and direction
+        this.position = position;
+        this.direction = 90 + direction;
+
+        // set position
+        this.person.position.x = this.position.x;
+        this.person.position.y = this.position.y;
+        this.person.position.z = this.position.z;
+
+        // set rotation
+        const rotation = new THREE.Euler(0, rad(this.direction), 0, 'XYZ');
+        this.person.setRotationFromEuler(rotation);
     }
 
     prepareCrossFade(startAction, endAction, duration) {
@@ -188,12 +206,6 @@ class Person {
         }
     }
 
-    setWeight(action, weight) {
-        action.enabled = true;
-        action.setEffectiveTimeScale(1);
-        action.setEffectiveWeight(weight);
-    }
-
     animate() {
         requestAnimationFrame(this.animate);
 
@@ -208,8 +220,62 @@ class Person {
     }
 
     update() {
-        if (this.person) {
-            this.mixer.update(this.clock.getDelta());
+        const sizeInner = this.config.forest.ground;
+
+        const personMargin = 1;
+        const personPositionMin = -sizeInner / 2 + personMargin;
+        const personPositionMax = sizeInner / 2 - personMargin;
+
+        // animate action
+        this.mixer.update(this.clock.getDelta());
+
+        // trajectory coordinates
+        const start = this.position;
+        const end = start.clone().add(new THREE.Vector3(
+            Math.cos(rad(this.direction - 90)),
+            0,
+            -Math.sin(rad(this.direction - 90))
+        ));
+
+        const speed = 1.65;
+        const moveDuration = start.distanceTo(end) / speed;
+
+        // calculate time
+        if (moveDuration > 0) {
+            const trajectoryTime = this.mixer.time / moveDuration;
+
+            const current = this.person.position.clone();
+            const trajectory = new THREE.Line3(start, end);
+            trajectory.at(trajectoryTime, current);
+
+            // set position
+            this.person.position.x = current.x;
+            this.person.position.y = current.y;
+            this.person.position.z = current.z;
+
+            // boundary detection
+            if (this.mixer.time > 0.1) {
+                if (current.x <= personPositionMin) {
+                    // Q1, Q4
+                    this.mixer.setTime(0.0);
+                    this.setPosition(current, randomInt(85, -85, this.direction));
+                }
+                else if (current.x >= personPositionMax) {
+                    // Q2, Q3
+                    this.mixer.setTime(0.0);
+                    this.setPosition(current, randomInt(95, 265, this.direction));
+                }
+                else if (current.z <= personPositionMin) {
+                    // Q3, Q4
+                    this.mixer.setTime(0.0);
+                    this.setPosition(current, randomInt(185, 355, this.direction));
+                }
+                else if (current.z >= personPositionMax) {
+                    // Q1, Q2
+                    this.mixer.setTime(0.0);
+                    this.setPosition(current, randomInt(5, 175, this.direction));
+                }
+            }
         }
 
         // render
@@ -228,4 +294,4 @@ class Person {
         this.clear();
         this.update();
     }
-}
+};

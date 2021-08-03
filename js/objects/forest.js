@@ -38,16 +38,22 @@ class Forest {
             'broad-leaf': new THREE.TextureLoader().load(`img/broad-leaf.png`)
         };
 
-        this.update();
-        this.addGround();
-        this.addTrees();
-        this.addPersons();
+        this.loaded = new Promise(function (resolve) {
+            this.update();
+            this.addGround();
+            this.addTrees();
+            this.addPersons();
+
+            resolve(this);
+        }.bind(this));
     }
 
     getGround(size) {
         const geometry = new THREE.PlaneGeometry(size, size);
-        geometry.rotateX(Math.PI / 2).translate(0, 0, 0);
-        return new THREE.Mesh(geometry, this.groundMaterial);
+        geometry.rotateX(rad(90)).translate(0, 0, 0);
+        const ground = new THREE.Mesh(geometry, this.groundMaterial);
+        ground.receiveShadow = true;
+        return ground;
     }
 
     getTree(index) {
@@ -73,15 +79,24 @@ class Forest {
     }
 
     getPerson(index) {
-        const person = new Person(this).mesh;
-        person.position.x = this.personPositions[index].x;
-        person.position.z = this.personPositions[index].z;
-        return person;
+        const position = new THREE.Vector3(
+            this.personPositions[index].x,
+            this.personPositions[index].y,
+            this.personPositions[index].z
+        );
+        const direction = randomInt(0, 360, index);
+
+        const person = new Person(this);
+        person.loaded.then((self) => {
+            self.setPosition(position, direction);
+        });
+
+        return person.mesh;
     }
 
     addGround() {
         const size = this.config.forest.ground;
-        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
 
         // inner ground
         const inner = this.getGround(size);
@@ -92,7 +107,7 @@ class Forest {
         const outer = this.getGround(size + 2 * coverage);
         outer.material.transparent = true;
         outer.material.opacity = 0.7;
-        outer.position.y = -0.05
+        outer.position.y = -0.01;
 
         this.grounds.push(outer);
         this.scene.add(outer);
@@ -152,7 +167,7 @@ class Forest {
                     treeGroup.position.x = this.treePositions[tree.index].x;
                     treeGroup.position.y = this.treePositions[tree.index].y;
                     treeGroup.position.z = this.treePositions[tree.index].z;
-                    treeGroup.rotateY(2 * Math.PI * randomFloat(0.0, 1.0, tree.index));
+                    treeGroup.rotateY(rad(randomInt(0, 360, tree.index)));
 
                     if (tree.index < this.trees.length) {
                         // update tree
@@ -193,7 +208,7 @@ class Forest {
     }
 
     update() {
-        const coverage = 2 * this.config.drone.height * Math.tan(radian(this.config.drone.camera.view / 2));
+        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const sizeOuter = this.config.forest.ground + 2 * coverage;
         const sizeInner = this.config.forest.ground;
 
@@ -221,7 +236,7 @@ class Forest {
                     // apply random position within grid
                     treePositions.push({
                         x: randomFloat(gridPositionMinX, gridPositionMaxX),
-                        y: 0,
+                        y: 0.01,
                         z: randomFloat(gridPositionMinZ, gridPositionMaxZ)
                     });
                 }
@@ -249,13 +264,14 @@ class Forest {
         this.personPositions = [];
         for (let i = 0; i <= 1000; i++) {
             this.personPositions.push({
-                x: randomFloat(personPositionMin, personPositionMax),
-                y: 0,
-                z: randomFloat(personPositionMin, personPositionMax)
+                x: 0.0, // randomFloat(personPositionMin, personPositionMax), // TEMP
+                y: 0.02,
+                z: 0.0  // randomFloat(personPositionMin, personPositionMax) // TEMP
             });
         }
 
-        // hide persons
+        // hide persons // TEMP
+        /*
         this.persons.forEach((person) => {
             if (person) {
                 const personInsideX = person.position.x > personPositionMin && person.position.x < personPositionMax;
@@ -263,16 +279,17 @@ class Forest {
                 person.visible = personInsideX && personInsideY;
             }
         });
+        */
 
         if (this.grounds.length == 2) {
             // inner ground
             const planeGeometryInner = new THREE.PlaneGeometry(sizeInner, sizeInner);
-            planeGeometryInner.rotateX(Math.PI / 2).translate(0, 0, 0);
+            planeGeometryInner.rotateX(rad(90)).translate(0, 0, 0);
             this.grounds[0].geometry.copy(planeGeometryInner);
 
             // outer ground
             const planeGeometryOuter = new THREE.PlaneGeometry(sizeOuter, sizeOuter);
-            planeGeometryOuter.rotateX(Math.PI / 2).translate(0, -0.05, 0);
+            planeGeometryOuter.rotateX(rad(90)).translate(0, -0.01, 0);
             this.grounds[1].geometry.copy(planeGeometryOuter);
         }
     }
@@ -330,4 +347,4 @@ class Forest {
 
         this.addPersons();
     }
-}
+};
