@@ -13,7 +13,6 @@ class Camera {
         this.planes = [];
         this.images = [];
 
-        this.worker = getWorkers(1)[0];
         this.slider = new Slider(document.querySelector('#captures'), this.config);
 
         this.viewLines = [];
@@ -52,11 +51,15 @@ class Camera {
             viewLine.layers.set(1);
         });
 
-        this.addView();
-        this.addPlane();
-        this.addRenderer();
-        this.addPreview();
-        this.update();
+        this.loaded = new Promise(function (resolve) {
+            this.addView();
+            this.addPlane();
+            this.addRenderer();
+            this.addPreview();
+            this.update();
+
+            resolve(this);
+        }.bind(this));
     }
 
     addView() {
@@ -247,4 +250,4 @@ class Camera {
         this.clear();
         this.update();
     }
-}
+};

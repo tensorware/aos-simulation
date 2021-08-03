@@ -1,58 +1,59 @@
 class Stage {
-    constructor(root, config, callback) {
+    constructor(root, config) {
         this.root = root;
         this.config = config;
 
-        new THREE.FontLoader().load('font/opensans.json', ((font) => {
-            this.fov = 60
-            this.font = font;
-            this.scene = new THREE.Scene();
+        this.loaded = new Promise(function (resolve) {
+            new THREE.FontLoader().load('font/opensans.json', ((font) => {
+                this.fov = 60
+                this.font = font;
+                this.scene = new THREE.Scene();
 
-            // light
-            this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
-            this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            this.directionalLight.position.set(100, 100, 100);
-            this.directionalLight.layers.set(1);
+                // light
+                this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+                this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                this.directionalLight.position.set(100, 100, 100);
+                this.directionalLight.layers.set(1);
 
-            // camera 
-            this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
-            this.camera.layers.enable(0);
-            this.camera.layers.enable(1);
-            this.camera.add(this.directionalLight);
-            this.camera.add(this.ambientLight);
-            this.scene.add(this.camera);
+                // camera 
+                this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
+                this.camera.layers.enable(0);
+                this.camera.layers.enable(1);
+                this.camera.add(this.directionalLight);
+                this.camera.add(this.ambientLight);
+                this.scene.add(this.camera);
 
-            // renderer
-            this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
-            this.renderer.setPixelRatio(window.devicePixelRatio);
+                // renderer
+                this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
+                this.renderer.setPixelRatio(window.devicePixelRatio);
 
-            // controls
-            this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
-            this.controls.minDistance = 0.1;
-            this.controls.maxDistance = 500;
-            this.controls.autoRotateSpeed = 1;
-            this.controls.autoRotate = false;
-            this.controls.enablePan = true;
+                // controls
+                this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
+                this.controls.minDistance = 0.1;
+                this.controls.maxDistance = 500;
+                this.controls.autoRotateSpeed = 1;
+                this.controls.autoRotate = false;
+                this.controls.enablePan = true;
 
-            // user interface
-            this.stats = new Stats();
-            this.root.querySelector('#info').append(this.stats.dom);
-            this.root.querySelector('#stage').append(this.renderer.domElement);
+                // user interface
+                this.stats = new Stats();
+                this.root.querySelector('#info').append(this.stats.dom);
+                this.root.querySelector('#stage').append(this.renderer.domElement);
 
-            // reset stage
-            this.reset();
+                // reset stage
+                this.reset();
 
-            // events
-            this.update = this.update.bind(this);
-            window.addEventListener('resize', this.update);
+                // events
+                this.update = this.update.bind(this);
+                window.addEventListener('resize', this.update);
 
-            // animations
-            this.animate = this.animate.bind(this);
-            requestAnimationFrame(this.animate);
+                // animations
+                this.animate = this.animate.bind(this);
+                requestAnimationFrame(this.animate);
 
-            callback(this);
-
-        }).bind(this));
+                resolve(this);
+            }).bind(this));
+        }.bind(this));
     }
 
     animate() {
@@ -120,9 +121,10 @@ class Stage {
 
         // reset camera position
         this.camera.position.set(0.0, height * 1.1, 0.0);
+        this.camera.position.set(0.0, 10.0, 10.0); // TEMP
         this.controls.target.set(0.0, 0.0, 0.0);
         this.controls.update();
         this.update();
         this.render();
     }
-}
+};

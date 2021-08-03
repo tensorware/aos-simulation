@@ -6,37 +6,40 @@ class Drone {
         this.stage = forest.stage;
         this.forest = forest;
 
-        new THREE.STLLoader().load('models/drone.stl', ((droneGeometry) => {
-            this.flying = false;
-            this.goal = { x: 0, y: 0 };
+        this.loaded = new Promise(function (resolve) {
+            new THREE.STLLoader().load('models/drone.stl', ((droneGeometry) => {
+                this.flying = false;
+                this.goal = { x: 0, y: 0 };
 
-            droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
-            const droneMaterial = new THREE.MeshStandardMaterial({
-                color: 0x666666,
-                roughness: 0.8,
-                metalness: 0.8
-            });
+                droneGeometry.rotateX(-Math.PI / 2).rotateY(-Math.PI / 2).translate(0, 0, 0);
+                const droneMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x666666,
+                    roughness: 0.8,
+                    metalness: 0.8
+                });
 
-            const scale = 0.15;
-            const droneMesh = new THREE.Mesh(droneGeometry, droneMaterial);
-            droneMesh.scale.set(scale, scale, scale);
-            this.drone = droneMesh;
+                const scale = 0.15;
+                const droneMesh = new THREE.Mesh(droneGeometry, droneMaterial);
+                droneMesh.scale.set(scale, scale, scale);
+                this.drone = droneMesh;
 
-            this.drone.position.x = this.config.drone.eastWest;
-            this.drone.position.y = this.config.drone.height;
-            this.drone.position.z = this.config.drone.northSouth;
+                this.drone.position.x = this.config.drone.eastWest;
+                this.drone.position.y = this.config.drone.height;
+                this.drone.position.z = this.config.drone.northSouth;
 
-            this.addDrone();
-            this.addCamera();
-            this.update();
+                this.addDrone();
+                this.addCamera();
+                this.update();
 
-            this.animate = this.animate.bind(this);
-            this.click = doubleClick(this.click.bind(this));
+                this.animate = this.animate.bind(this);
+                this.click = doubleClick(this.click.bind(this));
 
-            window.addEventListener('pointerdown', this.click);
-            window.addEventListener('pointerup', this.click);
+                window.addEventListener('pointerdown', this.click);
+                window.addEventListener('pointerup', this.click);
 
-        }).bind(this));
+                resolve(this);
+            }).bind(this));
+        }.bind(this));
     }
 
     addDrone() {
@@ -275,4 +278,4 @@ class Drone {
         this.clear();
         this.update();
     }
-}
+};

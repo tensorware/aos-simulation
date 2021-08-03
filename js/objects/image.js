@@ -14,6 +14,10 @@ class Image {
         this.resolution = this.camera.getResolution();
         this.borderPoints = this.camera.viewLines.map(getPoints);
         this.rendering = cloneCanvas(this.camera.renderer.domElement);
+
+        this.loaded = new Promise(function (resolve) {
+            resolve(this);
+        }.bind(this));
     }
 
     async capture(preview) {
@@ -381,4 +385,4 @@ class Image {
         // return image index
         return images.length - 1;
     }
-}
+};

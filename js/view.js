@@ -5,7 +5,8 @@ class View {
         this.configs = configs;
 
         // load canvas stage
-        this.stage = new Stage(this.root, this.config, () => {
+        this.stage = new Stage(this.root, this.config)
+        this.stage.loaded.then(() => {
             this.background(this.config.material.color.background);
             this.controls(this.root.querySelector('#controls'));
             this.splitter(['#top', '#bottom']);
@@ -220,7 +221,7 @@ class View {
         this.forest.reset();
         this.drone.reset();
     }
-}
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
 
