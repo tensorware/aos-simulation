@@ -77,10 +77,6 @@ class View {
             this.forest.addPersons();
         });
 
-        forestFolder.add(this.config.forest, 'persons', 0, 20, 1).onFinishChange(() => {
-            this.reset();
-        });
-
         forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
@@ -94,17 +90,17 @@ class View {
             this.drone.setNorthSouth(0.0);
         });
 
-        // tree folder
-        const treeFolder = forestFolder.addFolder('trees');
-        const treeFolders = [
-            treeFolder.add(this.config.forest.trees, 'levels', 0, 10, 1),
-            treeFolder.add(this.config.forest.trees, 'twigScale', 0.0, 1.0, 0.05),
-            treeFolder.add(this.config.forest.trees, 'homogeneity', 50, 100, 1),
-            treeFolder.add(this.config.forest.trees, 'type', ['needle-leaf', 'broad-leaf', 'mixed-leaf'])
+        // trees folder
+        const treesFolder = forestFolder.addFolder('trees');
+        const treesFolders = [
+            treesFolder.add(this.config.forest.trees, 'levels', 0, 10, 1),
+            treesFolder.add(this.config.forest.trees, 'twigScale', 0.0, 1.0, 0.05),
+            treesFolder.add(this.config.forest.trees, 'homogeneity', 50, 100, 1),
+            treesFolder.add(this.config.forest.trees, 'type', ['needle-leaf', 'broad-leaf', 'mixed-leaf'])
         ];
 
         // branching folder
-        const branchingFolder = treeFolder.addFolder('branching');
+        const branchingFolder = treesFolder.addFolder('branching');
         const branchingFolders = [
             branchingFolder.add(this.config.forest.trees.branching, 'initialBranchLength', 0.1, 1.0, 0.05),
             branchingFolder.add(this.config.forest.trees.branching, 'lengthFalloffFactor', 0.1, 1.0, 0.05),
@@ -118,7 +114,7 @@ class View {
         ];
 
         // trunk folder
-        const trunkFolder = treeFolder.addFolder('trunk');
+        const trunkFolder = treesFolder.addFolder('trunk');
         const trunkFolders = [
             trunkFolder.add(this.config.forest.trees.trunk, 'maxRadius', 0.05, 0.5, 0.05),
             trunkFolder.add(this.config.forest.trees.trunk, 'climbRate', 0.05, 2.0, 0.05),
@@ -131,7 +127,7 @@ class View {
         ];
 
         // forest folder
-        [treeFolders, branchingFolders, trunkFolders].forEach((folder) => {
+        [treesFolders, branchingFolders, trunkFolders].forEach((folder) => {
             folder.forEach((v) => {
                 v.onChange(() => {
                     this.forest.clear();
@@ -140,6 +136,10 @@ class View {
                 });
             });
         });
+
+        // persons folder
+        const personsFolder = forestFolder.addFolder('persons');
+        personsFolder.add(this.config.forest.persons, 'count', 1, 20, 1).onChange(() => { });
 
         // materials folder
         const materialsFolder = this.gui.addFolder('material');

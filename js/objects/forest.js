@@ -6,7 +6,7 @@ class Forest {
         this.stage = stage;
 
         this.trees = [...new Array(this.config.forest.size)];
-        this.persons = [... new Array(this.config.forest.persons)];
+        this.persons = [... new Array(this.config.forest.persons.count)];
 
         this.grounds = [];
         this.treePositions = [];
@@ -177,7 +177,7 @@ class Forest {
 
     addPersons() {
         const persons = [];
-        for (let i = 0; i < this.config.forest.persons; i++) {
+        for (let i = 0; i < this.config.forest.persons.count; i++) {
             persons.push(this.getPerson(i));
         }
 
