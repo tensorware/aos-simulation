@@ -68,7 +68,7 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config.forest, 'size', 1, 2000, 1).onFinishChange(() => {
+        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
 
@@ -140,7 +140,7 @@ class View {
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        personsFolder.add(this.config.forest.persons, 'count', 1, 20, 1).onChange(() => { /* TODO */ });
+        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onChange(() => { /* TODO */ });
         Object.keys(this.config.forest.persons.activities).forEach((k) => {
             personsFolder.add(this.config.forest.persons.activities, k).onChange(() => { /* TODO */ });
         })
