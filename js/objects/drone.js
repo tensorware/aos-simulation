@@ -106,7 +106,7 @@ class Drone {
             this.config.drone.eastWest = this.drone.position.x;
             this.config.drone.northSouth = this.drone.position.z;
 
-            // set flying
+            // flight start
             this.flying = true;
 
             // animate movement
@@ -177,69 +177,67 @@ class Drone {
             this.config.drone.eastWest = this.goal.x;
             this.config.drone.northSouth = this.goal.z;
 
-            // reset flying
+            // flight stop
             this.flying = false;
         }
     }
 
     capture() {
-        if (this.camera) {
-            return new Promise(async (resolve) => {
-                const view = this.getView();
+        return new Promise(async (resolve) => {
+            const view = this.getView();
 
-                const start = {
-                    x: Math.round(-this.config.forest.ground / 2 - view.r),
-                    y: 0,
-                    z: Math.round(-this.config.forest.ground / 2 + view.r)
-                };
+            const start = {
+                x: Math.round(-this.config.forest.ground / 2 - view.r),
+                y: 0,
+                z: Math.round(-this.config.forest.ground / 2 + view.r)
+            };
 
-                const end = {
-                    x: Math.round(this.config.forest.ground / 2 + view.r),
-                    y: 0,
-                    z: Math.round(this.config.forest.ground / 2 + view.r)
-                };
+            const end = {
+                x: Math.round(this.config.forest.ground / 2 + view.r),
+                y: 0,
+                z: Math.round(this.config.forest.ground / 2 + view.r)
+            };
 
-                const step = {
-                    x: this.config.drone.camera.sampling,
-                    y: 0,
-                    z: view.r * 2
-                };
+            const step = {
+                x: this.config.drone.camera.sampling,
+                y: 0,
+                z: view.r * 2
+            };
 
-                // set flying
-                this.flying = true;
+            // flight start
+            this.flying = true;
 
-                // update drone position
-                let dir = 1;
-                for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
-                    this.setNorthSouth(z);
+            // update drone position
+            let dir = 1;
+            for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
+                this.setNorthSouth(z);
 
-                    for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
-                        this.setEastWest(x * dir);
+                for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
+                    this.setEastWest(x * dir);
 
-                        // capture image
-                        await this.camera.capture(false);
-                        await new Promise((r) => { setTimeout(r, 10); });
-                    }
-
-                    // swap direction
-                    dir = dir * -1;
+                    // capture image
+                    await this.camera.capture(false);
+                    await new Promise((r) => { setTimeout(r, 10); });
                 }
 
-                // reset drone position
-                this.drone.position.x = 0.0;
-                this.drone.position.z = 0.0;
+                // swap direction
+                dir = dir * -1;
+            }
 
-                // reset config position
-                this.config.drone.eastWest = this.drone.position.x;
-                this.config.drone.northSouth = this.drone.position.z;
+            // reset drone position
+            this.drone.position.x = 0.0;
+            this.drone.position.z = 0.0;
 
-                // reset flying
-                this.flying = false;
-                this.update();
+            // reset config position
+            this.config.drone.eastWest = this.drone.position.x;
+            this.config.drone.northSouth = this.drone.position.z;
 
-                resolve();
-            });
-        }
+            // flight stop
+            this.flying = false;
+            this.update();
+
+            resolve();
+        });
     }
 
     update() {
@@ -272,8 +270,12 @@ class Drone {
     }
 
     clear() {
-        // reset flying
+        // flight abort
         this.flying = false;
+
+        // reset position
+        this.setEastWest(0.0);
+        this.setNorthSouth(0.0);
 
         if (this.camera) {
             this.camera.clear();
