@@ -1,8 +1,5 @@
 {
-    "previewServer.browsers": [
-        "firefox",
-        "chrome"
-    ],
-    "previewServer.ignoreDefaultBrowser": false,
-    "previewServer.port": 8080
+    "livePreview.portNumber": 8080,
+    "livePreview.showServerStatusNotifications": true,
+    "livePreview.serverKeepAliveAfterEmbeddedPreviewClose": 0
 }
