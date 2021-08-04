@@ -16,7 +16,7 @@
         }
     },
     "forest": {
-        "size": 0,
+        "size": 10,
         "ground": 70,
         "trees": {
             "levels": 6,
