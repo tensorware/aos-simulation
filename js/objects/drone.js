@@ -51,16 +51,6 @@ class Drone {
         this.camera = new Camera(this, this.index);
     }
 
-    setEastWest(position) {
-        this.drone.position.x = position;
-        this.update();
-    }
-
-    setNorthSouth(position) {
-        this.drone.position.z = position;
-        this.update();
-    }
-
     getView() {
         // drone position on sky
         const x = this.drone.position.x;
@@ -113,6 +103,16 @@ class Drone {
             // animate movement
             this.animate();
         }
+    }
+
+    async setEastWest(position) {
+        this.drone.position.x = position;
+        await this.update();
+    }
+
+    async setNorthSouth(position) {
+        this.drone.position.z = position;
+        await this.update();
     }
 
     async animate(currentTime) {
@@ -169,8 +169,8 @@ class Drone {
             }
             else {
                 // reset position
-                this.setEastWest(0.0);
-                this.setNorthSouth(0.0);
+                await this.setEastWest(0.0);
+                await this.setNorthSouth(0.0);
             }
         }
         else {
@@ -210,10 +210,12 @@ class Drone {
         // update drone position
         let dir = 1;
         for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
-            this.setNorthSouth(z);
+            // set north/south position
+            await this.setNorthSouth(z);
 
             for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
-                this.setEastWest(x * dir);
+                // set east/west position
+                await this.setEastWest(x * dir);
 
                 // capture image
                 await this.camera.capture(false);
@@ -251,9 +253,6 @@ class Drone {
                 await this.camera.update();
             }
         }
-
-        // render
-        await this.stage.render();
     }
 
     async export(zip) {
@@ -276,8 +275,8 @@ class Drone {
         this.flying = false;
 
         // reset position
-        this.setEastWest(0.0);
-        this.setNorthSouth(0.0);
+        await this.setEastWest(0.0);
+        await this.setNorthSouth(0.0);
 
         if (this.camera) {
             await this.camera.clear();

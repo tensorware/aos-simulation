@@ -295,9 +295,6 @@ class Person {
                 }
             }
         }
-
-        // render
-        await this.stage.render();
     }
 
     async export(zip) {
