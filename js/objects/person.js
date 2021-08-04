@@ -7,34 +7,18 @@ class Person {
         this.forest = forest;
         this.index = index;
 
-        const width = 1;
-        const height = 2;
+        const sizeInner = this.config.forest.ground;
 
-        const segments = 4;
-        const widthSegments = width * segments;
-        const heightSegments = height * segments;
+        const personMargin = 1;
+        const personPositionMin = -sizeInner / 2 + personMargin;
+        const personPositionMax = sizeInner / 2 - personMargin;
 
-        const planeGeometry = new THREE.PlaneGeometry(width, height, widthSegments, heightSegments);
-        planeGeometry.rotateX(rad(-90)).translate(0, 0.10, 0);
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: this.config.material.color.person });
-
-        const wireGeometry = new THREE.WireframeGeometry(planeGeometry);
-        const wireMaterial = new THREE.LineBasicMaterial({ color: this.config.material.color.person });
-
-        this.wire = new THREE.LineSegments(wireGeometry, wireMaterial);
-        this.mesh = new THREE.Mesh(planeGeometry, planeMaterial);
-        this.mesh.add(this.wire);
-
-        // ###############################################
-
-        // initial position and direction
         this.position = new THREE.Vector3(
-            0.0, // randomFloat(personPositionMin, personPositionMax, index), // TEMP
+            randomFloat(personPositionMin, personPositionMax),
             0.02,
-            0.0  // randomFloat(personPositionMin, personPositionMax, index) // TEMP
+            randomFloat(personPositionMin, personPositionMax)
         );
         this.direction = randomInt(0, 360, index);
-
         this.currentPosition = this.position.clone();
         this.currentDirection = this.direction;
 
@@ -54,7 +38,6 @@ class Person {
         };
 
         this.clock = new THREE.Clock();
-        this.active = false;
 
         this.loaded = new Promise(function (resolve) {
             new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
@@ -98,7 +81,6 @@ class Person {
                 let endAction = this.baseActions[this.getAction()].action;
                 this.prepareCrossFade(startAction, endAction, 0.35);
 
-                this.active = true;
                 this.animate = this.animate.bind(this);
                 requestAnimationFrame(this.animate);
 
@@ -226,24 +208,19 @@ class Person {
         // update person position
         await this.update();
 
-        if (this.active) {
-            // next animation
-            requestAnimationFrame(this.animate);
-        }
-        else {
-            // reset actions
-            this.mixer.stopAllAction();
-        }
+        // next animation
+        requestAnimationFrame(this.animate);
     }
 
     async update() {
         const sizeInner = this.config.forest.ground;
 
+        // ground position constraints
         const personMargin = 1;
         const personPositionMin = -sizeInner / 2 + personMargin;
         const personPositionMax = sizeInner / 2 - personMargin;
 
-        // animate action
+        // update action mixer time
         this.mixer.update(this.clock.getDelta());
 
         // trajectory coordinates
@@ -254,6 +231,7 @@ class Person {
             -Math.sin(rad(this.currentDirection))
         ));
 
+        // move duration
         const speed = 1.65 * 2;
         const moveDuration = start.distanceTo(end) / speed;
 

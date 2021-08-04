@@ -43,7 +43,7 @@ class View {
         // gui state
         const state = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
 
-        // init gui
+        // gui root
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
         this.gui.closed = state.closed || false;
         this.gui.useLocalStorage = true;
@@ -71,15 +71,20 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(() => {
-            this.forest.removeTrees();
-            this.forest.addTrees();
-            this.drone.reset();
-        });
-        forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
-            this.forest.removeTrees();
-            this.forest.addTrees();
-            this.drone.reset();
+        const forestFolders = [
+            forestFolder.add(this.config.forest, 'size', 0, 2000, 1),
+            forestFolder.add(this.config.forest, 'ground', 10, 500, 1)
+        ];
+
+        // forest folders
+        forestFolders.forEach((folder) => {
+            folder.onFinishChange(() => {
+                this.forest.removeTrees();
+                this.forest.addTrees();
+                this.forest.removePersons();
+                this.forest.addPersons();
+                this.drone.reset();
+            });
         });
 
         // trees folder
@@ -118,23 +123,27 @@ class View {
             trunkFolder.add(this.config.forest.trees.trunk, 'trunkLength', 0.1, 5.0, 0.05)
         ];
 
-        // forest folder
+        // trees folders
         [treesFolders, branchingFolders, trunkFolders].forEach((folders) => {
             folders.forEach((folder) => { folder.onChange(() => { this.forest.addTrees(); }); });
         });
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onFinishChange(() => {
-            this.forest.removePersons();
-            this.forest.addPersons();
-        });
+        const personsFolders = [
+            personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1)
+        ];
         Object.keys(this.config.forest.persons.activities).forEach((activity) => {
-            personsFolder.add(this.config.forest.persons.activities, activity).onFinishChange(() => {
+            personsFolders.push(personsFolder.add(this.config.forest.persons.activities, activity))
+        });
+
+        // persons folders
+        personsFolders.forEach((folder) => {
+            folder.onFinishChange(() => {
                 this.forest.removePersons();
                 this.forest.addPersons();
             });
-        })
+        });
 
         // material folder
         const materialFolder = this.gui.addFolder('material');
