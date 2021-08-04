@@ -302,11 +302,13 @@ class Person {
     }
 
     async clear() {
-        // reset time
-        this.mixer.setTime(0.0);
+        if (this.mixer) {
+            // reset time
+            this.mixer.setTime(0.0);
 
-        // set initial position
-        this.setPosition(this.position, this.direction);
+            // set initial position
+            this.setPosition(this.position, this.direction);
+        }
     }
 
     async remove() {

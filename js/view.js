@@ -71,23 +71,15 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(async () => {
-            await this.forest.clear();
-            await this.forest.update();
-
+        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(() => {
+            this.forest.removeTrees();
             this.forest.addTrees();
-            this.forest.addPersons();
-
-            await this.drone.reset();
+            this.drone.reset();
         });
-        forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(async () => {
-            await this.forest.clear(true);
-            await this.forest.update();
-
+        forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
+            this.forest.removeTrees();
             this.forest.addTrees();
-            this.forest.addPersons();
-
-            await this.drone.reset();
+            this.drone.reset();
         });
 
         // trees folder
@@ -127,22 +119,20 @@ class View {
         ];
 
         // forest folder
-        [treesFolders, branchingFolders, trunkFolders].forEach((folder) => {
-            folder.forEach((v) => {
-                v.onChange(() => {
-                    this.forest.clear();
-                    this.forest.addTrees();
-                    this.forest.addPersons();
-                });
-            });
+        [treesFolders, branchingFolders, trunkFolders].forEach((folders) => {
+            folders.forEach((folder) => { folder.onChange(() => { this.forest.addTrees(); }); });
         });
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onChange(() => { /* TODO */ });
-        Object.keys(this.config.forest.persons.activities).forEach((k) => {
-            personsFolder.add(this.config.forest.persons.activities, k).onChange(() => {
-                /* TODO */
+        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onFinishChange(() => {
+            this.forest.removePersons();
+            this.forest.addPersons();
+        });
+        Object.keys(this.config.forest.persons.activities).forEach((activity) => {
+            personsFolder.add(this.config.forest.persons.activities, activity).onFinishChange(() => {
+                this.forest.removePersons();
+                this.forest.addPersons();
             });
         })
 
@@ -151,16 +141,16 @@ class View {
 
         // color folder
         const colorFolder = materialFolder.addFolder('color');
-        //colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
-        //colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
+        // colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
+        // colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
-        colorFolder.addColor(this.config.material.color, 'person').onFinishChange(this.reset.bind(this));
+        // colorFolder.addColor(this.config.material.color, 'person').onChange((v) => { /* TODO */ });
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
-        this.gui.add(this.config, 'preset', this.configs).onChange((v) => {
-            this.gui.load.preset = v;
+        this.gui.add(this.config, 'preset', this.configs).onChange((preset) => {
+            this.gui.load.preset = preset;
             window.location.reload();
         });
 
@@ -231,8 +221,7 @@ class View {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-    // make Math.random() predictable globally
+    // make Math.random() globally predictable
     Math.seedrandom(document.title);
 
     // load preset and config

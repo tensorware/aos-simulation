@@ -11,7 +11,6 @@ class Forest {
 
         this.grounds = [];
         this.treePositions = [];
-        //this.personPositions = [];
 
         this.workers = getWorkers();
         this.workersUpdate = [];
@@ -179,17 +178,35 @@ class Forest {
         });
     }
 
-    addPersons() {
-        const persons = [];
-        for (let i = 0; i < this.config.forest.persons.count; i++) {
-            persons.push(this.getPerson(i));
-        }
+    removeTrees() {
+        // remove all trees
+        this.trees.forEach((tree) => { this.scene.remove(tree); });
+        this.trees = [];
 
-        // append persons
-        persons.forEach((person, i) => {
-            this.persons[i] = person;
-            //this.scene.add(person);
-        });
+        // extend trees list
+        const treesCount = this.config.forest.size - this.trees.length;
+        if (treesCount > 0) {
+            this.trees.push.apply(this.trees, [...new Array(treesCount)]);
+        }
+        this.update();
+    }
+
+    addPersons() {
+        for (let i = 0; i < this.config.forest.persons.count; i++) {
+            this.persons[i] = this.getPerson(i);
+        }
+    }
+
+    removePersons() {
+        // remove all persons
+        this.persons.forEach(async (person) => { await person.remove(); });
+        this.persons = [];
+
+        // extend persons list
+        const personCount = this.config.forest.persons.count - this.persons.length;
+        if (personCount > 0) {
+            this.persons.push.apply(this.persons, [...new Array(personCount)]);
+        }
     }
 
     onUpdate(cb) {
@@ -198,7 +215,6 @@ class Forest {
 
     async update() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
-
         const sizeOuter = this.config.forest.ground + 2 * coverage;
         const sizeInner = this.config.forest.ground;
 
@@ -213,9 +229,8 @@ class Forest {
 
         // calculate tree positions
         this.treePositions = [];
-        for (let k = 0; k <= 2; k++) {
+        for (let k = 0; k < 2; k++) {
             const treePositions = [];
-
             for (let i = 0; i < gridCount; i++) {
                 for (let j = 0; j < gridCount; j++) {
                     // calculate min and max values within grid
@@ -237,7 +252,7 @@ class Forest {
             this.treePositions = this.treePositions.concat(shuffle(treePositions, k));
         }
 
-        // hide trees
+        // hide trees outside margin area
         this.trees.forEach((tree) => {
             if (tree) {
                 const treeInsideX = tree.position.x >= treePositionMin && tree.position.x <= treePositionMax;
@@ -245,34 +260,6 @@ class Forest {
                 tree.visible = treeInsideX && treeInsideY;
             }
         });
-
-        // update persons // TEMP
-        /*
-        const personMargin = 2;
-        const personPositionMin = -sizeInner / 2 + personMargin;
-        const personPositionMax = sizeInner / 2 - personMargin;
-        
-        // calculate person positions
-        this.personPositions = [];
-        for (let i = 0; i <= 1000; i++) {
-            this.personPositions.push({
-                x: 0.0, // randomFloat(personPositionMin, personPositionMax), // TEMP
-                y: 0.02,
-                z: 0.0  // randomFloat(personPositionMin, personPositionMax) // TEMP
-            });
-        }
-        */
-
-        // hide persons // TEMP
-        /*
-        this.persons.forEach((person) => {
-            if (person) {
-                const personInsideX = person.position.x > personPositionMin && person.position.x < personPositionMax;
-                const personInsideY = person.position.z > personPositionMin && person.position.z < personPositionMax;
-                person.visible = personInsideX && personInsideY;
-            }
-        });
-        */
 
         if (this.grounds.length == 2) {
             // inner ground
@@ -307,43 +294,9 @@ class Forest {
         forest.file('persons.json', JSON.stringify(persons, null, 4));
     }
 
-    async clear(full) {
+    async clear() {
         // clear all persons
-        this.persons.forEach((person) => { person.clear(); });
-
-        if (full) {
-            // remove all trees
-            this.trees.forEach((tree) => { this.scene.remove(tree); });
-            this.trees = [];
-
-            // remove all persons
-            this.persons.forEach((person) => { person.remove(); });
-            this.persons = [];
-        }
-
-        // remove trees and shrink list
-        for (let i = (this.trees.length - 1); i >= this.config.forest.size; i--) {
-            this.scene.remove(this.trees[i]);
-            this.trees.splice(i, 1);
-        }
-
-        // extend list for missing trees
-        const missingTrees = this.config.forest.size - this.trees.length;
-        if (missingTrees > 0) {
-            this.trees.push.apply(this.trees, [...new Array(missingTrees)]);
-        }
-
-        // remove persons and shrink list
-        for (let i = (this.persons.length - 1); i >= this.config.forest.persons.count; i--) {
-            this.persons[i].remove();
-            this.persons.splice(i, 1);
-        }
-
-        // extend list for missing persons
-        const missingPersons = this.config.forest.persons.count - this.persons.length;
-        if (missingPersons > 0) {
-            this.persons.push.apply(this.persons, [...new Array(missingPersons)]);
-        }
+        this.persons.forEach(async (person) => { await person.clear(); });
     }
 
     async reset() {
