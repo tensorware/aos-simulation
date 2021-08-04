@@ -80,10 +80,12 @@ class Camera {
     }
 
     addRenderer() {
+        // preview image camera
         this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
         this.camera.layers.enable(0);
         this.scene.add(this.camera);
 
+        // render preview image
         this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
     }
@@ -117,7 +119,11 @@ class Camera {
     }
 
     getResolution() {
-        return new THREE.Vector3(this.config.drone.camera.resolution, 0, this.config.drone.camera.resolution);
+        return new THREE.Vector3(
+            this.config.drone.camera.resolution,
+            0,
+            this.config.drone.camera.resolution
+        );
     }
 
     getPlane() {
