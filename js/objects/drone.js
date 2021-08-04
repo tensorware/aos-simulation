@@ -162,9 +162,14 @@ class Drone {
                 this.camera.capture(true);
             }
 
-            // next animation
             if (this.flying) {
+                // next animation
                 requestAnimationFrame(this.animate);
+            }
+            else {
+                // reset position
+                this.setEastWest(0.0);
+                this.setNorthSouth(0.0);
             }
         }
         else {
@@ -267,6 +272,7 @@ class Drone {
     }
 
     clear() {
+        // reset flying
         this.flying = false;
 
         if (this.camera) {

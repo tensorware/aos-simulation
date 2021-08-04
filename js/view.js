@@ -89,9 +89,6 @@ class View {
             this.forest.update();
             this.forest.addTrees();
             this.forest.addPersons();
-
-            this.drone.setEastWest(0.0);
-            this.drone.setNorthSouth(0.0);
         });
 
         // trees folder
