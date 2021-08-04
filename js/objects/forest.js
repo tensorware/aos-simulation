@@ -91,7 +91,7 @@ class Forest {
             self.setPosition(position, direction);
         });
 
-        return person.mesh;
+        return person;
     }
 
     addGround() {
@@ -108,7 +108,6 @@ class Forest {
         outer.material.transparent = true;
         outer.material.opacity = 0.7;
         outer.position.y = -0.01;
-
         this.grounds.push(outer);
         this.scene.add(outer);
     }
@@ -178,7 +177,8 @@ class Forest {
                             this.scene.remove(this.trees[tree.index]);
                         }
                         this.trees[tree.index] = treeGroup;
-                    } else {
+                    }
+                    else {
                         // append tree
                         this.trees.push(treeGroup);
                     }
@@ -199,7 +199,7 @@ class Forest {
         // append persons
         persons.forEach((person, i) => {
             this.persons[i] = person;
-            this.scene.add(person);
+            //this.scene.add(person);
         });
     }
 
@@ -209,6 +209,7 @@ class Forest {
 
     update() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
+
         const sizeOuter = this.config.forest.ground + 2 * coverage;
         const sizeInner = this.config.forest.ground;
 
@@ -225,6 +226,7 @@ class Forest {
         this.treePositions = [];
         for (let k = 0; k <= 2; k++) {
             const treePositions = [];
+
             for (let i = 0; i < gridCount; i++) {
                 for (let j = 0; j < gridCount; j++) {
                     // calculate min and max values within grid
@@ -255,10 +257,12 @@ class Forest {
             }
         });
 
-        // update persons
+        // update persons // TEMP
+        /*
         const personMargin = 2;
         const personPositionMin = -sizeInner / 2 + personMargin;
         const personPositionMax = sizeInner / 2 - personMargin;
+        */
 
         // calculate person positions
         this.personPositions = [];
@@ -319,25 +323,32 @@ class Forest {
             this.trees = [];
 
             // remove all persons
-            this.persons.forEach((person) => { this.scene.remove(person); });
+            this.persons.forEach((person) => { person.remove(); });
             this.persons = [];
         }
 
-        // remove trees
+        // remove trees and shrink list
         for (let i = (this.trees.length - 1); i >= this.config.forest.size; i--) {
             this.scene.remove(this.trees[i]);
             this.trees.splice(i, 1);
         }
 
-        // remove persons
-        for (let i = (this.persons.length - 1); i >= 0; i--) {
-            this.scene.remove(this.persons[i]);
+        // extend list for missing trees
+        const missingTrees = this.config.forest.size - this.trees.length;
+        if (missingTrees > 0) {
+            this.trees.push.apply(this.trees, [...new Array(missingTrees)]);
+        }
+
+        // remove persons and shrink list
+        for (let i = (this.persons.length - 1); i >= this.config.forest.persons.count; i--) {
+            this.persons[i].remove();
             this.persons.splice(i, 1);
         }
 
-        const appendTrees = this.config.forest.size - this.trees.length;
-        if (appendTrees > 0) {
-            this.trees.push.apply(this.trees, [...new Array(appendTrees)]);
+        // extend list for missing persons
+        const missingPersons = this.config.forest.persons.count - this.persons.length;
+        if (missingPersons > 0) {
+            this.persons.push.apply(this.persons, [...new Array(missingPersons)]);
         }
     }
 
@@ -345,6 +356,6 @@ class Forest {
         this.clear();
         this.update();
 
-        this.addPersons();
+        //this.addPersons();
     }
 };

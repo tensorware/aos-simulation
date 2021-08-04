@@ -237,7 +237,7 @@ class Person {
             -Math.sin(rad(this.direction - 90))
         ));
 
-        const speed = 1.65;
+        const speed = 1.65 * 5;
         const moveDuration = start.distanceTo(end) / speed;
 
         // calculate time
@@ -260,7 +260,7 @@ class Person {
                 const left = current.x <= personPositionMin;
                 const right = current.x >= personPositionMax;
 
-                // check boundary 
+                // check boundary
                 const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
                 if (boundaryReached) {
                     const oppositeDirections = {
@@ -285,6 +285,10 @@ class Person {
 
     export(zip) {
         // TODO
+    }
+
+    remove() {
+        log("TODO");
     }
 
     clear() {
