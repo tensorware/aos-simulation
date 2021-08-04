@@ -22,13 +22,13 @@ class View {
             // set config
             setConfig(this.config, getHash());
 
+            // update forest
+            this.forest.update();
+
             // update drone
             this.drone.setEastWest(this.config.drone.eastWest);
             this.drone.setNorthSouth(this.config.drone.northSouth);
             this.drone.update();
-
-            // update forest
-            this.forest.update();
         });
     }
 
@@ -73,22 +73,20 @@ class View {
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
         forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(() => {
-            this.drone.clear();
-            this.drone.update();
-
             this.forest.clear();
             this.forest.update();
             this.forest.addTrees();
             this.forest.addPersons();
+
+            this.drone.reset();
         });
         forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
-            this.drone.clear();
-            this.drone.update();
-
             this.forest.clear(true);
             this.forest.update();
             this.forest.addTrees();
             this.forest.addPersons();
+
+            this.drone.reset();
         });
 
         // trees folder
