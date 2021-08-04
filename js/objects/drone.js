@@ -224,9 +224,6 @@ class Drone {
                 await sleep(10);
             }
 
-            // TEMP
-            this.flying = false;
-
             // swap direction
             dir = dir * -1;
         }
