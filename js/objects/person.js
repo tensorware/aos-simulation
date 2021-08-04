@@ -7,16 +7,14 @@ class Person {
         this.forest = forest;
         this.index = index;
 
-        const sizeInner = this.config.forest.ground;
-
         const personMargin = 1;
-        const personPositionMin = -sizeInner / 2 + personMargin;
-        const personPositionMax = sizeInner / 2 - personMargin;
+        const personPositionMin = -this.config.forest.ground / 2 + personMargin;
+        const personPositionMax = this.config.forest.ground / 2 - personMargin;
 
         this.initialPosition = new THREE.Vector3(
-            0,//randomFloat(personPositionMin, personPositionMax),
+            randomFloat(personPositionMin, personPositionMax),
             0.02,
-            0//randomFloat(personPositionMin, personPositionMax)
+            randomFloat(personPositionMin, personPositionMax)
         );
         this.initialDirection = randomInt(0, 360, index);
 
@@ -25,42 +23,55 @@ class Person {
 
         this.allActions = [];
         this.baseActions = {
-            idle: { weight: 1 },
-            walk: { weight: 0 },
-            run: { weight: 0 }
+            idle: {
+                weight: 1
+            },
+            walk: {
+                weight: 0
+            },
+            run: {
+                weight: 0
+            }
+        };
+        this.poseActions = {
+            sneak_pose: {
+                weight: 0
+            },
+            sad_pose: {
+                weight: 0
+            },
+            agree: {
+                weight: 0
+            },
+            headShake: {
+                weight: 0
+            }
         };
 
-        this.additiveActions = {
-            sneak_pose: { weight: 0 },
-            sad_pose: { weight: 0 },
-            agree: { weight: 0 },
-            headShake: { weight: 0 }
-        };
-
-        // TODO
+        this.currentActivity;
         this.activityMapping = {
             'idle': {
                 name: 'idle',
                 speed: 0.0
             },
             'laying': {
-                name: 'idle',
+                name: 'idle', // TODO
                 speed: 0.0
             },
             'sitting': {
-                name: 'idle',
+                name: 'idle', // TODO
                 speed: 0.0
             },
             'standing': {
-                name: 'idle',
+                name: 'idle', // TODO
                 speed: 0.0
             },
             'waving': {
-                name: 'idle',
+                name: 'idle', // TODO
                 speed: 0.0
             },
             'injured': {
-                name: 'idle',
+                name: 'idle', // TODO
                 speed: 0.0
             },
             'walking': {
@@ -72,55 +83,51 @@ class Person {
                 speed: 3.63
             }
         };
-        this.currentActivity;
 
         this.clock = new THREE.Clock();
 
         this.loaded = new Promise(function (resolve) {
             new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
                 this.person = gltf.scene;
-                this.person.traverse((obj) => {
-                    if (obj.isMesh) {
-                        obj.castShadow = true;
+                this.person.traverse((p) => {
+                    if (p.isMesh) {
+                        p.castShadow = true;
                     }
                 });
                 this.setPosition(this.initialPosition, this.initialDirection);
 
+                // init animation mixer
+                this.animations = gltf.animations.length;
                 this.mixer = new THREE.AnimationMixer(this.person);
 
-                this.numAnimations = gltf.animations.length;
-                for (let i = 0; i < this.numAnimations; ++i) {
+                // init actions
+                for (let i = 0; i < this.animations; ++i) {
                     let clip = gltf.animations[i];
+                    let name = clip.name;
 
-                    const name = clip.name;
                     if (this.baseActions[name]) {
+                        // add base action
                         const action = this.mixer.clipAction(clip);
-                        this.activateAction(action);
+                        this.addAction(action);
                         this.baseActions[name].action = action;
-                        this.allActions.push(action);
                     }
-                    else if (this.additiveActions[name]) {
+                    else if (this.poseActions[name]) {
+                        // additive clip
                         THREE.AnimationUtils.makeClipAdditive(clip);
                         if (clip.name.endsWith('_pose')) {
                             clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30);
                         }
 
+                        // add pose action
                         const action = this.mixer.clipAction(clip);
-                        this.activateAction(action);
-                        this.additiveActions[name].action = action;
-                        this.allActions.push(action);
+                        this.addAction(action);
+                        this.poseActions[name].action = action;
                     }
                 }
 
-                this.setActivity(this.currentActivity, this.getActivity(), 0.2);
+                this.setActivity();
                 this.addPerson();
                 this.update();
-
-                // TEMP
-                sleep(2000).then(() => {
-                    const endActivity = this.activityMapping['running'];
-                    this.setActivity(this.currentActivity, endActivity, 0.2);
-                });
 
                 this.animate = this.animate.bind(this);
                 requestAnimationFrame(this.animate);
@@ -134,15 +141,15 @@ class Person {
         this.scene.add(this.person);
     }
 
-    activateAction(action) {
+    addAction(action) {
         const clip = action.getClip();
-        const settings = this.baseActions[clip.name] || this.additiveActions[clip.name];
+        const settings = this.baseActions[clip.name] || this.poseActions[clip.name];
         this.setWeight(action, settings.weight);
-
+        this.allActions.push(action);
         action.play();
     }
 
-    setActivity(startActivity, endActivity, duration) {
+    crossFade(startActivity, endActivity, duration) {
         const startActivityName = startActivity ? startActivity.name : this.activityMapping['idle'].name;
         const endActivityName = endActivity.name;
 
@@ -157,7 +164,9 @@ class Person {
 
         // execute cross fade
         if (!startActivity || startActivityName !== endActivityName) {
-            this.crossFade(startAction, endAction, duration);
+            this.setWeight(endAction, 1);
+            endAction.time = 0;
+            startAction.crossFadeTo(endAction, duration, true);
         }
 
         // set current activity
@@ -181,6 +190,10 @@ class Person {
         const randomActivity = activeActivities[randomIndex];
 
         return randomActivity || this.activityMapping['idle'];
+    }
+
+    setActivity() {
+        this.crossFade(this.currentActivity, this.getActivity(), 0.2);
     }
 
     setWeight(action, weight) {
@@ -207,28 +220,11 @@ class Person {
         this.person.setRotationFromEuler(rotation);
     }
 
-    crossFade(startAction, endAction, duration) {
-        if (endAction) {
-            this.setWeight(endAction, 1);
-            endAction.time = 0;
-
-            if (startAction) {
-                startAction.crossFadeTo(endAction, duration, true);
-            }
-            else {
-                endAction.fadeIn(duration);
-            }
-        }
-        else {
-            startAction.fadeOut(duration);
-        }
-    }
-
     async animate() {
-        for (let i = 0; i < this.numAnimations; ++i) {
+        for (let i = 0; i < this.animations; ++i) {
             const action = this.allActions[i];
             const clip = action.getClip();
-            const settings = this.baseActions[clip.name] || this.additiveActions[clip.name];
+            const settings = this.baseActions[clip.name] || this.poseActions[clip.name];
             settings.weight = action.getEffectiveWeight();
         }
 
@@ -240,12 +236,10 @@ class Person {
     }
 
     async update() {
-        const sizeInner = this.config.forest.ground;
-
         // ground position constraints
         const personMargin = 1;
-        const personPositionMin = -sizeInner / 2 + personMargin;
-        const personPositionMax = sizeInner / 2 - personMargin;
+        const personPositionMin = -this.config.forest.ground / 2 + personMargin;
+        const personPositionMax = this.config.forest.ground / 2 - personMargin;
 
         // update action mixer time
         this.mixer.update(this.clock.getDelta());
@@ -303,7 +297,7 @@ class Person {
     }
 
     async export(zip) {
-        // TODO
+        // TODO export json
     }
 
     async clear() {
