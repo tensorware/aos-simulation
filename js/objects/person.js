@@ -255,25 +255,26 @@ class Person {
 
             // boundary detection
             if (this.mixer.time > 0.1) {
-                if (current.x <= personPositionMin) {
-                    // Q1, Q4
+                const top = current.z <= personPositionMin;
+                const bottom = current.z >= personPositionMax;
+                const left = current.x <= personPositionMin;
+                const right = current.x >= personPositionMax;
+
+                // check boundary 
+                const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
+                if (boundaryReached) {
+                    const oppositeDirections = {
+                        'top': randomInt(185, 355, this.direction),
+                        'bottom': randomInt(5, 175, this.direction),
+                        'left': randomInt(85, -85, this.direction),
+                        'right': randomInt(95, 265, this.direction)
+                    };
+
+                    // reset time
                     this.mixer.setTime(0.0);
-                    this.setPosition(current, randomInt(85, -85, this.direction));
-                }
-                else if (current.x >= personPositionMax) {
-                    // Q2, Q3
-                    this.mixer.setTime(0.0);
-                    this.setPosition(current, randomInt(95, 265, this.direction));
-                }
-                else if (current.z <= personPositionMin) {
-                    // Q3, Q4
-                    this.mixer.setTime(0.0);
-                    this.setPosition(current, randomInt(185, 355, this.direction));
-                }
-                else if (current.z >= personPositionMax) {
-                    // Q1, Q2
-                    this.mixer.setTime(0.0);
-                    this.setPosition(current, randomInt(5, 175, this.direction));
+
+                    // move to opposite direction in a random angle
+                    this.setPosition(current, oppositeDirections[boundaryReached]);
                 }
             }
         }
