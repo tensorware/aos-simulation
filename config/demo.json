@@ -48,9 +48,9 @@
         "persons": {
             "count": 1,
             "activities": {
-                "lying": false,
+                "laying": false,
                 "sitting": false,
-                "standing": false,
+                "standing": true,
                 "waving": false,
                 "injured": false,
                 "walking": true,
