@@ -26,9 +26,8 @@ class View {
             await this.forest.update();
 
             // update drone
-            this.drone.setEastWest(this.config.drone.eastWest);
-            this.drone.setNorthSouth(this.config.drone.northSouth);
-            await this.drone.update();
+            await this.drone.setEastWest(this.config.drone.eastWest);
+            await this.drone.setNorthSouth(this.config.drone.northSouth);
         });
     }
 
