@@ -130,18 +130,13 @@ class View {
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        const personsFolders = [
-            personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1)
-        ];
-        Object.keys(this.config.forest.persons.activities).forEach((activity) => {
-            personsFolders.push(personsFolder.add(this.config.forest.persons.activities, activity))
+        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onFinishChange(() => {
+            this.forest.removePersons();
+            this.forest.addPersons();
         });
-
-        // persons folders
-        personsFolders.forEach((folder) => {
-            folder.onFinishChange(() => {
-                this.forest.removePersons();
-                this.forest.addPersons();
+        Object.keys(this.config.forest.persons.activities).forEach((activity) => {
+            personsFolder.add(this.config.forest.persons.activities, activity).onFinishChange(() => {
+                this.forest.persons.forEach(async (person) => { person.setActivity(); });
             });
         });
 
