@@ -41,8 +41,12 @@ class View {
     }
 
     controls(root) {
+        // gui state
+        const state = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+
         // init gui
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
+        this.gui.closed = state.closed || false;
         this.gui.useLocalStorage = true;
         root.append(this.gui.domElement);
 
@@ -77,7 +81,6 @@ class View {
             this.forest.addTrees();
             this.forest.addPersons();
         });
-
         forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
             this.drone.clear();
             this.drone.update();
@@ -145,11 +148,11 @@ class View {
             personsFolder.add(this.config.forest.persons.activities, k).onChange(() => { /* TODO */ });
         })
 
-        // materials folder
-        const materialsFolder = this.gui.addFolder('material');
+        // material folder
+        const materialFolder = this.gui.addFolder('material');
 
         // color folder
-        const colorFolder = materialsFolder.addFolder('color');
+        const colorFolder = materialFolder.addFolder('color');
         //colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
         //colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
@@ -163,7 +166,7 @@ class View {
             window.location.reload();
         });
 
-        // simulation data
+        // config actions
         this.gui.add(this, 'capture');
         this.gui.add(this, 'export');
         this.gui.add(this, 'reset');
