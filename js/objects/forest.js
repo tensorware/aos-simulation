@@ -1,16 +1,17 @@
 class Forest {
-    constructor(stage) {
+    constructor(stage, index) {
         this.root = stage.root;
         this.config = stage.config;
         this.scene = stage.scene;
         this.stage = stage;
+        this.index = index;
 
         this.trees = [...new Array(this.config.forest.size)];
         this.persons = [... new Array(this.config.forest.persons.count)];
 
         this.grounds = [];
         this.treePositions = [];
-        this.personPositions = [];
+        //this.personPositions = [];
 
         this.workers = getWorkers();
         this.workersUpdate = [];
@@ -79,19 +80,7 @@ class Forest {
     }
 
     getPerson(index) {
-        const position = new THREE.Vector3(
-            this.personPositions[index].x,
-            this.personPositions[index].y,
-            this.personPositions[index].z
-        );
-        const direction = randomInt(0, 360, index);
-
-        const person = new Person(this);
-        person.loaded.then((self) => {
-            self.setPosition(position, direction);
-        });
-
-        return person;
+        return new Person(this, index);
     }
 
     addGround() {
@@ -207,7 +196,7 @@ class Forest {
         this.workersUpdate.push(cb);
     }
 
-    update() {
+    async update() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
 
         const sizeOuter = this.config.forest.ground + 2 * coverage;
@@ -262,8 +251,7 @@ class Forest {
         const personMargin = 2;
         const personPositionMin = -sizeInner / 2 + personMargin;
         const personPositionMax = sizeInner / 2 - personMargin;
-        */
-
+        
         // calculate person positions
         this.personPositions = [];
         for (let i = 0; i <= 1000; i++) {
@@ -273,6 +261,7 @@ class Forest {
                 z: 0.0  // randomFloat(personPositionMin, personPositionMax) // TEMP
             });
         }
+        */
 
         // hide persons // TEMP
         /*
@@ -298,12 +287,13 @@ class Forest {
         }
     }
 
-    export(zip) {
+    async export(zip) {
         const forest = zip.folder('forest');
 
         // export trees
         const trees = { positions: [] };
         for (let i = 0; i < this.trees.length; i++) {
+            // TODO only visible positions
             trees.positions.push(this.treePositions[i]);
         }
         forest.file('trees.json', JSON.stringify(trees, null, 4));
@@ -311,12 +301,16 @@ class Forest {
         // export persons
         const persons = { positions: [] };
         for (let i = 0; i < this.persons.length; i++) {
-            persons.positions.push(this.personPositions[i]);
+            // TODO move to image capture function
+            //persons.positions.push(this.personPositions[i]);
         }
         forest.file('persons.json', JSON.stringify(persons, null, 4));
     }
 
-    clear(full) {
+    async clear(full) {
+        // clear all persons
+        this.persons.forEach((person) => { person.clear(); });
+
         if (full) {
             // remove all trees
             this.trees.forEach((tree) => { this.scene.remove(tree); });
@@ -352,10 +346,10 @@ class Forest {
         }
     }
 
-    reset() {
-        this.clear();
-        this.update();
+    async reset() {
+        await this.clear();
+        await this.update();
 
-        //this.addPersons();
+        await sleep(100);
     }
 };

@@ -1,5 +1,5 @@
 class Image {
-    constructor(camera) {
+    constructor(camera, index) {
         this.root = camera.root;
         this.config = camera.config;
         this.scene = camera.scene;
@@ -7,9 +7,10 @@ class Image {
         this.forest = camera.forest;
         this.drone = camera.drone;
         this.camera = camera;
+        this.index = index;
 
         this.view = this.drone.getView();
-        this.plane = this.camera.capturePlane();
+        this.plane = this.camera.getPlane();
         this.type = this.config.drone.camera.type;
         this.resolution = this.camera.getResolution();
         this.borderPoints = this.camera.viewLines.map(getPoints);

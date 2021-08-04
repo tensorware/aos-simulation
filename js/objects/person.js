@@ -1,10 +1,11 @@
 class Person {
-    constructor(forest) {
+    constructor(forest, index) {
         this.root = forest.root;
         this.config = forest.config;
         this.scene = forest.scene;
         this.stage = forest.stage;
         this.forest = forest;
+        this.index = index;
 
         const width = 1;
         const height = 2;
@@ -26,10 +27,16 @@ class Person {
 
         // ###############################################
 
-        this.position = new THREE.Vector3();
-        this.direction = 90;
+        // initial position and direction
+        this.position = new THREE.Vector3(
+            0.0, // randomFloat(personPositionMin, personPositionMax, index), // TEMP
+            0.02,
+            0.0  // randomFloat(personPositionMin, personPositionMax, index) // TEMP
+        );
+        this.direction = randomInt(0, 360, index);
 
-        this.currentBaseAction = 'idle';
+        this.currentPosition = this.position.clone();
+        this.currentDirection = this.direction;
 
         this.allActions = [];
         this.baseActions = {
@@ -37,6 +44,7 @@ class Person {
             walk: { weight: 0 },
             run: { weight: 0 }
         };
+        this.currentBaseAction = 'idle';
 
         this.additiveActions = {
             sneak_pose: { weight: 0 },
@@ -46,6 +54,7 @@ class Person {
         };
 
         this.clock = new THREE.Clock();
+        this.active = false;
 
         this.loaded = new Promise(function (resolve) {
             new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
@@ -56,12 +65,11 @@ class Person {
                     }
                 });
 
-                this.animations = gltf.animations;
                 this.mixer = new THREE.AnimationMixer(this.person);
 
-                this.numAnimations = this.animations.length;
-                for (let i = 0; i !== this.numAnimations; ++i) {
-                    let clip = this.animations[i];
+                this.numAnimations = gltf.animations.length;
+                for (let i = 0; i < this.numAnimations; ++i) {
+                    let clip = gltf.animations[i];
 
                     const name = clip.name;
                     if (this.baseActions[name]) {
@@ -90,6 +98,7 @@ class Person {
                 let endAction = this.baseActions[this.getAction()].action;
                 this.prepareCrossFade(startAction, endAction, 0.35);
 
+                this.active = true;
                 this.animate = this.animate.bind(this);
                 requestAnimationFrame(this.animate);
 
@@ -99,6 +108,7 @@ class Person {
     }
 
     addPerson() {
+        this.setPosition(this.position, this.direction);
         this.scene.add(this.person);
     }
 
@@ -148,17 +158,16 @@ class Person {
     }
 
     setPosition(position, direction) {
-        // initial position and direction
-        this.position = position;
-        this.direction = 90 + direction;
+        this.currentPosition = position;
+        this.currentDirection = direction;
 
         // set position
-        this.person.position.x = this.position.x;
-        this.person.position.y = this.position.y;
-        this.person.position.z = this.position.z;
+        this.person.position.x = this.currentPosition.x;
+        this.person.position.y = this.currentPosition.y;
+        this.person.position.z = this.currentPosition.z;
 
         // set rotation
-        const rotation = new THREE.Euler(0, rad(this.direction), 0, 'XYZ');
+        const rotation = new THREE.Euler(0, rad(this.currentDirection + 90), 0, 'XYZ');
         this.person.setRotationFromEuler(rotation);
     }
 
@@ -206,20 +215,28 @@ class Person {
         }
     }
 
-    animate() {
-        requestAnimationFrame(this.animate);
-
-        for (let i = 0; i !== this.numAnimations; ++i) {
+    async animate() {
+        for (let i = 0; i < this.numAnimations; ++i) {
             const action = this.allActions[i];
             const clip = action.getClip();
             const settings = this.baseActions[clip.name] || this.additiveActions[clip.name];
             settings.weight = action.getEffectiveWeight();
         }
 
-        this.update();
+        // update person position
+        await this.update();
+
+        if (this.active) {
+            // next animation
+            requestAnimationFrame(this.animate);
+        }
+        else {
+            // reset actions
+            this.mixer.stopAllAction();
+        }
     }
 
-    update() {
+    async update() {
         const sizeInner = this.config.forest.ground;
 
         const personMargin = 1;
@@ -230,14 +247,14 @@ class Person {
         this.mixer.update(this.clock.getDelta());
 
         // trajectory coordinates
-        const start = this.position;
+        const start = this.currentPosition;
         const end = start.clone().add(new THREE.Vector3(
-            Math.cos(rad(this.direction - 90)),
+            Math.cos(rad(this.currentDirection)),
             0,
-            -Math.sin(rad(this.direction - 90))
+            -Math.sin(rad(this.currentDirection))
         ));
 
-        const speed = 1.65 * 5;
+        const speed = 1.65 * 2;
         const moveDuration = start.distanceTo(end) / speed;
 
         // calculate time
@@ -264,39 +281,45 @@ class Person {
                 const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
                 if (boundaryReached) {
                     const oppositeDirections = {
-                        'top': randomInt(185, 355, this.direction),
-                        'bottom': randomInt(5, 175, this.direction),
-                        'left': randomInt(85, -85, this.direction),
-                        'right': randomInt(95, 265, this.direction)
+                        'top': randomInt(185, 355, this.currentDirection),
+                        'bottom': randomInt(5, 175, this.currentDirection),
+                        'left': randomInt(85, -85, this.currentDirection),
+                        'right': randomInt(95, 265, this.currentDirection)
                     };
 
                     // reset time
                     this.mixer.setTime(0.0);
 
-                    // move to opposite direction in a random angle
+                    // move to opposite direction using a random angle
                     this.setPosition(current, oppositeDirections[boundaryReached]);
                 }
             }
         }
 
         // render
-        this.stage.render();
+        await this.stage.render();
     }
 
-    export(zip) {
+    async export(zip) {
         // TODO
     }
 
-    remove() {
-        log("TODO");
+    async clear() {
+        // reset time
+        this.mixer.setTime(0.0);
+
+        // set initial position
+        this.setPosition(this.position, this.direction);
     }
 
-    clear() {
-        // TODO
+    async remove() {
+        this.scene.remove(this.person);
     }
 
-    reset() {
-        this.clear();
-        this.update();
+    async reset() {
+        await this.clear();
+        await this.update();
+
+        await sleep(100);
     }
 };

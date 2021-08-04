@@ -60,25 +60,25 @@ class Stage {
         }.bind(this));
     }
 
-    animate() {
+    async animate() {
+        await this.render();
         requestAnimationFrame(this.animate);
-        this.controls.update();
-        this.render();
     }
 
-    render() {
+    async render() {
         this.stats.begin();
+        this.controls.update();
         this.renderer.render(this.scene, this.camera);
         this.stats.end();
     }
 
-    update() {
+    async update() {
         this.renderer.setSize(this.root.clientWidth, this.root.clientHeight);
         this.camera.aspect = this.root.clientWidth / this.root.clientHeight;
         this.camera.updateProjectionMatrix();
     }
 
-    export(zip) {
+    async export(zip) {
         const stage = zip.folder('stage');
 
         // navigator
@@ -118,7 +118,7 @@ class Stage {
         stage.file('image.png', image, { base64: true });
     }
 
-    reset() {
+    async reset() {
         const size = this.config.forest.ground;
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const height = (size + 2 * coverage) / (2 * Math.tan(rad(this.fov / 2)));
@@ -130,8 +130,10 @@ class Stage {
         this.camera.position.set(0.0, 10.0, 10.0);
 
         this.controls.target.set(0.0, 0.0, 0.0);
-        this.controls.update();
-        this.update();
-        this.render();
+
+        await this.update();
+        await this.render();
+
+        await sleep(100);
     }
 };

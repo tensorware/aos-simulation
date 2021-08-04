@@ -59,7 +59,7 @@ const doubleClick = (callback) => {
         which = -1;
         state = 0;
     };
-    reset()
+    reset();
     return (e) => {
         if (state === 0) {
             which = e.which;
@@ -221,6 +221,10 @@ const clone = (obj) => {
     return JSON.parse(JSON.stringify(obj));
 };
 
+const sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const log = (...arguments) => {
     let level = 'log';
     let args = Array.from(arguments);
@@ -247,11 +251,12 @@ const log = (...arguments) => {
     }
 };
 
-Date.prototype.yyyymmddhhmm = function () {
+Date.prototype.yyyymmddhhmmss = function () {
     const yyyy = this.getFullYear();
     const mm = this.getMonth() < 9 ? '0' + (this.getMonth() + 1) : (this.getMonth() + 1);
     const dd = this.getDate() < 10 ? '0' + this.getDate() : this.getDate();
     const hh = this.getHours() < 10 ? '0' + this.getHours() : this.getHours();
     const min = this.getMinutes() < 10 ? '0' + this.getMinutes() : this.getMinutes();
-    return yyyy + '-' + mm + '-' + dd + '-' + hh + '-' + min;
+    const sec = this.getSeconds() < 10 ? '0' + this.getSeconds() : this.getSeconds();
+    return yyyy + '-' + mm + '-' + dd + '-' + hh + '-' + min + '-' + sec;
 };

@@ -1,11 +1,12 @@
 class Camera {
-    constructor(drone) {
+    constructor(drone, index) {
         this.root = drone.root;
         this.config = drone.config;
         this.scene = drone.scene;
         this.stage = drone.stage;
         this.forest = drone.forest;
         this.drone = drone;
+        this.index = index;
 
         this.rays = [];
         this.boxes = [];
@@ -119,7 +120,7 @@ class Camera {
         return new THREE.Vector3(this.config.drone.camera.resolution, 0, this.config.drone.camera.resolution);
     }
 
-    capturePlane() {
+    getPlane() {
         // rectangle
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
@@ -145,12 +146,12 @@ class Camera {
         return rectangle;
     }
 
-    capture(preview) {
-        const image = new Image(this);
-        return image.capture(preview);
+    async capture(preview) {
+        const image = new Image(this, this.images.length);
+        return await image.capture(preview);
     }
 
-    update() {
+    async update() {
         const view = this.drone.getView();
 
         const distance = this.config.drone.speed * this.config.drone.cpu.speed;
@@ -203,11 +204,12 @@ class Camera {
         this.renderer.render(this.scene, this.camera);
     }
 
-    export(zip) {
+    async export(zip) {
         const camera = zip.folder('camera');
 
         const images = { captures: [] };
         this.images.forEach((image, index) => {
+            // TODO use image.index
             const number = index + 1;
 
             images.captures.push({
@@ -227,7 +229,7 @@ class Camera {
         camera.file('camera.json', JSON.stringify(images, null, 4));
     }
 
-    clear() {
+    async clear() {
         // clear planes
         this.planes.forEach((capture) => { this.scene.remove(capture); });
         this.planes = [];
@@ -242,14 +244,16 @@ class Camera {
 
         // clear images
         this.images = [];
-        this.slider.clear();
+        await this.slider.clear();
 
         // add initial preview
         this.addPreview();
     }
 
-    reset() {
-        this.clear();
-        this.update();
+    async reset() {
+        await this.clear();
+        await this.update();
+
+        await sleep(100);
     }
 };

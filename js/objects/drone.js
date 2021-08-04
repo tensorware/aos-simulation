@@ -1,17 +1,20 @@
 class Drone {
-    constructor(forest) {
+    constructor(forest, index) {
         this.root = forest.root;
         this.config = forest.config;
         this.scene = forest.scene;
         this.stage = forest.stage;
         this.forest = forest;
+        this.index = index;
+
+        this.flying = false;
+        this.goal = { x: 0, y: 0 };
 
         this.loaded = new Promise(function (resolve) {
-            new THREE.STLLoader().load('models/drone.stl', ((droneGeometry) => {
-                this.flying = false;
-                this.goal = { x: 0, y: 0 };
-
+            new THREE.STLLoader().load('models/drone.stl', ((stl) => {
+                const droneGeometry = stl;
                 droneGeometry.rotateX(rad(-90)).rotateY(rad(-90)).translate(0, 0, 0);
+
                 const droneMaterial = new THREE.MeshStandardMaterial({
                     color: 0x666666,
                     roughness: 0.8,
@@ -19,10 +22,8 @@ class Drone {
                 });
 
                 const scale = 0.15;
-                const droneMesh = new THREE.Mesh(droneGeometry, droneMaterial);
-                droneMesh.scale.set(scale, scale, scale);
-                this.drone = droneMesh;
-
+                this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
+                this.drone.scale.set(scale, scale, scale);
                 this.drone.position.x = this.config.drone.eastWest;
                 this.drone.position.y = this.config.drone.height;
                 this.drone.position.z = this.config.drone.northSouth;
@@ -47,7 +48,7 @@ class Drone {
     }
 
     addCamera() {
-        this.camera = new Camera(this);
+        this.camera = new Camera(this, this.index);
     }
 
     setEastWest(position) {
@@ -114,7 +115,7 @@ class Drone {
         }
     }
 
-    animate(currentTime) {
+    async animate(currentTime) {
         if (!currentTime) {
             this.startTime = 0;
             this.lastCapture = 0;
@@ -154,12 +155,12 @@ class Drone {
             // update drone position
             this.drone.position.x = current.x;
             this.drone.position.z = current.z;
-            this.update();
+            await this.update();
 
             // capture image
             if (deltaDistance >= this.config.drone.camera.sampling) {
                 this.lastCapture = Math.floor(currentDistance);
-                this.camera.capture(true);
+                await this.camera.capture(true);
             }
 
             if (this.flying) {
@@ -182,79 +183,80 @@ class Drone {
         }
     }
 
-    capture() {
-        return new Promise(async (resolve) => {
-            const view = this.getView();
+    async capture() {
+        const view = this.getView();
 
-            const start = {
-                x: Math.round(-this.config.forest.ground / 2 - view.r),
-                y: 0,
-                z: Math.round(-this.config.forest.ground / 2 + view.r)
-            };
+        const start = {
+            x: Math.round(-this.config.forest.ground / 2 - view.r),
+            y: 0,
+            z: Math.round(-this.config.forest.ground / 2 + view.r)
+        };
 
-            const end = {
-                x: Math.round(this.config.forest.ground / 2 + view.r),
-                y: 0,
-                z: Math.round(this.config.forest.ground / 2 + view.r)
-            };
+        const end = {
+            x: Math.round(this.config.forest.ground / 2 + view.r),
+            y: 0,
+            z: Math.round(this.config.forest.ground / 2 + view.r)
+        };
 
-            const step = {
-                x: this.config.drone.camera.sampling,
-                y: 0,
-                z: view.r * 2
-            };
+        const step = {
+            x: this.config.drone.camera.sampling,
+            y: 0,
+            z: view.r * 2
+        };
 
-            // flight start
-            this.flying = true;
+        // flight start
+        this.flying = true;
 
-            // update drone position
-            let dir = 1;
-            for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
-                this.setNorthSouth(z);
+        // update drone position
+        let dir = 1;
+        for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
+            this.setNorthSouth(z);
 
-                for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
-                    this.setEastWest(x * dir);
+            for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
+                this.setEastWest(x * dir);
 
-                    // capture image
-                    await this.camera.capture(false);
-                    await new Promise((r) => { setTimeout(r, 10); });
-                }
+                // capture image
+                await this.camera.capture(false);
 
-                // swap direction
-                dir = dir * -1;
+                // TODO check if still necessary
+                await sleep(10);
             }
 
-            // reset drone position
-            this.drone.position.x = 0.0;
-            this.drone.position.z = 0.0;
-
-            // reset config position
-            this.config.drone.eastWest = this.drone.position.x;
-            this.config.drone.northSouth = this.drone.position.z;
-
-            // flight stop
+            // TEMP
             this.flying = false;
-            this.update();
 
-            resolve();
-        });
+            // swap direction
+            dir = dir * -1;
+        }
+
+        // reset drone position
+        this.drone.position.x = 0.0;
+        this.drone.position.z = 0.0;
+
+        // reset config position
+        this.config.drone.eastWest = this.drone.position.x;
+        this.config.drone.northSouth = this.drone.position.z;
+
+        // flight stop
+        this.flying = false;
+        await this.update();
     }
 
-    update() {
+    async update() {
         if (this.drone) {
             this.drone.position.y = this.config.drone.height;
 
             // update camera
             if (this.camera) {
-                this.camera.update();
+                await this.camera.update();
             }
         }
 
         // render
-        this.stage.render();
+        await this.stage.render();
     }
 
-    export(zip) {
+    async export(zip) {
         const drone = zip.folder('drone');
 
         // export drone
@@ -265,11 +267,11 @@ class Drone {
 
         // export camera
         if (this.camera) {
-            this.camera.export(drone);
+            await this.camera.export(drone);
         }
     }
 
-    clear() {
+    async clear() {
         // flight abort
         this.flying = false;
 
@@ -278,12 +280,14 @@ class Drone {
         this.setNorthSouth(0.0);
 
         if (this.camera) {
-            this.camera.clear();
+            await this.camera.clear();
         }
     }
 
-    reset() {
-        this.clear();
-        this.update();
+    async reset() {
+        await this.clear();
+        await this.update();
+
+        await sleep(100);
     }
 };

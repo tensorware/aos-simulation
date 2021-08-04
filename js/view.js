@@ -12,23 +12,23 @@ class View {
             this.splitter(['#top', '#bottom']);
 
             // load objects
-            this.forest = new Forest(this.stage);
-            this.drone = new Drone(this.forest);
+            this.forest = new Forest(this.stage, 0);
+            this.drone = new Drone(this.forest, 0);
             this.forest.onUpdate(this.drone.update.bind(this.drone));
         });
 
         // update config from hash parameters
-        window.addEventListener('hashchange', () => {
+        window.addEventListener('hashchange', async () => {
             // set config
             setConfig(this.config, getHash());
 
             // update forest
-            this.forest.update();
+            await this.forest.update();
 
             // update drone
             this.drone.setEastWest(this.config.drone.eastWest);
             this.drone.setNorthSouth(this.config.drone.northSouth);
-            this.drone.update();
+            await this.drone.update();
         });
     }
 
@@ -72,21 +72,23 @@ class View {
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
-        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(() => {
-            this.forest.clear();
-            this.forest.update();
+        forestFolder.add(this.config.forest, 'size', 0, 2000, 1).onFinishChange(async () => {
+            await this.forest.clear();
+            await this.forest.update();
+
             this.forest.addTrees();
             this.forest.addPersons();
 
-            this.drone.reset();
+            await this.drone.reset();
         });
-        forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(() => {
-            this.forest.clear(true);
-            this.forest.update();
+        forestFolder.add(this.config.forest, 'ground', 10, 500, 1).onFinishChange(async () => {
+            await this.forest.clear(true);
+            await this.forest.update();
+
             this.forest.addTrees();
             this.forest.addPersons();
 
-            this.drone.reset();
+            await this.drone.reset();
         });
 
         // trees folder
@@ -140,7 +142,9 @@ class View {
         const personsFolder = forestFolder.addFolder('persons');
         personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onChange(() => { /* TODO */ });
         Object.keys(this.config.forest.persons.activities).forEach((k) => {
-            personsFolder.add(this.config.forest.persons.activities, k).onChange(() => { /* TODO */ });
+            personsFolder.add(this.config.forest.persons.activities, k).onChange(() => {
+                /* TODO */
+            });
         })
 
         // material folder
@@ -187,19 +191,25 @@ class View {
         this.stage.update();
     }
 
-    capture() {
-        this.reset();
+    async capture() {
+        const date = new Date().yyyymmddhhmmss();
 
-        // capture images and export
-        this.drone.capture().then(() => {
-            this.stage.reset();
-            this.export();
-        });
+        // reset forest and drone
+        await this.reset();
+
+        // capture drone images
+        await this.drone.capture()
+
+        // reset stage camera
+        await this.stage.reset();
+
+        // export zip file
+        await this.export(date);
     }
 
-    export() {
+    async export(date) {
         const zip = new JSZip();
-        const name = `${document.title}-${new Date().yyyymmddhhmm()}.zip`;
+        const zipName = `${document.title}-${date || new Date().yyyymmddhhmmss()}.zip`;
 
         // add folders
         this.stage.export(zip);
@@ -210,14 +220,14 @@ class View {
         zip.file('config.json', JSON.stringify(this.config, null, 4));
 
         // generate zip
-        zip.generateAsync({ type: 'blob' }).then((data) => {
-            saveAs(data, name);
+        zip.generateAsync({ type: 'blob' }).then((zipData) => {
+            saveAs(zipData, zipName);
         });
     }
 
-    reset() {
-        this.forest.reset();
-        this.drone.reset();
+    async reset() {
+        await this.forest.reset();
+        await this.drone.reset();
     }
 };
 

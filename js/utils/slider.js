@@ -64,8 +64,11 @@ class Slider {
         this.images.append(image);
 
         // update width and scroll to last child
-        this.update();
-        this.scroll.x = this.width.slider - this.width.images;
+        this.update().then((empty) => {
+            if (!empty) {
+                this.scroll.x = this.width.slider - this.width.images;
+            }
+        });
     }
 
     addPreview(preview) {
@@ -80,39 +83,42 @@ class Slider {
         this.previews.prepend(preview);
     }
 
-    animate() {
+    async animate() {
         // calculate scroll
         this.scroll.x = Math.min(0, Math.max(this.width.slider - this.width.images, this.scroll.x));
         this.scroll.next = interpolate(this.scroll.next, this.scroll.x, 0.2);
 
-        if (this.update()) {
-            const delta = this.scroll.next - this.scroll.start;
+        // update slider
+        this.update().then((empty) => {
+            if (!empty) {
+                const delta = this.scroll.next - this.scroll.start;
 
-            // set positions
-            gsap.set(this.image, {
-                x: (i) => { return i * this.width.image + this.scroll.next; },
-                modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x, 10)) + 'px'; } }
-            });
+                // set positions
+                gsap.set(this.image, {
+                    x: (i) => { return i * this.width.image + this.scroll.next; },
+                    modifiers: { x: (x) => { return gsap.utils.clamp(-this.width.slider, this.width.images, parseInt(x, 10)) + 'px'; } }
+                });
 
-            // animate transitions
-            gsap.to(this.image, {
-                skewX: -delta * 0.1,
-                rotate: delta * 0.01,
-                scale: 1 - Math.min(100, Math.abs(delta)) * 0.003
-            });
+                // animate transitions
+                gsap.to(this.image, {
+                    skewX: -delta * 0.1,
+                    rotate: delta * 0.01,
+                    scale: 1 - Math.min(100, Math.abs(delta)) * 0.003
+                });
 
-            this.scroll.start = this.scroll.next;
-            this.image[this.count - 1].style.zIndex = 1;
-        }
-        else {
-            // reset positions
-            this.scroll = { start: 0, next: 0, x: 0 };
-        }
+                this.scroll.start = this.scroll.next;
+                this.image[this.count - 1].style.zIndex = 1;
+            }
+            else {
+                // reset positions
+                this.scroll = { start: 0, next: 0, x: 0 };
+            }
 
-        requestAnimationFrame(this.animate);
+            requestAnimationFrame(this.animate);
+        });
     }
 
-    update() {
+    async update() {
         this.image = this.images.querySelectorAll('.image:not(.removed)');
         this.preview = this.previews.querySelectorAll('.image:not(.removed)');
 
@@ -126,12 +132,12 @@ class Slider {
                 images: this.count * (this.image[0].firstChild.clientWidth + 4),
                 image: this.image[0].firstChild.clientWidth + 4
             };
+            return false;
         }
-
-        return this.count > 0;
+        return true;
     }
 
-    clear() {
+    async clear() {
         // clear images, all of them
         for (let i = 0; i < this.image.length; i++) {
             this.images.removeChild(this.image[i]);
@@ -143,8 +149,10 @@ class Slider {
         }
     }
 
-    reset() {
-        this.clear();
-        this.update();
+    async reset() {
+        await this.clear();
+        await this.update();
+
+        await sleep(100);
     }
 };
