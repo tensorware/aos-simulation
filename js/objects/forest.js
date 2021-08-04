@@ -59,6 +59,7 @@ class Forest {
     getTree(index) {
         const seed = randomInt(0, this.config.forest.trees.homogeneity * 100, index);
 
+        // merge config
         const config = {
             levels: this.config.forest.trees.levels,
             twigScale: this.config.forest.trees.twigScale,
@@ -66,12 +67,14 @@ class Forest {
             ... this.config.forest.trees.trunk
         };
 
+        // add random config value noise 
         for (let key in config) {
             if (randomFloat(0.0, 1.0, seed) < 0.5) {
                 config[key] = config[key] * randomFloat(this.config.forest.trees.homogeneity / 100, 1.0, seed);
             }
         }
 
+        // set index and seed
         config.index = index;
         config.seed = seed;
 
@@ -218,7 +221,7 @@ class Forest {
         const sizeOuter = this.config.forest.ground + 2 * coverage;
         const sizeInner = this.config.forest.ground;
 
-        // update trees
+        // ground position constraints
         const treeMargin = 1;
         const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
         const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
