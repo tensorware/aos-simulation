@@ -125,10 +125,6 @@ class Stage {
 
         // reset camera position
         this.camera.position.set(0.0, height * 1.1, 0.0);
-
-        // TEMP
-        this.camera.position.set(0.0, 10.0, 10.0);
-
         this.controls.target.set(0.0, 0.0, 0.0);
 
         await this.update();
