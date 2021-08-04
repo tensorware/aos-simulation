@@ -220,7 +220,6 @@ class Forest {
     async update() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const sizeOuter = this.config.forest.ground + 2 * coverage;
-        const sizeInner = this.config.forest.ground;
 
         // ground position constraints
         const treeMargin = 1;
@@ -267,7 +266,7 @@ class Forest {
 
         if (this.grounds.length == 2) {
             // inner ground
-            const planeGeometryInner = new THREE.PlaneGeometry(sizeInner, sizeInner);
+            const planeGeometryInner = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
             planeGeometryInner.rotateX(rad(90)).translate(0, 0, 0);
             this.grounds[0].geometry.copy(planeGeometryInner);
 
@@ -290,12 +289,12 @@ class Forest {
         forest.file('trees.json', JSON.stringify(trees, null, 4));
 
         // export persons
-        const persons = { positions: [] };
-        for (let i = 0; i < this.persons.length; i++) {
-            // TODO move to image capture function
-            //persons.positions.push(this.personPositions[i]);
-        }
-        forest.file('persons.json', JSON.stringify(persons, null, 4));
+        //const persons = { positions: [] };
+        //for (let i = 0; i < this.persons.length; i++) {
+        // TODO move to image capture function
+        //persons.positions.push(this.personPositions[i]);
+        //}
+        //forest.file('persons.json', JSON.stringify(persons, null, 4));
     }
 
     async clear() {
