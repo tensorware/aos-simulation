@@ -216,7 +216,7 @@ class Person {
         this.person.position.z = this.lastPosition.z;
 
         // set rotation
-        const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0, 'XYZ');
+        const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0);
         this.person.setRotationFromEuler(rotation);
     }
 
