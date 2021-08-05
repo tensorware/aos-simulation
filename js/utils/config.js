@@ -104,14 +104,22 @@ const getConfig = async (preset) => {
         fetch(`config/${preset}.json`).then((response) => {
             return response.json();
         }).then((config) => {
-            config.preset = preset;
+            const hash = getHash();
 
             // set config from hash parameters
-            setConfig(config, getHash());
+            setConfig(config, hash);
+            config.preset = preset;
+
+            // update forest persons activities format
+            for (key in config.forest.persons.activities) {
+                const value = String(config.forest.persons.activities[key]);
+                config.forest.persons.activities[key] = value.toLowerCase() === 'true';
+            }
 
             // update material color format
             for (key in config.material.color) {
-                config.material.color[key] = parseInt(config.material.color[key], 16);
+                const value = config.material.color[key];
+                config.material.color[key] = parseInt(value, 16);
             }
 
             // resolve promise
