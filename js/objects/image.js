@@ -9,7 +9,10 @@ class Image {
         this.camera = camera;
         this.index = index;
 
-        this.view = this.drone.getView();
+        const { center, coverage } = this.drone.getView();
+
+        this.center = center;
+        this.coverage = coverage;
         this.plane = this.camera.getPlane();
         this.type = this.config.drone.camera.type;
         this.resolution = this.camera.getResolution();
@@ -39,15 +42,15 @@ class Image {
     }
 
     async getRays() {
-        const cameraVector = new THREE.Vector3(this.view.x, this.view.y, this.view.z);
-        const cornerDistance = Math.sqrt(this.view.r ** 2 + this.view.r ** 2) + 3;
+        const cameraVector = new THREE.Vector3(this.center.x, this.center.y, this.center.z);
+        const cornerDistance = Math.sqrt((this.coverage / 2) ** 2 + (this.coverage / 2) ** 2) + 3;
 
         // nearby persons
         const persons = [];
         this.forest.persons.forEach((person) => {
             if (person && person.visible) {
-                const start = new THREE.Vector3(this.view.x, 0, this.view.z);
-                const end = new THREE.Vector3(person.position.x, 0, this.view.z);
+                const start = new THREE.Vector3(this.center.x, 0, this.center.z);
+                const end = new THREE.Vector3(person.position.x, 0, this.center.z);
 
                 // distance from camera to person
                 const personDistance = start.distanceTo(end);
@@ -61,7 +64,7 @@ class Image {
         const trees = [];
         this.forest.trees.forEach((tree) => {
             if (tree && tree.visible) {
-                const start = new THREE.Vector3(this.view.x, 0, this.view.z);
+                const start = new THREE.Vector3(this.center.x, 0, this.center.z);
                 const end = new THREE.Vector3(tree.position.x, 0, tree.position.z);
 
                 // distance from camera to tree
@@ -156,9 +159,9 @@ class Image {
         const image = {
             rendered: {
                 center: new THREE.Vector3(
-                    this.view.x,
+                    this.center.x,
                     0,
-                    this.view.z
+                    this.center.z
                 ),
                 points: rayPointsGround.map((p) => {
                     return new THREE.Vector3(
@@ -170,9 +173,9 @@ class Image {
             },
             processed: {
                 center: new THREE.Vector3(
-                    Math.round(this.view.x * this.resolution.x / max.x),
+                    Math.round(this.center.x * this.resolution.x / max.x),
                     0,
-                    Math.round(this.view.z * this.resolution.z / max.z)
+                    Math.round(this.center.z * this.resolution.z / max.z)
                 ),
                 points: rayPointsGround.map((p) => {
                     return new THREE.Vector3(
@@ -312,9 +315,9 @@ class Image {
         const image = {
             rendered: {
                 center: new THREE.Vector3(
-                    this.view.x,
+                    this.center.x,
                     0,
-                    this.view.z
+                    this.center.z
                 ),
                 points: visiblePoints.map((p) => {
                     return new THREE.Vector3(
@@ -326,9 +329,9 @@ class Image {
             },
             processed: {
                 center: new THREE.Vector3(
-                    Math.round(this.view.x * this.resolution.x / max.x),
+                    Math.round(this.center.x * this.resolution.x / max.x),
                     0,
-                    Math.round(this.view.z * this.resolution.z / max.z)
+                    Math.round(this.center.z * this.resolution.z / max.z)
                 ),
                 points: visiblePoints
             }

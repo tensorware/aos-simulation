@@ -158,31 +158,23 @@ class Camera {
     }
 
     async update() {
-        const view = this.drone.getView();
-
-        const distance = this.config.drone.speed * this.config.drone.cpu.speed;
-        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
-        const overlap = coverage / distance;
-        const time = coverage / this.config.drone.speed;
-
-        // DEBUG
-        // log('debug', distance, coverage, overlap, time);
+        const { center, coverage, rotation } = this.drone.getView();
 
         // update view lines (camera to corner)
         const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
         this.viewLines.forEach((viewLine, i) => {
-            const x = view.r * corners[i][0] + view.x;
-            const z = view.r * corners[i][1] + view.z;
+            const x = coverage / 2 * corners[i][0] + center.x;
+            const z = coverage / 2 * corners[i][1] + center.z;
 
             viewLine.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(view.x, view.y, view.z),
+                new THREE.Vector3(center.x, center.y, center.z),
                 new THREE.Vector3(x, 0, z)
             ]));
         });
 
         // update plane
         const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(rad(-90)).translate(view.x, 0.01, view.z);
+        rectangleGeometry.rotateX(rad(-90)).translate(center.x, 0.01, center.z);
         this.plane.rectangle.geometry.copy(rectangleGeometry);
         this.plane.border.update();
 
@@ -195,13 +187,14 @@ class Camera {
         // update text position
         const textSize = new THREE.Vector3();
         new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
-        textGeometry.translate(view.x - textSize.x / 2, 0.005, view.z + textSize.z / 2);
+        textGeometry.translate(center.x - textSize.x / 2, 0.005, center.z + textSize.z / 2);
         this.plane.text.geometry.copy(textGeometry);
 
         // update camera position
         this.camera.fov = this.config.drone.camera.view;
-        this.camera.position.set(view.x, view.y, view.z);
-        this.camera.lookAt(view.x, 0, view.z);
+        this.camera.position.set(center.x, center.y, center.z);
+        this.camera.lookAt(center.x, 0, center.z);
+        this.camera.rotateZ(rotation);
         this.camera.updateProjectionMatrix();
 
         // render camera preview
@@ -218,6 +211,7 @@ class Camera {
             // TODO use image.index
             const number = index + 1;
 
+            // TODO add rotation
             images.captures.push({
                 image: number,
                 center: {

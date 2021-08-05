@@ -52,24 +52,19 @@ class Drone {
     }
 
     getView() {
-        // drone position on sky
-        const x = this.drone.position.x;
-        const y = this.drone.position.y;
-        const z = this.drone.position.z;
+        // center
+        const center = this.drone.position.clone();
 
-        // angles from sky to ground
-        const a = this.config.drone.camera.view / 2;
-        const b = 90 - a;
-        const c = y / Math.sin(rad(b));
+        // coverage
+        const coverage = 2 * center.y * Math.tan(rad(this.config.drone.camera.view / 2));
 
-        // field of view "radius" on ground
-        const r = Math.sqrt(c ** 2 - y ** 2);
+        // rotation
+        const rotation = rad(this.config.drone.camera.rotation);
 
         return {
-            x: x,
-            y: y,
-            z: z,
-            r: r
+            center: center,
+            coverage: coverage,
+            rotation: rotation
         };
     }
 
@@ -184,24 +179,24 @@ class Drone {
     }
 
     async capture() {
-        const view = this.getView();
+        const { coverage } = this.getView();
 
         const start = {
-            x: Math.round(-this.config.forest.ground / 2 - view.r),
+            x: Math.round(-this.config.forest.ground / 2 - coverage / 2),
             y: 0,
-            z: Math.round(-this.config.forest.ground / 2 + view.r)
+            z: Math.round(-this.config.forest.ground / 2 + coverage / 2)
         };
 
         const end = {
-            x: Math.round(this.config.forest.ground / 2 + view.r),
+            x: Math.round(this.config.forest.ground / 2 + coverage / 2),
             y: 0,
-            z: Math.round(this.config.forest.ground / 2 + view.r)
+            z: Math.round(this.config.forest.ground / 2 + coverage / 2)
         };
 
         const step = {
             x: this.config.drone.camera.sampling,
             y: 0,
-            z: view.r * 2
+            z: coverage
         };
 
         // flight start
