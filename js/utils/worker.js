@@ -9,15 +9,23 @@ const getTrees = (configs, caller, chunks) => {
     configs.forEach((config, i) => {
         trees.push(new Tree(config));
 
+        // continuous message
         if (!((i + 1) % chunks)) {
-            // continuous message
-            self.postMessage(trees);
+            self.postMessage({
+                trees: trees,
+                caller: caller,
+                done: false
+            });
             trees.splice(0, trees.length);
         }
     });
 
     // final message
-    self.postMessage(trees);
+    self.postMessage({
+        trees: trees,
+        caller: caller,
+        done: true
+    });
 };
 
 

@@ -13,7 +13,7 @@ class Forest {
         this.treePositions = [];
 
         this.workers = getWorkers();
-        this.workersUpdate = [];
+        this.workersSubscriber = [];
 
         this.groundMaterial = new THREE.MeshLambertMaterial({
             color: this.config.material.color.ground,
@@ -40,12 +40,21 @@ class Forest {
 
         this.loaded = new Promise(function (resolve) {
             this.update();
+
             this.addGround();
             this.addTrees();
             this.addPersons();
 
-            resolve(this);
+            this.workersMessage((finished) => {
+                if (finished) {
+                    resolve(this);
+                }
+            });
         }.bind(this));
+    }
+
+    workersMessage(callback) {
+        this.workersSubscriber.push(callback);
     }
 
     getGround(size) {
@@ -111,6 +120,7 @@ class Forest {
         // init workers
         this.workers.forEach((worker) => { worker.terminate(); });
         this.workers = getWorkers();
+        this.workersDone = 0;
 
         splitArray(workerConfigs, this.workers.length).forEach((configs, i) => {
             this.workers[i].postMessage({
@@ -123,7 +133,9 @@ class Forest {
             });
 
             this.workers[i].onmessage = ((e) => {
-                e.data.forEach((tree) => {
+                const { trees, done } = e.data;
+
+                trees.forEach((tree) => {
                     // tree trunk
                     const treeGeometry = new THREE.BufferGeometry();
                     treeGeometry.setAttribute('position', createFloatAttribute(tree.verts, 3));
@@ -176,9 +188,21 @@ class Forest {
                     this.scene.add(treeGroup);
                 });
 
-                this.workersUpdate.forEach((cb) => { cb(); });
+                if (done) {
+                    this.workersDone += 1;
+                }
+
+                // workers finished
+                const finished = this.workersDone == this.workers.length;
+                this.workersSubscriber.forEach((callback) => { callback(finished); });
             }).bind(this);
         });
+    }
+
+    addPersons() {
+        for (let i = 0; i < this.config.forest.persons.count; i++) {
+            this.persons[i] = this.getPerson(i);
+        }
     }
 
     removeTrees() {
@@ -191,13 +215,9 @@ class Forest {
         if (treesCount > 0) {
             this.trees.push.apply(this.trees, [...new Array(treesCount)]);
         }
-        this.update();
-    }
 
-    addPersons() {
-        for (let i = 0; i < this.config.forest.persons.count; i++) {
-            this.persons[i] = this.getPerson(i);
-        }
+        // update positions
+        this.update();
     }
 
     removePersons() {
@@ -210,10 +230,6 @@ class Forest {
         if (personCount > 0) {
             this.persons.push.apply(this.persons, [...new Array(personCount)]);
         }
-    }
-
-    onUpdate(cb) {
-        this.workersUpdate.push(cb);
     }
 
     async update() {

@@ -37,9 +37,16 @@ class Drone {
                 this.addCamera();
                 this.update();
 
+                // update preview
+                this.forest.workersMessage(() => {
+                    this.update();
+                });
+
+                // animations
                 this.animate = this.animate.bind(this);
                 this.click = doubleClick(this.click.bind(this));
 
+                // events
                 window.addEventListener('pointerdown', this.click);
                 window.addEventListener('pointerup', this.click);
 
