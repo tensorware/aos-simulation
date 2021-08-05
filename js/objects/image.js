@@ -9,13 +9,14 @@ class Image {
         this.camera = camera;
         this.index = index;
 
-        const { center, coverage } = this.drone.getView();
+        this.center = this.camera.center;
+        this.coverage = this.camera.coverage;
+        this.rotation = this.camera.rotation;
 
-        this.center = center;
-        this.coverage = coverage;
         this.plane = this.camera.getPlane();
-        this.type = this.config.drone.camera.type;
         this.resolution = this.camera.getResolution();
+        this.type = this.config.drone.camera.type;
+
         this.borderPoints = this.camera.viewLines.map(getPoints);
         this.rendering = cloneCanvas(this.camera.renderer.domElement);
 
@@ -42,10 +43,10 @@ class Image {
     }
 
     async getRays() {
-        const cameraVector = new THREE.Vector3(this.center.x, this.center.y, this.center.z);
+        const cameraVector = this.center;
         const cornerDistance = Math.sqrt((this.coverage / 2) ** 2 + (this.coverage / 2) ** 2) + 3;
 
-        // TODO remove or refactor person raycasting
+        // TODO remove or refactor person ray casting
 
         // nearby persons
         const persons = [];
