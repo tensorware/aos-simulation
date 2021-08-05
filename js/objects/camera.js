@@ -133,17 +133,9 @@ class Camera {
         rectangle.geometry = this.plane.rectangle.geometry.clone();
         rectangle.translateY(0);
 
-        // border
-        const border = this.plane.border.clone();
-        border.material = this.plane.border.material.clone();
-        border.geometry = this.plane.border.geometry.clone();
-
         // plane group
         const plane = new THREE.Group();
         plane.add(rectangle);
-
-        // DEBUG
-        // plane.add(border);
 
         // add to scene
         this.scene.add(plane);
