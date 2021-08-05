@@ -124,6 +124,7 @@ class Person {
                 this.addPerson();
                 this.update();
 
+                // animations
                 this.animate = this.animate.bind(this);
                 requestAnimationFrame(this.animate);
 

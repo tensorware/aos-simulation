@@ -104,9 +104,8 @@ const getConfig = async (preset) => {
         fetch(`config/${preset}.json`).then((response) => {
             return response.json();
         }).then((config) => {
+            // set config from hash
             const hash = getHash();
-
-            // set config from hash parameters
             setConfig(config, hash);
             config.preset = preset;
 

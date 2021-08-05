@@ -13,6 +13,11 @@ class Slider {
         this.scroll = { start: 0, next: 0, x: 0 };
         this.touch = { start: 0, x: 0 };
 
+        // animations
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
+
+        // events
         this.images.addEventListener('wheel', this.scrollWheel.bind(this));
         this.images.addEventListener('touchstart', this.touchStart.bind(this));
         this.images.addEventListener('touchmove', this.touchMove.bind(this));
@@ -22,11 +27,7 @@ class Slider {
         this.images.addEventListener('mouseleave', this.touchEnd.bind(this));
         this.images.addEventListener('mouseup', this.touchEnd.bind(this));
 
-        // TODO stay on current items
         window.addEventListener('resize', this.update.bind(this));
-
-        this.animate = this.animate.bind(this);
-        requestAnimationFrame(this.animate);
     }
 
     scrollWheel(e) {

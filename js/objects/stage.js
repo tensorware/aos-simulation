@@ -45,13 +45,13 @@ class Stage {
                 // reset stage
                 this.reset();
 
-                // events
-                this.update = this.update.bind(this);
-                window.addEventListener('resize', this.update);
-
                 // animations
                 this.animate = this.animate.bind(this);
                 requestAnimationFrame(this.animate);
+
+                // events
+                this.update = this.update.bind(this);
+                window.addEventListener('resize', this.update);
 
                 resolve(this);
             }).bind(this));
