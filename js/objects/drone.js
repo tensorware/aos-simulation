@@ -22,11 +22,16 @@ class Drone {
                 });
 
                 const scale = 0.15;
+                const rotation = rad(this.config.drone.camera.rotation);
+
                 this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
                 this.drone.scale.set(scale, scale, scale);
-                this.drone.position.x = this.config.drone.eastWest;
-                this.drone.position.y = this.config.drone.height;
-                this.drone.position.z = this.config.drone.northSouth;
+                this.drone.position.set(
+                    this.config.drone.eastWest,
+                    this.config.drone.height,
+                    this.config.drone.northSouth
+                );
+                this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
 
                 this.addDrone();
                 this.addCamera();
@@ -238,7 +243,13 @@ class Drone {
 
     async update() {
         if (this.drone) {
+            const { rotation } = this.getView();
+
+            // set height
             this.drone.position.y = this.config.drone.height;
+
+            // set rotation
+            this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
 
             // update camera
             if (this.camera) {

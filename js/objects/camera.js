@@ -8,14 +8,29 @@ class Camera {
         this.drone = drone;
         this.index = index;
 
+        const { center, coverage, rotation } = this.drone.getView();
+
+        this.center = center;
+        this.coverage = coverage;
+        this.rotation = rotation;
+
         this.rays = [];
         this.boxes = [];
 
         this.planes = [];
         this.images = [];
 
-        this.slider = new Slider(document.querySelector('#captures'), this.config);
+        this.planeMaterial = new THREE.MeshStandardMaterial({
+            color: this.config.material.color.plane,
+            side: THREE.DoubleSide
+        });
 
+        this.textMaterial = new THREE.MeshPhongMaterial({
+            color: 0x990000,
+            specular: 0xff2222
+        });
+
+        // view lines
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
             const viewLinePoints = [new THREE.Vector3(0, this.config.drone.height, 0), new THREE.Vector3(0, 0, 0)];
@@ -23,31 +38,34 @@ class Camera {
             this.viewLines.push(new THREE.Line(viewLineGeometry, new THREE.LineBasicMaterial({ color: 0x990000 })));
         }
 
-        this.planeMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.material.color.plane,
-            side: THREE.DoubleSide
-        });
-        this.textMaterial = new THREE.MeshPhongMaterial({
-            color: 0x990000,
-            specular: 0xff2222
-        });
-
+        // plane
         const rectangleGeometry = new THREE.PlaneGeometry();
-        rectangleGeometry.rotateX(rad(-90)).translate(0, 0, 0);
+        rectangleGeometry.rotateX(rad(-90));
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
         rectangle.receiveShadow = true;
 
+        // plane border
+        const border = new THREE.EdgesHelper(rectangle, 0x990000);
+        border.matrixAutoUpdate = true;
+
+        // plane text
         const textGeometry = new THREE.TextGeometry('', { font: this.stage.font });
-        textGeometry.rotateX(rad(-90)).translate(0, 0, 0);
+        textGeometry.rotateX(rad(-90));
         const text = new THREE.Mesh(textGeometry, this.textMaterial);
+        text.userData = { clone: text.clone() };
         text.receiveShadow = true;
 
+        // init plane
         this.plane = {
             rectangle: rectangle,
-            border: new THREE.BoxHelper(rectangle, 0x990000),
+            border: border,
             text: text
         };
 
+        // init slider
+        this.slider = new Slider(document.querySelector('#captures'), this.config);
+
+        // move objects to layer 1 (invisible for preview camera)
         this.plane.border.layers.set(1);
         this.plane.text.layers.set(1);
         this.viewLines.forEach((viewLine) => {
@@ -80,7 +98,7 @@ class Camera {
     }
 
     addRenderer() {
-        // preview image camera
+        // preview image camera (layer 0)
         this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
         this.camera.layers.enable(0);
         this.scene.add(this.camera);
@@ -119,11 +137,7 @@ class Camera {
     }
 
     getResolution() {
-        return new THREE.Vector3(
-            this.config.drone.camera.resolution,
-            0,
-            this.config.drone.camera.resolution
-        );
+        return new THREE.Vector3(this.config.drone.camera.resolution, 0, this.config.drone.camera.resolution);
     }
 
     getPlane() {
@@ -131,17 +145,55 @@ class Camera {
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
         rectangle.geometry = this.plane.rectangle.geometry.clone();
-        rectangle.translateY(0);
 
         // plane group
         const plane = new THREE.Group();
         plane.add(rectangle);
+        plane.translateY(0);
 
         // add to scene
         this.scene.add(plane);
         this.planes.push(plane);
 
         return rectangle;
+    }
+
+    getText() {
+        let planeText = this.plane.text.userData.clone;
+        let { offset, coverage, rotation } = planeText.userData;
+
+        const updateText = this.coverage !== coverage || this.rotation !== rotation;
+        if (updateText) {
+            // plane text
+            const text = this.coverage.toFixed(2) + ' x ' + this.coverage.toFixed(2);
+            const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: this.coverage / 10, height: 0.01 });
+            textGeometry.rotateX(rad(-90))
+            planeText.geometry.copy(textGeometry);
+
+            // plane text width/height
+            const textSize = new THREE.Vector3();
+            new THREE.Box3().setFromObject(planeText).getSize(textSize);
+
+            // plane text center offset
+            offset = Math.sqrt((textSize.x / 2) ** 2 + (textSize.z / 2) ** 2);
+        }
+
+        // update text data
+        planeText.userData = {
+            offset: offset,
+            center: this.center,
+            coverage: this.coverage,
+            rotation: this.rotation
+        };
+
+        // plane text position 
+        const x = this.center.x - offset * Math.cos(this.rotation);
+        const z = this.center.z + offset * Math.sin(this.rotation);
+
+        return {
+            text: planeText,
+            position: new THREE.Vector3(x, 0.005, z)
+        };
     }
 
     async capture(preview) {
@@ -152,35 +204,40 @@ class Camera {
     async update() {
         const { center, coverage, rotation } = this.drone.getView();
 
-        // update view lines (camera to corner)
-        const corners = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
-        this.viewLines.forEach((viewLine, i) => {
-            const x = coverage / 2 * corners[i][0] + center.x;
-            const z = coverage / 2 * corners[i][1] + center.z;
+        // update properties
+        this.center = center;
+        this.coverage = coverage;
+        this.rotation = rotation;
 
-            viewLine.geometry.copy(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(center.x, center.y, center.z),
-                new THREE.Vector3(x, 0, z)
-            ]));
+        // view corners (right-top, left-top, left-bottom, right-bottom])
+        const cornerAngles = [45, 135, 225, 315];
+        const cornerDistance = Math.sqrt((coverage / 2) ** 2 + (coverage / 2) ** 2);
+
+        // update view lines 
+        this.viewLines.forEach((viewLine, i) => {
+            const theta = rad(cornerAngles[i]) - rotation;
+            const x = center.x + cornerDistance * Math.cos(theta);
+            const z = center.z + cornerDistance * Math.sin(theta);
+
+            const from = new THREE.Vector3(center.x, center.y, center.z);
+            const to = new THREE.Vector3(x, 0, z);
+            viewLine.geometry.setFromPoints([from, to]);
         });
 
         // update plane
-        const rectangleGeometry = new THREE.PlaneGeometry(coverage, coverage);
-        rectangleGeometry.rotateX(rad(-90)).translate(center.x, 0.01, center.z);
-        this.plane.rectangle.geometry.copy(rectangleGeometry);
-        this.plane.border.update();
+        this.plane.rectangle.scale.set(coverage, 1, coverage);
+        this.plane.rectangle.position.set(center.x, 0.01, center.z);
+        this.plane.rectangle.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
 
-        // update text
-        const text = coverage.toFixed(2) + ' x ' + coverage.toFixed(2);
-        const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: coverage / 10, height: 0.01 });
-        textGeometry.rotateX(rad(-90));
-        this.plane.text.geometry.copy(textGeometry);
+        // update plane border
+        this.plane.border.scale.set(coverage, 1, coverage);
+        this.plane.border.position.set(center.x, 0.01, center.z);
+        this.plane.border.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
 
-        // update text position
-        const textSize = new THREE.Vector3();
-        new THREE.Box3().setFromObject(this.plane.text).getSize(textSize);
-        textGeometry.translate(center.x - textSize.x / 2, 0.005, center.z + textSize.z / 2);
-        this.plane.text.geometry.copy(textGeometry);
+        // update plane text
+        const { position } = this.getText();
+        this.plane.text.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
+        this.plane.text.position.set(position.x, 0.005, position.z);
 
         // update camera position
         this.camera.fov = this.config.drone.camera.view;

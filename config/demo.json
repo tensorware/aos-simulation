@@ -6,9 +6,10 @@
         "northSouth": 0.0,
         "camera": {
             "view": 50,
-            "images": 30,
-            "sampling": 1,
+            "rotation": 0,
             "resolution": 512,
+            "sampling": 1,
+            "images": 30,
             "type": "monochrome"
         },
         "cpu": {
