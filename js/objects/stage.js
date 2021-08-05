@@ -9,17 +9,17 @@ class Stage {
                 this.font = font;
                 this.scene = new THREE.Scene();
 
-                // directional light
+                // stage directional light
                 this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
                 this.directionalLight.castShadow = true;
                 this.directionalLight.position.set(100, 100, 100);
                 this.directionalLight.layers.set(1);
 
-                // ambient light
+                // stage ambient light
                 this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
                 this.ambientLight.castShadow = true;
 
-                // camera 
+                // stage camera (layer 0 and layer 1)
                 this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
                 this.camera.layers.enable(0);
                 this.camera.layers.enable(1);
