@@ -4,30 +4,26 @@ class View {
         this.config = config;
         this.configs = configs;
 
-        // load canvas stage
+        // init stage
         this.stage = new Stage(this.root, this.config)
         this.stage.loaded.then(() => {
+
+            // init html
             this.background(this.config.material.color.background);
             this.controls(this.root.querySelector('#controls'));
             this.splitter(['#top', '#bottom']);
 
-            // load objects
+            // init objects
             this.forest = new Forest(this.stage, 0);
             this.drone = new Drone(this.forest, 0);
-            this.forest.onUpdate(this.drone.update.bind(this.drone));
-        });
+            this.forest.loaded.then(() => {
+                this.update();
+            });
 
-        // update config from hash parameters
-        window.addEventListener('hashchange', async () => {
-            // set config
-            setConfig(this.config, getHash());
-
-            // update forest
-            await this.forest.update();
-
-            // update drone
-            await this.drone.setEastWest(this.config.drone.eastWest);
-            await this.drone.setNorthSouth(this.config.drone.northSouth);
+            // events
+            window.addEventListener('hashchange', () => {
+                this.update();
+            });
         });
     }
 
@@ -135,9 +131,12 @@ class View {
             this.forest.removePersons();
             this.forest.addPersons();
         });
+
+        // activities folder
+        const activitiesFolder = personsFolder.addFolder('activities');
         Object.keys(this.config.forest.persons.activities).forEach((activity) => {
-            personsFolder.add(this.config.forest.persons.activities, activity).onFinishChange(() => {
-                this.forest.persons.forEach(async (person) => { person.setActivity(); });
+            activitiesFolder.add(this.config.forest.persons.activities, activity).onFinishChange(() => {
+                this.forest.persons.forEach((person) => { person.setActivity(); });
             });
         });
 
@@ -183,6 +182,40 @@ class View {
 
         // update stage canvas
         this.stage.update();
+    }
+
+    async update() {
+        // set config from hash
+        const hash = getHash();
+        setConfig(this.config, hash);
+
+        // update forest
+        await this.forest.update();
+
+        // update drone
+        await this.drone.setEastWest(this.config.drone.eastWest);
+        await this.drone.setNorthSouth(this.config.drone.northSouth);
+
+        // update persons
+        this.forest.persons.forEach((person) => { person.setActivity(); });
+
+        // execute capture
+        if ('capture' in hash) {
+            await sleep(100);
+            await this.capture();
+        }
+
+        // execute export
+        if ('export' in hash) {
+            await sleep(100);
+            await this.export();
+        }
+
+        // execute reset
+        if ('reset' in hash) {
+            await sleep(100);
+            await this.reset();
+        }
     }
 
     async capture() {
