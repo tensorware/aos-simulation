@@ -89,11 +89,6 @@ class Person {
         this.loaded = new Promise(function (resolve) {
             new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
                 this.person = gltf.scene;
-                this.person.traverse((p) => {
-                    if (p.isMesh) {
-                        p.castShadow = true;
-                    }
-                });
                 this.setPosition(this.initialPosition, this.initialDirection);
 
                 // init animation mixer

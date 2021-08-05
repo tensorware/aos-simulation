@@ -42,7 +42,6 @@ class Camera {
         const rectangleGeometry = new THREE.PlaneGeometry();
         rectangleGeometry.rotateX(rad(-90));
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
-        rectangle.receiveShadow = true;
 
         // plane border
         const border = new THREE.EdgesHelper(rectangle, 0x990000);
@@ -53,7 +52,6 @@ class Camera {
         textGeometry.rotateX(rad(-90));
         const text = new THREE.Mesh(textGeometry, this.textMaterial);
         text.userData = { clone: text.clone() };
-        text.receiveShadow = true;
 
         // init plane
         this.plane = {

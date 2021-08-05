@@ -52,7 +52,6 @@ class Forest {
         const geometry = new THREE.PlaneGeometry(size, size);
         geometry.rotateX(rad(90)).translate(0, 0, 0);
         const ground = new THREE.Mesh(geometry, this.groundMaterial);
-        ground.receiveShadow = true;
         return ground;
     }
 
