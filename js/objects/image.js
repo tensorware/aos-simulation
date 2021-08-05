@@ -45,6 +45,8 @@ class Image {
         const cameraVector = new THREE.Vector3(this.center.x, this.center.y, this.center.z);
         const cornerDistance = Math.sqrt((this.coverage / 2) ** 2 + (this.coverage / 2) ** 2) + 3;
 
+        // TODO remove or refactor person raycasting
+
         // nearby persons
         const persons = [];
         this.forest.persons.forEach((person) => {
