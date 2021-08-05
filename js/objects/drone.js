@@ -249,20 +249,23 @@ class Drone {
     }
 
     async update() {
-        if (this.drone) {
-            const { rotation } = this.getView();
-
-            // set height
-            this.drone.position.y = this.config.drone.height;
-
-            // set rotation
-            this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
-
-            // update camera
-            if (this.camera) {
-                await this.camera.update();
-            }
+        if (!this.drone) {
+            return;
         }
+
+        const { rotation } = this.getView();
+
+        // set height
+        this.drone.position.y = this.config.drone.height;
+
+        // set rotation
+        this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
+
+        // update camera
+        if (this.camera) {
+            await this.camera.update();
+        }
+
     }
 
     async export(zip) {
