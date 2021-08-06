@@ -13,7 +13,7 @@ class Person {
 
         this.initialPosition = new THREE.Vector3(
             randomFloat(personPositionMin, personPositionMax),
-            0.02,
+            0,
             randomFloat(personPositionMin, personPositionMax)
         );
         this.initialDirection = randomInt(0, 360, index);
@@ -21,102 +21,86 @@ class Person {
         this.lastPosition = this.initialPosition.clone();
         this.lastDirection = this.initialDirection;
 
-        this.allActions = [];
-        this.baseActions = {
-            idle: {
-                weight: 1
-            },
-            walk: {
-                weight: 0
-            },
-            run: {
-                weight: 0
-            }
-        };
-        this.poseActions = {
-            sneak_pose: {
-                weight: 0
-            },
-            sad_pose: {
-                weight: 0
-            },
-            agree: {
-                weight: 0
-            },
-            headShake: {
-                weight: 0
-            }
-        };
+        this.clock = new THREE.Clock();
+        this.actions = [];
 
         this.currentActivity;
         this.activityMapping = {
-            'idle': {
+            laying: {
+                name: 'laying',
+                weight: 0.0,
+                height: 0.94,
+                speed: 0.0
+            },
+            sitting: {
+                name: 'sitting',
+                weight: 0.0,
+                height: 0.92,
+                speed: 0.0
+            },
+            standing: {
+                name: 'standing',
+                weight: 0.0,
+                height: 0.91,
+                speed: 0.0
+            },
+            waving: {
+                name: 'waving',
+                weight: 0.0,
+                height: 0.91,
+                speed: 0.0
+            },
+            injured: {
+                name: 'injured',
+                weight: 0.0,
+                height: 0.91,
+                speed: 1.7
+            },
+            walking: {
+                name: 'walking',
+                weight: 0.0,
+                height: 0.91,
+                speed: 1.8
+            },
+            running: {
+                name: 'running',
+                weight: 0.0,
+                height: 0.91,
+                speed: 3.9
+            },
+            idle: {
                 name: 'idle',
+                weight: 0.0,
+                height: 0.91,
                 speed: 0.0
-            },
-            'laying': {
-                name: 'idle', // TODO
-                speed: 0.0
-            },
-            'sitting': {
-                name: 'idle', // TODO
-                speed: 0.0
-            },
-            'standing': {
-                name: 'idle', // TODO
-                speed: 0.0
-            },
-            'waving': {
-                name: 'idle', // TODO
-                speed: 0.0
-            },
-            'injured': {
-                name: 'idle', // TODO
-                speed: 0.0
-            },
-            'walking': {
-                name: 'walk',
-                speed: 1.63
-            },
-            'running': {
-                name: 'run',
-                speed: 3.63
             }
         };
 
-        this.clock = new THREE.Clock();
+        const gender = parseInt(this.index % 2, 10);
+        this.model = ['models/male.glb', 'models/female.glb'][gender];
+        this.offset = [0.0, 0.04][gender];
 
         this.loaded = new Promise(function (resolve) {
-            new THREE.GLTFLoader().load('models/person.glb', ((gltf) => {
+            new THREE.GLTFLoader().load(this.model, ((gltf) => {
                 this.person = gltf.scene;
+                this.person.scale.multiplyScalar(10 / 1000);
                 this.setPosition(this.initialPosition, this.initialDirection);
 
                 // init animation mixer
                 this.animations = gltf.animations.length;
                 this.mixer = new THREE.AnimationMixer(this.person);
+                this.setTime(1.0);
 
                 // init actions
                 for (let i = 0; i < this.animations; ++i) {
                     let clip = gltf.animations[i];
                     let name = clip.name;
 
-                    if (this.baseActions[name]) {
-                        // add base action
+                    // add actions
+                    if (this.activityMapping[name]) {
                         const action = this.mixer.clipAction(clip);
+                        this.activityMapping[name].action = action;
                         this.addAction(action);
-                        this.baseActions[name].action = action;
-                    }
-                    else if (this.poseActions[name]) {
-                        // additive clip
-                        THREE.AnimationUtils.makeClipAdditive(clip);
-                        if (clip.name.endsWith('_pose')) {
-                            clip = THREE.AnimationUtils.subclip(clip, clip.name, 2, 3, 30);
-                        }
-
-                        // add pose action
-                        const action = this.mixer.clipAction(clip);
-                        this.addAction(action);
-                        this.poseActions[name].action = action;
                     }
                 }
 
@@ -139,9 +123,9 @@ class Person {
 
     addAction(action) {
         const clip = action.getClip();
-        const settings = this.baseActions[clip.name] || this.poseActions[clip.name];
+        const settings = this.activityMapping[clip.name];
         this.setWeight(action, settings.weight);
-        this.allActions.push(action);
+        this.actions.push(action);
         action.play();
     }
 
@@ -153,8 +137,8 @@ class Person {
         const startActivityName = startActivity ? startActivity.name : this.activityMapping['idle'].name;
         const endActivityName = endActivity.name;
 
-        const startAction = this.baseActions[startActivityName].action;
-        const endAction = this.baseActions[endActivityName].action;
+        const startAction = this.activityMapping[startActivityName].action;
+        const endAction = this.activityMapping[endActivityName].action;
 
         // reset time
         this.mixer.setTime(0.0);
@@ -164,9 +148,9 @@ class Person {
 
         // execute cross fade
         if (!startActivity || startActivityName !== endActivityName) {
-            this.setWeight(endAction, 1);
+            this.setWeight(endAction, 1.0);
             endAction.time = 0;
-            startAction.crossFadeTo(endAction, duration, true);
+            startAction.crossFadeTo(endAction, startActivity ? duration : 0, true);
         }
 
         // set current activity
@@ -180,7 +164,7 @@ class Person {
         let activeActivities = [];
         Object.entries(this.config.forest.persons.activities).forEach(([activity, active]) => {
             if (active) {
-                activeSeed += `-${activity}`;
+                activeSeed += `${activity}`;
                 activeActivities.push(this.activityMapping[activity]);
             }
         });
@@ -198,7 +182,7 @@ class Person {
 
     setWeight(action, weight) {
         action.enabled = true;
-        action.setEffectiveTimeScale(1);
+        action.setEffectiveTimeScale(1.0);
         action.setEffectiveWeight(weight);
     }
 
@@ -207,24 +191,25 @@ class Person {
     }
 
     setPosition(position, direction) {
+        // update last position and direction
         this.lastPosition = position;
         this.lastDirection = direction;
 
-        // set position
+        // set position with offset
         this.person.position.x = this.lastPosition.x;
         this.person.position.y = this.lastPosition.y;
         this.person.position.z = this.lastPosition.z;
 
-        // set rotation
+        // set direction rotation
         const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0);
         this.person.setRotationFromEuler(rotation);
     }
 
     async animate() {
         for (let i = 0; i < this.animations; ++i) {
-            const action = this.allActions[i];
+            const action = this.actions[i];
             const clip = action.getClip();
-            const settings = this.baseActions[clip.name] || this.poseActions[clip.name];
+            const settings = this.activityMapping[clip.name];
             settings.weight = action.getEffectiveWeight();
         }
 
@@ -244,13 +229,14 @@ class Person {
         // update action mixer time
         this.mixer.update(this.clock.getDelta());
 
+        // update height offset based on activity
+        const height = (this.currentActivity ? this.currentActivity.height : 0) + this.offset;
+        this.person.position.y = height;
+
         // trajectory coordinates
         const start = this.lastPosition;
-        const end = start.clone().add(new THREE.Vector3(
-            Math.cos(rad(this.lastDirection)),
-            0,
-            -Math.sin(rad(this.lastDirection))
-        ));
+        const dir = new THREE.Vector3(Math.cos(rad(this.lastDirection)), 0, -Math.sin(rad(this.lastDirection)));
+        const end = start.clone().add(dir);
 
         // move duration
         const speed = this.currentActivity.speed;
@@ -260,9 +246,10 @@ class Person {
         if (moveDuration > 0) {
             const trajectoryTime = this.mixer.time / moveDuration;
 
-            const current = this.person.position.clone();
+            const current = new THREE.Vector3();
             const trajectory = new THREE.Line3(start, end);
             trajectory.at(trajectoryTime, current);
+            current.y = height;
 
             // set position
             this.person.position.x = current.x;

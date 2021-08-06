@@ -47,14 +47,14 @@
             }
         },
         "persons": {
-            "count": 1,
+            "count": 5,
             "activities": {
-                "laying": false,
+                "laying": true,
                 "sitting": false,
-                "standing": true,
-                "waving": false,
+                "standing": false,
+                "waving": true,
                 "injured": false,
-                "walking": true,
+                "walking": false,
                 "running": true
             }
         }
