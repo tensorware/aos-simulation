@@ -22,7 +22,7 @@ class Drone {
                 });
 
                 const scale = 0.15;
-                const rotation = rad(this.config.drone.camera.rotation);
+                const rotation = rad(this.config.drone.rotation);
 
                 this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
                 this.drone.scale.set(scale, scale, scale);
@@ -71,7 +71,7 @@ class Drone {
         const coverage = 2 * center.y * Math.tan(rad(this.config.drone.camera.view / 2));
 
         // rotation
-        const rotation = rad(this.config.drone.camera.rotation);
+        const rotation = rad(this.config.drone.rotation);
 
         return {
             center: center,

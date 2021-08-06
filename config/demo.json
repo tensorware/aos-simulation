@@ -2,11 +2,11 @@
     "drone": {
         "speed": 4,
         "height": 35.0,
+        "rotation": 0.0,
         "eastWest": 0.0,
         "northSouth": 0.0,
         "camera": {
             "view": 50,
-            "rotation": 0,
             "resolution": 512,
             "sampling": 1,
             "images": 30,
