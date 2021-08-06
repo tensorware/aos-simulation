@@ -166,27 +166,15 @@ const canvasImage = (canvas) => {
     return dataUrl.substr(dataUrl.indexOf(',') + 1);
 };
 
-const cloneCanvas = (canvas) => {
+const cloneCanvas = (canvas, grayscale) => {
     const cloned = document.createElement('canvas');
     cloned.width = canvas.width;
     cloned.height = canvas.height;
     const ctx = cloned.getContext('2d');
-    ctx.drawImage(canvas, 0, 0);
-    return cloned;
-};
-
-const grayscaleCanvas = (canvas) => {
-    const cloned = cloneCanvas(canvas);
-    const ctx = cloned.getContext('2d');
-    const data = ctx.getImageData(0, 0, cloned.width, cloned.height);
-    const pixels = data.data;
-    for (let i = 0; i < pixels.length; i += 4) {
-        const lightness = parseInt((pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3);
-        pixels[i] = lightness;
-        pixels[i + 1] = lightness;
-        pixels[i + 2] = lightness;
+    if (grayscale) {
+        ctx.filter = 'grayscale(1)';
     }
-    ctx.putImageData(data, 0, 0);
+    ctx.drawImage(canvas, 0, 0);
     return cloned;
 };
 

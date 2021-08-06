@@ -147,15 +147,11 @@ class Camera {
         const rectangle = this.plane.rectangle.clone();
         rectangle.material = this.plane.rectangle.material.clone();
         rectangle.geometry = this.plane.rectangle.geometry.clone();
-
-        // plane group
-        const plane = new THREE.Group();
-        plane.add(rectangle);
-        plane.translateY(0);
+        rectangle.translateY(0);
 
         // add to scene
-        this.scene.add(plane);
-        this.planes.push(plane);
+        this.scene.add(rectangle);
+        this.planes.push(rectangle);
 
         return rectangle;
     }
@@ -260,11 +256,9 @@ class Camera {
         const camera = zip.folder('camera');
 
         const images = { captures: [] };
-        this.images.forEach((image, index) => {
-            // TODO use image.index
-            const number = index + 1;
+        this.images.forEach((image) => {
+            const number = image.index + 1;
 
-            // TODO add rotation
             images.captures.push({
                 image: number,
                 center: {
@@ -274,8 +268,7 @@ class Camera {
             });
 
             // export images
-            // camera.file(`image-${number}.png`, image.rendered.base64, { base64: true });
-            camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.processed.base64, { base64: true });
+            camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.base64, { base64: true });
         });
 
         // export config

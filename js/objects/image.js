@@ -18,7 +18,7 @@ class Image {
         this.type = this.config.drone.camera.type;
 
         this.borderPoints = this.camera.viewLines.map(getPoints);
-        this.rendering = cloneCanvas(this.camera.renderer.domElement);
+        this.rendering = cloneCanvas(this.camera.renderer.domElement, true);
 
         this.loaded = new Promise(function (resolve) {
             resolve(this);
@@ -160,6 +160,7 @@ class Image {
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
+            index: this.index,
             rendered: {
                 center: new THREE.Vector3(
                     this.center.x,
@@ -207,8 +208,7 @@ class Image {
         });
 
         // save base64 image
-        image.rendered.base64 = canvasImage(this.rendering);
-        image.processed.base64 = canvasImage(canvas);
+        image.base64 = canvasImage(canvas);
 
         if (preview) {
             // canvas container
@@ -316,6 +316,7 @@ class Image {
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
+            index: this.index,
             rendered: {
                 center: new THREE.Vector3(
                     this.center.x,
@@ -341,11 +342,10 @@ class Image {
         };
 
         // canvas image
-        const canvas = grayscaleCanvas(this.rendering);
+        const canvas = this.rendering;
 
         // save base64 image
-        image.rendered.base64 = canvasImage(this.rendering);
-        image.processed.base64 = canvasImage(canvas);
+        image.base64 = canvasImage(canvas);
 
         if (preview) {
             // canvas container
@@ -364,7 +364,7 @@ class Image {
 
     async integrateMonochromeImages(images) {
         // canvas image
-        const canvas = grayscaleCanvas(this.rendering);
+        const canvas = cloneCanvas(this.rendering, true);
         const ctx = canvas.getContext('2d');
 
         // draw pixel points
