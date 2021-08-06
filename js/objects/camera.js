@@ -30,12 +30,16 @@ class Camera {
             specular: 0xff2222
         });
 
+        this.lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x990000
+        });
+
         // view lines
         this.viewLines = [];
         for (let i = 0; i < 4; i++) {
             const viewLinePoints = [new THREE.Vector3(0, this.config.drone.height, 0), new THREE.Vector3(0, 0, 0)];
             const viewLineGeometry = new THREE.BufferGeometry().setFromPoints(viewLinePoints);
-            this.viewLines.push(new THREE.Line(viewLineGeometry, new THREE.LineBasicMaterial({ color: 0x990000 })));
+            this.viewLines.push(new THREE.Line(viewLineGeometry, this.lineMaterial));
         }
 
         // plane
@@ -44,7 +48,7 @@ class Camera {
         const rectangle = new THREE.Mesh(rectangleGeometry, this.planeMaterial);
 
         // plane border
-        const border = new THREE.EdgesHelper(rectangle, 0x990000);
+        const border = new THREE.LineSegments(new THREE.EdgesGeometry(rectangleGeometry), this.lineMaterial);
         border.matrixAutoUpdate = true;
 
         // plane text
