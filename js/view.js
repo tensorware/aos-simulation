@@ -250,7 +250,11 @@ class View {
         zip.file('config.json', JSON.stringify(this.config, null, 4));
 
         // generate zip
-        zip.generateAsync({ type: 'blob' }, (zipMeta) => {
+        zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+        }, (zipMeta) => {
             this.stage.status(`${Math.round(zipMeta.percent)}%`);
         }).then((zipData) => {
             // export zip
