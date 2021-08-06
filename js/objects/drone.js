@@ -21,17 +21,14 @@ class Drone {
                     metalness: 0.8
                 });
 
-                const scale = 0.15;
-                const rotation = rad(this.config.drone.rotation);
-
                 this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
-                this.drone.scale.set(scale, scale, scale);
+                this.drone.scale.multiplyScalar(15 / 100);
                 this.drone.position.set(
                     this.config.drone.eastWest,
                     this.config.drone.height,
                     this.config.drone.northSouth
                 );
-                this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
+                this.drone.setRotationFromEuler(new THREE.Euler(0, rad(this.config.drone.rotation), 0));
 
                 this.addDrone();
                 this.addCamera();
