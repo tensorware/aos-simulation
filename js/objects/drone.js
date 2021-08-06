@@ -226,9 +226,7 @@ class Drone {
 
                 // capture image
                 await this.camera.capture(false);
-
-                // TODO check if still necessary
-                await sleep(10);
+                await sleep();
             }
 
             // swap direction
@@ -265,7 +263,6 @@ class Drone {
         if (this.camera) {
             await this.camera.update();
         }
-
     }
 
     async export(zip) {

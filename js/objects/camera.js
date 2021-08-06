@@ -197,7 +197,6 @@ class Camera {
     async capture(preview) {
         const index = this.images.length;
         const image = new Image(this, index);
-
         return await image.capture(preview);
     }
 
