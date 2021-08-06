@@ -236,7 +236,10 @@ class View {
 
     async export(date) {
         const zip = new JSZip();
-        const zipName = `${document.title}-${date || new Date().yyyymmddhhmmss()}.zip`;
+        const zipName = `${this.stage.name}-${date || new Date().yyyymmddhhmmss()}.zip`;
+
+        // export status
+        this.stage.status('0%');
 
         // add folders
         this.stage.export(zip);
@@ -247,8 +250,17 @@ class View {
         zip.file('config.json', JSON.stringify(this.config, null, 4));
 
         // generate zip
-        zip.generateAsync({ type: 'blob' }).then((zipData) => {
+        zip.generateAsync({ type: 'blob' }, (zipMeta) => {
+            this.stage.status(`${Math.round(zipMeta.percent)}%`);
+        }).then((zipData) => {
+            // export zip
             saveAs(zipData, zipName);
+
+            // export finished
+            this.stage.status('100%');
+            sleep(1000).then(() => {
+                this.stage.status();
+            });
         });
     }
 

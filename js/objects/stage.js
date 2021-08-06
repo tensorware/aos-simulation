@@ -2,6 +2,7 @@ class Stage {
     constructor(root, config) {
         this.root = root;
         this.config = config;
+        this.name = document.title;
 
         this.loaded = new Promise(function (resolve) {
             new THREE.FontLoader().load('font/opensans.json', ((font) => {
@@ -56,6 +57,15 @@ class Stage {
                 resolve(this);
             }).bind(this));
         }.bind(this));
+    }
+
+    status(text) {
+        if (text) {
+            document.title = `${this.name} (${text})`;
+        }
+        else {
+            document.title = this.name;
+        }
     }
 
     async animate() {
@@ -125,9 +135,12 @@ class Stage {
         this.camera.position.set(0.0, height * 1.1, 0.0);
         this.controls.target.set(0.0, 0.0, 0.0);
 
+        // update camera
         await this.update();
         await this.render();
 
+        // reset status
         await sleep(100);
+        this.status();
     }
 };

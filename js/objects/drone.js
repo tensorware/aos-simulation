@@ -213,20 +213,28 @@ class Drone {
 
         // flight start
         this.flying = true;
+        this.stage.status('0%');
+
+        // approximate number of images
+        const imageCount = Math.ceil((end.z - start.z) / step.z) * Math.ceil((end.x - start.x) / step.x) + 1;
 
         // update drone position
+        let i = 0;
         let dir = 1;
-        for (let z = start.z; z <= end.z && this.flying; z = z + step.z) {
+        for (let z = start.z; z <= end.z && this.flying; z += step.z) {
             // set north/south position
             await this.setNorthSouth(z);
 
-            for (let x = start.x; x <= end.x && this.flying; x = x + step.x) {
+            for (let x = start.x; x <= end.x && this.flying; x += step.x) {
                 // set east/west position
                 await this.setEastWest(x * dir);
 
                 // capture image
                 await this.camera.capture(false);
                 await sleep();
+
+                // update capture status
+                this.stage.status(`${Math.round(++i * 100 / imageCount)}%`);
             }
 
             // swap direction
@@ -244,6 +252,12 @@ class Drone {
         // flight stop
         this.flying = false;
         await this.update();
+
+        // capture finished
+        this.stage.status('100%');
+        sleep(1000).then(() => {
+            this.stage.status();
+        });
     }
 
     async update() {

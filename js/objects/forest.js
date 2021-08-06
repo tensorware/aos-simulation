@@ -120,8 +120,12 @@ class Forest {
         // init workers
         this.workers.forEach((worker) => { worker.terminate(); });
         this.workers = getWorkers();
-        this.workersDone = 0;
 
+        // worker status
+        let treesDone = 0;
+        this.stage.status('0%');
+
+        // start workers
         splitArray(workerConfigs, this.workers.length).forEach((configs, i) => {
             this.workers[i].postMessage({
                 method: 'getTrees',
@@ -133,7 +137,7 @@ class Forest {
             });
 
             this.workers[i].onmessage = ((e) => {
-                const { trees, done } = e.data;
+                const { trees } = e.data;
 
                 trees.forEach((tree) => {
                     // tree trunk
@@ -186,14 +190,19 @@ class Forest {
                         this.trees.push(treeGroup);
                     }
                     this.scene.add(treeGroup);
+
+                    // update workers status
+                    this.stage.status(`${Math.round(++treesDone * 100 / this.trees.length)}%`);
                 });
 
-                if (done) {
-                    this.workersDone += 1;
-                }
-
                 // workers finished
-                const finished = this.workersDone == this.workers.length;
+                const finished = this.trees.length == treesDone;
+                if (finished) {
+                    this.stage.status('100%');
+                    sleep(1000).then(() => {
+                        this.stage.status();
+                    });
+                }
                 this.workersSubscriber.forEach((callback) => { callback(finished); });
             }).bind(this);
         });
