@@ -43,10 +43,11 @@ class Image {
     }
 
     async getRays() {
+        // TODO remove or refactor person ray casting
+        return [];
+
         const cameraVector = this.center;
         const cornerDistance = Math.sqrt((this.coverage / 2) ** 2 + (this.coverage / 2) ** 2) + 3;
-
-        // TODO remove or refactor person ray casting
 
         // nearby persons
         const persons = [];
@@ -263,6 +264,9 @@ class Image {
     }
 
     async getPixels() {
+        // TODO remove or refactor person pixel matching
+        return [];
+
         // get person pixel color
         const color = rgbColor(this.config.material.color.person);
 
