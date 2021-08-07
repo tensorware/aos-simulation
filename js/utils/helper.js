@@ -153,10 +153,36 @@ const hexColor = (color) => {
     return '#' + color.toString(16).padStart(6, '0');
 };
 
-const colorMatch = (c1, c2, range) => {
+const intColor = (color) => {
+    if (getType(color) === 'string') {
+        return parseInt(color.replace('#', '0x'), 16);
+    }
+    else if (getType(color) === 'object') {
+        return ((color.r & 0x0ff) << 16) | ((color.g & 0x0ff) << 8) | (color.b & 0x0ff);
+    }
+    return parseInt(color);
+};
+
+const rgbColor = (color) => {
+    return {
+        r: (color & 0xff0000) >> 16,
+        g: (color & 0x00ff00) >> 8,
+        b: (color & 0x0000ff)
+    };
+};
+
+const shadeColor = (color, percent) => {
+    const rgb = rgbColor(color);
+    rgb.r = parseInt(clamp(rgb.r * percent, 0, 255));
+    rgb.g = parseInt(clamp(rgb.g * percent, 0, 255));
+    rgb.b = parseInt(clamp(rgb.b * percent, 0, 255));
+    return intColor(rgb);
+};
+
+const colorMatch = (c1, c2, delta) => {
     let match = true;
     ['r', 'g', 'b'].forEach((k) => {
-        match = match && c1[k] <= (c2[k] + range) && c1[k] >= (c2[k] - range);
+        match = match && c1[k] <= (c2[k] + delta) && c1[k] >= (c2[k] - delta);
     });
     return match;
 };
@@ -203,6 +229,10 @@ const shuffle = (array, seed) => {
 
 const rad = (deg) => {
     return deg * Math.PI / 180;
+};
+
+const clamp = (value, min, max) => {
+    return Math.min(Math.max(value, min), max);
 };
 
 const clone = (obj) => {

@@ -264,11 +264,7 @@ class Image {
 
     async getPixels() {
         // get person pixel color
-        const color = {
-            r: (this.config.material.color.person & 0xff0000) >> 16,
-            g: (this.config.material.color.person & 0x00ff00) >> 8,
-            b: (this.config.material.color.person & 0x0000ff)
-        };
+        const color = rgbColor(this.config.material.color.person);
 
         // get canvas pixel data
         const ctx = this.rendering.getContext('2d');

@@ -76,13 +76,32 @@ class Person {
             }
         };
 
-        const gender = parseInt(this.index % 2, 10);
-        this.model = ['models/male.glb', 'models/female.glb'][gender];
-        this.offset = [0.0, 0.04][gender];
+        this.gender = parseInt(this.index % 2, 10);
+        this.offset = [0.0, 0.04][this.gender];
+
+        this.surfaceMaterial = new THREE.MeshStandardMaterial({
+            color: this.config.material.color.person,
+            roughness: 0.8,
+            metalness: 0.8
+        });
+
+        this.jointsMaterial = new THREE.MeshStandardMaterial({
+            color: shadeColor(this.config.material.color.person, 0.5),
+            roughness: 0.8,
+            metalness: 0.8
+        });
 
         this.loaded = new Promise(function (resolve) {
-            new THREE.GLTFLoader().load(this.model, ((gltf) => {
+            new THREE.GLTFLoader().load(['models/male.glb', 'models/female.glb'][this.gender], ((gltf) => {
                 this.person = gltf.scene;
+
+                // init person
+                this.person.traverse((o) => {
+                    if (o.isMesh) {
+                        const joints = o.name.includes('Joints');
+                        o.material = joints ? this.jointsMaterial : this.surfaceMaterial;
+                    }
+                });
                 this.person.scale.multiplyScalar(10 / 1000);
                 this.setPosition(this.initialPosition, this.initialDirection);
 

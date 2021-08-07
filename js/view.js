@@ -149,7 +149,12 @@ class View {
         // colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
-        // colorFolder.addColor(this.config.material.color, 'person').onChange((v) => { /* TODO */ });
+        colorFolder.addColor(this.config.material.color, 'person').onChange((v) => {
+            this.forest.persons.forEach((person) => {
+                person.surfaceMaterial.color.setHex(v);
+                person.jointsMaterial.color.setHex(shadeColor(v, 0.5));
+            });
+        });
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
