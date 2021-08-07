@@ -17,6 +17,14 @@
             "url": "http://127.0.0.1:8080",
             "webRoot": "${workspaceFolder}",
             "runtimeExecutable": "/usr/bin/chromium"
+        },
+        {
+            "name": "Electron",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/index.js",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron"
         }
     ]
 }
