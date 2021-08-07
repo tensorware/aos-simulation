@@ -65,7 +65,7 @@
             "twig": "0x557755",
             "ground": "0x010101",
             "plane": "0xffffff",
-            "person": "0x660000",
+            "person": "0xff9898",
             "background": "0x87ceeb"
         }
     }
