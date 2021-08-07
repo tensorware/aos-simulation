@@ -161,7 +161,7 @@ class Image {
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
-            index: this.index,
+            number: this.index + 1,
             rendered: {
                 center: new THREE.Vector3(
                     this.center.x,
@@ -316,7 +316,7 @@ class Image {
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
         const image = {
-            index: this.index,
+            number: this.index + 1,
             rendered: {
                 center: new THREE.Vector3(
                     this.center.x,

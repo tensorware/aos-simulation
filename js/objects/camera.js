@@ -256,10 +256,8 @@ class Camera {
 
         const images = { captures: [] };
         this.images.forEach((image) => {
-            const number = image.index + 1;
-
             images.captures.push({
-                image: number,
+                image: image.number,
                 center: {
                     rendered: image.rendered.center,
                     processed: image.processed.center
@@ -267,7 +265,7 @@ class Camera {
             });
 
             // export images
-            camera.file(`image-${number}-${this.config.drone.camera.type}.png`, image.base64, { base64: true });
+            camera.file(`image-${image.number}-${this.config.drone.camera.type}.png`, image.base64, { base64: true });
         });
 
         // export config
