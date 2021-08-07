@@ -47,7 +47,7 @@ app.whenReady().then(() => {
 
     item.setSavePath(fileName);
 
-    dialog.showMessageBox({
+    dialog.showMessageBox(main, {
       title: 'Download completed',
       message: `File of size ${fileSize} MB saved to "${fileName}"`
     });
