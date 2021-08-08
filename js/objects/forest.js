@@ -113,7 +113,7 @@ class Forest {
 
     addTrees() {
         const workerConfigs = [];
-        for (let i = 0; i < this.config.forest.size; i++) {
+        for (let i = 0; i < this.trees.length; i++) {
             workerConfigs.push(this.getTree(i));
         }
 
@@ -176,22 +176,18 @@ class Forest {
                     );
                     treeGroup.rotateY(rad(randomInt(0, 360, tree.index)));
 
-                    if (tree.index < this.trees.length) {
-                        // update tree
-                        if (this.trees[tree.index]) {
-                            treeGroup.position.set(
-                                this.trees[tree.index].position.x,
-                                this.trees[tree.index].position.y,
-                                this.trees[tree.index].position.z
-                            );
-                            this.scene.remove(this.trees[tree.index]);
-                        }
-                        this.trees[tree.index] = treeGroup;
+                    // update tree
+                    if (this.trees[tree.index]) {
+                        treeGroup.position.set(
+                            this.trees[tree.index].position.x,
+                            this.trees[tree.index].position.y,
+                            this.trees[tree.index].position.z
+                        );
+                        this.scene.remove(this.trees[tree.index]);
                     }
-                    else {
-                        // append tree
-                        this.trees.push(treeGroup);
-                    }
+
+                    // add tree
+                    this.trees[tree.index] = treeGroup;
                     this.scene.add(treeGroup);
 
                     // update workers status
@@ -212,7 +208,7 @@ class Forest {
     }
 
     addPersons() {
-        for (let i = 0; i < this.config.forest.persons.count; i++) {
+        for (let i = 0; i < this.persons.length; i++) {
             this.persons[i] = this.getPerson(i);
         }
     }
@@ -220,13 +216,7 @@ class Forest {
     removeTrees() {
         // remove all trees
         this.trees.forEach((tree) => { this.scene.remove(tree); });
-        this.trees = [];
-
-        // extend trees list
-        const treesCount = this.config.forest.size - this.trees.length;
-        if (treesCount > 0) {
-            this.trees.push.apply(this.trees, [...new Array(treesCount)]);
-        }
+        this.trees = [...new Array(this.config.forest.size)];
 
         // update positions
         this.update();
@@ -234,14 +224,8 @@ class Forest {
 
     removePersons() {
         // remove all persons
-        this.persons.forEach(async (person) => { await person.remove(); });
-        this.persons = [];
-
-        // extend persons list
-        const personCount = this.config.forest.persons.count - this.persons.length;
-        if (personCount > 0) {
-            this.persons.push.apply(this.persons, [...new Array(personCount)]);
-        }
+        this.persons.forEach(async (person) => { this.scene.remove(person.person); });
+        this.persons = [... new Array(this.config.forest.persons.count)];
     }
 
     async initTreePos() {
