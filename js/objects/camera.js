@@ -18,7 +18,7 @@ class Camera {
         this.boxes = [];
 
         this.planes = [];
-        this.images = [];
+        this.captures = [];
 
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: this.config.material.color.plane,
@@ -195,7 +195,7 @@ class Camera {
     }
 
     async capture(preview) {
-        const index = this.images.length;
+        const index = this.captures.length;
         const image = new Image(this, index);
         return await image.capture(preview);
     }
@@ -255,17 +255,17 @@ class Camera {
         const camera = zip.folder('camera');
 
         const images = { captures: [] };
-        this.images.forEach((image) => {
+        this.captures.forEach((capture) => {
             images.captures.push({
-                image: image.number,
+                image: capture.number,
                 center: {
-                    rendered: image.rendered.center,
-                    processed: image.processed.center
+                    rendered: capture.rendered.center,
+                    processed: capture.processed.center
                 }
             });
 
             // export images
-            camera.file(`image-${image.number}-${this.config.drone.camera.type}.png`, image.base64, { base64: true });
+            camera.file(`image-${capture.number}-${this.config.drone.camera.type}.png`, capture.base64, { base64: true });
         });
 
         // export config
@@ -285,8 +285,10 @@ class Camera {
         this.boxes.forEach((ray) => { this.scene.remove(ray); });
         this.boxes = [];
 
-        // clear images
-        this.images = [];
+        // clear captures
+        this.captures = [];
+
+        // clear slider
         await this.slider.clear();
 
         // add initial preview

@@ -160,7 +160,7 @@ class Image {
         const rayPointsGround = rayPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const image = {
+        const capture = {
             number: this.index + 1,
             rendered: {
                 center: new THREE.Vector3(
@@ -203,13 +203,13 @@ class Image {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // draw pixel points
-        image.processed.points.forEach((p) => {
+        capture.processed.points.forEach((p) => {
             ctx.fillStyle = hexColor(this.config.material.color.person);
             ctx.fillRect(p.x, p.z, 1, 1);
         });
 
         // save base64 image
-        image.base64 = canvasImage(canvas);
+        capture.base64 = canvasImage(canvas);
 
         if (preview) {
             // canvas container
@@ -221,9 +221,11 @@ class Image {
             this.camera.slider.addImage(container);
         }
 
-        // return last captured images
-        this.camera.images.push(image);
-        return this.camera.images.slice(Math.max(this.camera.images.length - this.config.drone.camera.images, 0));
+        // append capture to camera
+        this.camera.captures.push(capture);
+
+        // return last captures
+        return this.camera.captures.slice(Math.max(this.camera.captures.length - this.config.drone.camera.captures, 0));
     }
 
     async integrateInfraredImages(images) {
@@ -315,7 +317,7 @@ class Image {
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const image = {
+        const capture = {
             number: this.index + 1,
             rendered: {
                 center: new THREE.Vector3(
@@ -345,7 +347,7 @@ class Image {
         const canvas = this.rendering;
 
         // save base64 image
-        image.base64 = canvasImage(canvas);
+        capture.base64 = canvasImage(canvas);
 
         if (preview) {
             // canvas container
@@ -357,9 +359,11 @@ class Image {
             this.camera.slider.addImage(container);
         }
 
-        // return last captured images
-        this.camera.images.push(image);
-        return this.camera.images.slice(Math.max(this.camera.images.length - this.config.drone.camera.images, 0));
+        // append capture to camera
+        this.camera.captures.push(capture);
+
+        // return last captures
+        return this.camera.captures.slice(Math.max(this.camera.captures.length - this.config.drone.camera.captures, 0));
     }
 
     async integrateMonochromeImages(images) {
