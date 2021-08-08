@@ -21,6 +21,8 @@ class Person {
         this.lastPosition = this.initialPosition.clone();
         this.lastDirection = this.initialDirection;
 
+        this.positions = [];
+
         this.clock = new THREE.Clock();
         this.actions = [];
 
@@ -215,9 +217,11 @@ class Person {
         this.lastDirection = direction;
 
         // set position with offset
-        this.person.position.x = this.lastPosition.x;
-        this.person.position.y = this.lastPosition.y;
-        this.person.position.z = this.lastPosition.z;
+        this.person.position.set(
+            this.lastPosition.x,
+            this.lastPosition.y,
+            this.lastPosition.z
+        );
 
         // set direction rotation
         const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0);
