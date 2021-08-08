@@ -6,7 +6,7 @@ class View {
         this.loader = new Loader();
 
         // init stage
-        this.stage = new Stage(this.root, this.config, this.loader)
+        this.stage = new Stage(this.root, this.config, this.loader);
         this.stage.loaded.then(() => {
             // init html
             this.background(this.config.material.color.background);

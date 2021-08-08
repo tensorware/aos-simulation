@@ -47,10 +47,12 @@ class Forest {
                 this.twigMaterials[type].map = await this.loader.load('texture', `img/${type}.png`);
             }
 
-            this.update();
+            this.init();
+
             this.addGround();
             this.addTrees();
             this.addPersons();
+            this.update();
 
             this.workersMessage((finished) => {
                 if (finished) {
@@ -58,6 +60,47 @@ class Forest {
                 }
             });
         }.bind(this));
+    }
+
+    init() {
+        // TODO refactor position logic
+
+        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
+        const sizeOuter = this.config.forest.ground + 2 * coverage;
+
+        // ground position constraints
+        const treeMargin = 1;
+        const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
+        const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
+
+        // divide ground into grids
+        const gridCount = Math.floor(Math.sqrt(this.config.forest.size));
+        const gridSize = 2 * treePositionMax / gridCount;
+
+        // calculate tree positions
+        this.treePositions = [];
+        for (let k = 0; k < 2; k++) {
+            const treePositions = [];
+            for (let i = 0; i < gridCount; i++) {
+                for (let j = 0; j < gridCount; j++) {
+                    // calculate min and max values within grid
+                    const gridPositionMinX = treePositionMin + j * gridSize;
+                    const gridPositionMaxX = treePositionMin + (j + 1) * gridSize;
+                    const gridPositionMinZ = treePositionMin + i * gridSize;
+                    const gridPositionMaxZ = treePositionMin + (i + 1) * gridSize;
+
+                    // apply random position within grid
+                    treePositions.push(new THREE.Vector3(
+                        randomFloat(gridPositionMinX, gridPositionMaxX),
+                        0.01,
+                        randomFloat(gridPositionMinZ, gridPositionMaxZ)
+                    ));
+                }
+            }
+
+            // shuffle grid positions and append to existing
+            this.treePositions = this.treePositions.concat(shuffle(treePositions, k));
+        }
     }
 
     workersMessage(callback) {
@@ -129,7 +172,7 @@ class Forest {
         this.workers = getWorkers();
 
         // worker status
-        let treesDone = 0;
+        let done = 0;
         this.stage.status('Loading', 0);
 
         // start workers
@@ -195,11 +238,11 @@ class Forest {
                     this.scene.add(treeGroup);
 
                     // update workers status
-                    this.stage.status('Loading', Math.round(++treesDone * 100 / this.trees.length));
+                    this.stage.status('Loading', Math.round(++done * 100 / this.trees.length));
                 });
 
                 // workers finished
-                const finished = this.trees.length == treesDone;
+                const finished = this.trees.length == done;
                 if (finished) {
                     this.stage.status('Loading', 100);
                     sleep(1000).then(() => {
@@ -209,6 +252,9 @@ class Forest {
                 this.workersSubscriber.forEach((callback) => { callback(finished); });
             }).bind(this);
         });
+
+        // update ground
+        this.update();
     }
 
     addPersons() {
@@ -223,7 +269,7 @@ class Forest {
         this.trees = [...new Array(this.config.forest.size)];
 
         // update positions
-        this.update();
+        this.init();
     }
 
     removePersons() {
@@ -232,48 +278,7 @@ class Forest {
         this.persons = [... new Array(this.config.forest.persons.count)];
     }
 
-    async initTreePos() {
-        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
-        const sizeOuter = this.config.forest.ground + 2 * coverage;
-
-        // ground position constraints
-        const treeMargin = 1;
-        const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
-        const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
-
-        // divide ground into grids
-        const gridCount = Math.floor(Math.sqrt(this.config.forest.size));
-        const gridSize = 2 * treePositionMax / gridCount;
-
-        // calculate tree positions
-        this.treePositions = [];
-        for (let k = 0; k < 2; k++) {
-            const treePositions = [];
-            for (let i = 0; i < gridCount; i++) {
-                for (let j = 0; j < gridCount; j++) {
-                    // calculate min and max values within grid
-                    const gridPositionMinX = treePositionMin + j * gridSize;
-                    const gridPositionMaxX = treePositionMin + (j + 1) * gridSize;
-                    const gridPositionMinZ = treePositionMin + i * gridSize;
-                    const gridPositionMaxZ = treePositionMin + (i + 1) * gridSize;
-
-                    // apply random position within grid
-                    treePositions.push(new THREE.Vector3(
-                        randomFloat(gridPositionMinX, gridPositionMaxX),
-                        0.01,
-                        randomFloat(gridPositionMinZ, gridPositionMaxZ)
-                    ));
-                }
-            }
-
-            // shuffle grid positions and append to existing
-            this.treePositions = this.treePositions.concat(shuffle(treePositions, k));
-        }
-    }
-
     async update() {
-        this.initTreePos();
-
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const sizeOuter = this.config.forest.ground + 2 * coverage;
 
@@ -291,17 +296,15 @@ class Forest {
             }
         });
 
-        if (this.grounds.length == 2) {
-            // inner ground
-            const planeGeometryInner = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
-            planeGeometryInner.rotateX(rad(90)).translate(0, 0, 0);
-            this.grounds[0].geometry.copy(planeGeometryInner);
+        // inner ground
+        const planeGeometryInner = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
+        planeGeometryInner.rotateX(rad(90)).translate(0, 0, 0);
+        this.grounds[0].geometry.copy(planeGeometryInner);
 
-            // outer ground
-            const planeGeometryOuter = new THREE.PlaneGeometry(sizeOuter, sizeOuter);
-            planeGeometryOuter.rotateX(rad(90)).translate(0, -0.01, 0);
-            this.grounds[1].geometry.copy(planeGeometryOuter);
-        }
+        // outer ground
+        const planeGeometryOuter = new THREE.PlaneGeometry(sizeOuter, sizeOuter);
+        planeGeometryOuter.rotateX(rad(90)).translate(0, -0.01, 0);
+        this.grounds[1].geometry.copy(planeGeometryOuter);
     }
 
     async export(zip) {
