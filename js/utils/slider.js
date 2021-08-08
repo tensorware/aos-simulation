@@ -1,7 +1,8 @@
 class Slider {
-    constructor(root, config) {
+    constructor(root, config, loader) {
         this.root = root;
         this.config = config;
+        this.loader = loader;
 
         this.images = root.querySelector('#images');
         this.previews = root.querySelector('#previews');

@@ -1,61 +1,64 @@
 class Stage {
-    constructor(root, config) {
+    constructor(root, config, loader) {
         this.root = root;
         this.config = config;
+        this.loader = loader;
+
         this.name = document.title;
 
-        this.loaded = new Promise(function (resolve) {
-            new THREE.FontLoader().load('font/opensans.json', ((font) => {
-                this.fov = 60
-                this.font = font;
-                this.scene = new THREE.Scene();
+        this.loaded = new Promise(async function (resolve) {
+            const path = 'font/opensans.json';
+            const font = await this.loader.load('font', path);
 
-                // stage directional light
-                this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                this.directionalLight.position.set(100, 100, 100);
-                this.directionalLight.layers.set(1);
+            this.fov = 60
+            this.font = font;
+            this.scene = new THREE.Scene();
 
-                // stage ambient light
-                this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
+            // stage directional light
+            this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            this.directionalLight.position.set(100, 100, 100);
+            this.directionalLight.layers.set(1);
 
-                // stage camera (layer 0 and layer 1)
-                this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
-                this.camera.layers.enable(0);
-                this.camera.layers.enable(1);
-                this.camera.add(this.directionalLight);
-                this.camera.add(this.ambientLight);
-                this.scene.add(this.camera);
+            // stage ambient light
+            this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
 
-                // renderer
-                this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
-                this.renderer.setPixelRatio(window.devicePixelRatio);
+            // stage camera (layer 0 and layer 1)
+            this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
+            this.camera.layers.enable(0);
+            this.camera.layers.enable(1);
+            this.camera.add(this.directionalLight);
+            this.camera.add(this.ambientLight);
+            this.scene.add(this.camera);
 
-                // controls
-                this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
-                this.controls.minDistance = 0.1;
-                this.controls.maxDistance = 500;
-                this.controls.autoRotateSpeed = 1;
-                this.controls.autoRotate = false;
-                this.controls.enablePan = true;
+            // renderer
+            this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
+            this.renderer.setPixelRatio(window.devicePixelRatio);
 
-                // user interface
-                this.stats = new Stats();
-                this.root.querySelector('#info').append(this.stats.dom);
-                this.root.querySelector('#stage').append(this.renderer.domElement);
+            // controls
+            this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
+            this.controls.minDistance = 0.1;
+            this.controls.maxDistance = 500;
+            this.controls.autoRotateSpeed = 1;
+            this.controls.autoRotate = false;
+            this.controls.enablePan = true;
 
-                // reset stage
-                this.reset();
+            // user interface
+            this.stats = new Stats();
+            this.root.querySelector('#info').append(this.stats.dom);
+            this.root.querySelector('#stage').append(this.renderer.domElement);
 
-                // animations
-                this.animate = this.animate.bind(this);
-                requestAnimationFrame(this.animate);
+            // reset stage
+            this.reset();
 
-                // events
-                this.update = this.update.bind(this);
-                window.addEventListener('resize', this.update);
+            // animations
+            this.animate = this.animate.bind(this);
+            requestAnimationFrame(this.animate);
 
-                resolve(this);
-            }).bind(this));
+            // events
+            this.update = this.update.bind(this);
+            window.addEventListener('resize', this.update);
+
+            resolve(this);
         }.bind(this));
     }
 

@@ -2,6 +2,7 @@ class Person {
     constructor(forest, index) {
         this.root = forest.root;
         this.config = forest.config;
+        this.loader = forest.loader;
         this.scene = forest.scene;
         this.stage = forest.stage;
         this.forest = forest;
@@ -93,48 +94,48 @@ class Person {
             metalness: 0.8
         });
 
-        this.loaded = new Promise(function (resolve) {
-            new THREE.GLTFLoader().load(['model/male.glb', 'model/female.glb'][this.gender], ((gltf) => {
-                this.person = gltf.scene;
+        this.loaded = new Promise(async function (resolve) {
+            const path = ['model/male.glb', 'model/female.glb'][this.gender];
+            const gltf = await this.loader.load('gltf', path);
 
-                // init person
-                this.person.traverse((o) => {
-                    if (o.isMesh) {
-                        const joints = o.name.includes('Joints');
-                        o.material = joints ? this.jointsMaterial : this.surfaceMaterial;
-                    }
-                });
-                this.person.scale.multiplyScalar(10 / 1000);
-                this.setPosition(this.initialPosition, this.initialDirection);
-
-                // init animation mixer
-                this.animations = gltf.animations.length;
-                this.mixer = new THREE.AnimationMixer(this.person);
-                this.setTime(1.0);
-
-                // init actions
-                for (let i = 0; i < this.animations; ++i) {
-                    let clip = gltf.animations[i];
-                    let name = clip.name;
-
-                    // add actions
-                    if (this.activityMapping[name]) {
-                        const action = this.mixer.clipAction(clip);
-                        this.activityMapping[name].action = action;
-                        this.addAction(action);
-                    }
+            // init person
+            this.person = gltf.scene;
+            this.person.traverse((o) => {
+                if (o.isMesh) {
+                    const joints = o.name.includes('Joints');
+                    o.material = joints ? this.jointsMaterial : this.surfaceMaterial;
                 }
+            });
+            this.person.scale.multiplyScalar(10 / 1000);
+            this.setPosition(this.initialPosition, this.initialDirection);
 
-                this.setActivity();
-                this.addPerson();
-                this.update();
+            // init animation mixer
+            this.animations = gltf.animations.length;
+            this.mixer = new THREE.AnimationMixer(this.person);
+            this.setTime(1.0);
 
-                // animations
-                this.animate = this.animate.bind(this);
-                requestAnimationFrame(this.animate);
+            // init actions
+            for (let i = 0; i < this.animations; ++i) {
+                let clip = gltf.animations[i];
+                let name = clip.name;
 
-                resolve(this);
-            }).bind(this));
+                // add actions
+                if (this.activityMapping[name]) {
+                    const action = this.mixer.clipAction(clip);
+                    this.activityMapping[name].action = action;
+                    this.addAction(action);
+                }
+            }
+
+            this.setActivity();
+            this.addPerson();
+            this.update();
+
+            // animations
+            this.animate = this.animate.bind(this);
+            requestAnimationFrame(this.animate);
+
+            resolve(this);
         }.bind(this));
     }
 

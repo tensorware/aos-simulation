@@ -2,6 +2,7 @@ class Camera {
     constructor(drone, index) {
         this.root = drone.root;
         this.config = drone.config;
+        this.loader = drone.loader;
         this.scene = drone.scene;
         this.stage = drone.stage;
         this.forest = drone.forest;
@@ -65,7 +66,7 @@ class Camera {
         };
 
         // init slider
-        this.slider = new Slider(document.querySelector('#captures'), this.config);
+        this.slider = new Slider(document.querySelector('#captures'), this.config, this.loader);
 
         // move objects to layer 1 (invisible for preview camera)
         this.plane.border.layers.set(1);
@@ -74,7 +75,7 @@ class Camera {
             viewLine.layers.set(1);
         });
 
-        this.loaded = new Promise(function (resolve) {
+        this.loaded = new Promise(async function (resolve) {
             this.addView();
             this.addPlane();
             this.addRenderer();

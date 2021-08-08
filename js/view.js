@@ -1,16 +1,16 @@
 class View {
-    constructor(root, config, configs) {
+    constructor(root, config, presets) {
         this.root = root;
         this.config = config;
-        this.configs = configs;
+        this.presets = presets;
+        this.loader = new Loader();
 
         // init stage
-        this.stage = new Stage(this.root, this.config)
+        this.stage = new Stage(this.root, this.config, this.loader)
         this.stage.loaded.then(() => {
-
             // init html
             this.background(this.config.material.color.background);
-            this.controls(this.root.querySelector('#controls'));
+            this.controls(this.root.querySelector('#controls'), presets);
             this.splitter(['#top', '#bottom']);
 
             // init objects
@@ -149,8 +149,12 @@ class View {
 
         // color folder
         const colorFolder = materialFolder.addFolder('color');
-        // colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
-        // colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => this.forest.twigMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => {
+            Object.values(this.forest.twigMaterials).forEach((material) => {
+                material.color.setHex(v);
+            });
+        });
         colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
         colorFolder.addColor(this.config.material.color, 'person').onChange((v) => {
@@ -162,7 +166,7 @@ class View {
         colorFolder.addColor(this.config.material.color, 'background').onChange(this.background.bind(this));
 
         // config preset
-        this.gui.add(this.config, 'preset', this.configs).onChange((preset) => {
+        this.gui.add(this.config, 'preset', this.presets).onChange((preset) => {
             this.gui.load.preset = preset;
             window.location.reload();
         });

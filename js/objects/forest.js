@@ -2,6 +2,7 @@ class Forest {
     constructor(stage, index) {
         this.root = stage.root;
         this.config = stage.config;
+        this.loader = stage.loader;
         this.scene = stage.scene;
         this.stage = stage;
         this.index = index;
@@ -26,21 +27,27 @@ class Forest {
             metalness: 0.3
         });
 
-        this.twigMaterial = new THREE.MeshStandardMaterial({
-            color: this.config.material.color.twig,
-            roughness: 1.0,
-            metalness: 0.3,
-            alphaTest: 0.1
-        });
-
-        this.twigLeafTexture = {
-            'needle-leaf': new THREE.TextureLoader().load('img/needle-leaf.png'),
-            'broad-leaf': new THREE.TextureLoader().load(`img/broad-leaf.png`)
+        this.twigMaterials = {
+            'needle-leaf': new THREE.MeshStandardMaterial({
+                color: this.config.material.color.twig,
+                roughness: 1.0,
+                metalness: 0.3,
+                alphaTest: 0.1
+            }),
+            'broad-leaf': new THREE.MeshStandardMaterial({
+                color: this.config.material.color.twig,
+                roughness: 1.0,
+                metalness: 0.3,
+                alphaTest: 0.1
+            })
         };
 
-        this.loaded = new Promise(function (resolve) {
-            this.update();
+        this.loaded = new Promise(async function (resolve) {
+            for (const type in this.twigMaterials) {
+                this.twigMaterials[type].map = await this.loader.load('texture', `img/${type}.png`);
+            }
 
+            this.update();
             this.addGround();
             this.addTrees();
             this.addPersons();
@@ -153,18 +160,16 @@ class Forest {
                     twigGeometry.setAttribute('uv', createFloatAttribute(tree.uvsTwig, 2));
                     twigGeometry.setIndex(createIntAttribute(tree.facesTwig, 1));
 
-                    // tree twigs material
-                    const twigMaterial = new THREE.MeshStandardMaterial().copy(this.twigMaterial);
+                    // tree twigs leaf type
                     let twigLeafType = this.config.forest.trees.type;
                     if (twigLeafType == 'mixed-leaf') {
                         twigLeafType = ['needle-leaf', 'broad-leaf'][randomInt(0, 1, tree.index)];
                     }
-                    twigMaterial.map = this.twigLeafTexture[twigLeafType];
 
                     // tree trunk and twigs
                     const treeGroup = new THREE.Group();
                     treeGroup.add(new THREE.Mesh(treeGeometry, this.treeMaterial));
-                    treeGroup.add(new THREE.Mesh(twigGeometry, twigMaterial));
+                    treeGroup.add(new THREE.Mesh(twigGeometry, this.twigMaterials[twigLeafType]));
 
                     // tree position
                     treeGroup.scale.multiplyScalar(3);

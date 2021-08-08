@@ -2,6 +2,7 @@ class Image {
     constructor(camera, index) {
         this.root = camera.root;
         this.config = camera.config;
+        this.loader = camera.loader;
         this.scene = camera.scene;
         this.stage = camera.stage;
         this.forest = camera.forest;
@@ -20,7 +21,7 @@ class Image {
         this.borderPoints = this.camera.viewLines.map(getPoints);
         this.rendering = cloneCanvas(this.camera.renderer.domElement, true);
 
-        this.loaded = new Promise(function (resolve) {
+        this.loaded = new Promise(async function (resolve) {
             resolve(this);
         }.bind(this));
     }

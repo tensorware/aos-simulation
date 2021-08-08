@@ -2,6 +2,7 @@ class Drone {
     constructor(forest, index) {
         this.root = forest.root;
         this.config = forest.config;
+        this.loader = forest.loader;
         this.scene = forest.scene;
         this.stage = forest.stage;
         this.forest = forest;
@@ -10,45 +11,46 @@ class Drone {
         this.flying = false;
         this.goal = new THREE.Vector3();
 
-        this.loaded = new Promise(function (resolve) {
-            new THREE.STLLoader().load('model/drone.stl', ((stl) => {
-                const droneGeometry = stl;
-                droneGeometry.rotateX(rad(-90)).rotateY(rad(-90)).translate(0, 0, 0);
+        this.loaded = new Promise(async function (resolve) {
+            const path = 'model/drone.stl';
+            const stl = await this.loader.load('stl', path);
 
-                const droneMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x666666,
-                    roughness: 0.8,
-                    metalness: 0.8
-                });
+            const droneGeometry = stl;
+            droneGeometry.rotateX(rad(-90)).rotateY(rad(-90)).translate(0, 0, 0);
 
-                this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
-                this.drone.scale.multiplyScalar(15 / 100);
-                this.drone.position.set(
-                    this.config.drone.eastWest,
-                    this.config.drone.height,
-                    this.config.drone.northSouth
-                );
-                this.drone.setRotationFromEuler(new THREE.Euler(0, rad(this.config.drone.rotation), 0));
+            const droneMaterial = new THREE.MeshStandardMaterial({
+                color: 0x666666,
+                roughness: 0.8,
+                metalness: 0.8
+            });
 
-                this.addDrone();
-                this.addCamera();
+            this.drone = new THREE.Mesh(droneGeometry, droneMaterial);
+            this.drone.scale.multiplyScalar(15 / 100);
+            this.drone.position.set(
+                this.config.drone.eastWest,
+                this.config.drone.height,
+                this.config.drone.northSouth
+            );
+            this.drone.setRotationFromEuler(new THREE.Euler(0, rad(this.config.drone.rotation), 0));
+
+            this.addDrone();
+            this.addCamera();
+            this.update();
+
+            // update preview
+            this.forest.workersMessage(() => {
                 this.update();
+            });
 
-                // update preview
-                this.forest.workersMessage(() => {
-                    this.update();
-                });
+            // animations
+            this.animate = this.animate.bind(this);
+            this.click = doubleClick(this.click.bind(this));
 
-                // animations
-                this.animate = this.animate.bind(this);
-                this.click = doubleClick(this.click.bind(this));
+            // events
+            window.addEventListener('pointerdown', this.click);
+            window.addEventListener('pointerup', this.click);
 
-                // events
-                window.addEventListener('pointerdown', this.click);
-                window.addEventListener('pointerup', this.click);
-
-                resolve(this);
-            }).bind(this));
+            resolve(this);
         }.bind(this));
     }
 
