@@ -324,9 +324,7 @@ class Forest {
         const persons = { positions: [] };
         for (let i = 0; i < this.persons.length; i++) {
             const person = this.persons[i];
-            if (person.visible) {
-                persons.positions.push(person.positions);
-            }
+            persons.positions.push(person.positions);
         }
         forest.file('persons.json', JSON.stringify(persons, null, 4));
     }

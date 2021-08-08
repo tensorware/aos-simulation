@@ -18,13 +18,10 @@ class Person {
             randomFloat(personPositionMin, personPositionMax)
         );
         this.initialDirection = randomInt(0, 360, index);
-
         this.lastPosition = this.initialPosition.clone();
         this.lastDirection = this.initialDirection;
 
         this.positions = [];
-
-        this.clock = new THREE.Clock();
         this.actions = [];
 
         this.currentActivity;
@@ -93,6 +90,8 @@ class Person {
             roughness: 0.7,
             metalness: 0.7
         });
+
+        this.clock = new THREE.Clock();
 
         this.loaded = new Promise(async function (resolve) {
             const path = ['model/male.glb', 'model/female.glb'][this.gender];
@@ -227,6 +226,9 @@ class Person {
         // set direction rotation
         const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0);
         this.person.setRotationFromEuler(rotation);
+
+        // TODO append to position list
+        //this.positions.push(position);
     }
 
     async animate() {
@@ -308,7 +310,7 @@ class Person {
     }
 
     async export(zip) {
-        // TODO export json
+        // TODO export json to camera.json
     }
 
     async clear() {
@@ -320,6 +322,7 @@ class Person {
         this.mixer.setTime(0.0);
 
         // set initial position
+        this.positions = [];
         this.setPosition(this.initialPosition, this.initialDirection);
     }
 

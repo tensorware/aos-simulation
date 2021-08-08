@@ -143,6 +143,5 @@ class Stage {
 
         // reset status
         await sleep(100);
-        this.status();
     }
 };
