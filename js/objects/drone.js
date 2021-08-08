@@ -8,7 +8,7 @@ class Drone {
         this.index = index;
 
         this.flying = false;
-        this.goal = { x: 0, y: 0 };
+        this.goal = new THREE.Vector3();
 
         this.loaded = new Promise(function (resolve) {
             new THREE.STLLoader().load('models/drone.stl', ((stl) => {
