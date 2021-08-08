@@ -11,10 +11,13 @@ class Loader {
 
     async load(type, path) {
         if (path in this.cache) {
-            return this.cache[path].clone();
+            return this.cache[path];
         }
         return new Promise(function (resolve) {
-            this.loader[type].load(path, resolve);
+            this.loader[type].load(path, (data) => {
+                this.cache[path] = data;
+                resolve(data);
+            });
         }.bind(this));
     }
 };

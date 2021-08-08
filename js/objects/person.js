@@ -84,14 +84,14 @@ class Person {
 
         this.surfaceMaterial = new THREE.MeshStandardMaterial({
             color: this.config.material.color.person,
-            roughness: 0.8,
-            metalness: 0.8
+            roughness: 0.7,
+            metalness: 0.7
         });
 
         this.jointsMaterial = new THREE.MeshStandardMaterial({
-            color: shadeColor(this.config.material.color.person, 0.5),
-            roughness: 0.8,
-            metalness: 0.8
+            color: shadeColor(this.config.material.color.person, 0.4),
+            roughness: 0.7,
+            metalness: 0.7
         });
 
         this.loaded = new Promise(async function (resolve) {
@@ -99,7 +99,7 @@ class Person {
             const gltf = await this.loader.load('gltf', path);
 
             // init person
-            this.person = gltf.scene;
+            this.person = THREE.SkeletonUtils.clone(gltf.scene);
             this.person.traverse((o) => {
                 if (o.isMesh) {
                     const joints = o.name.includes('Joints');
@@ -116,7 +116,7 @@ class Person {
 
             // init actions
             for (let i = 0; i < this.animations; ++i) {
-                let clip = gltf.animations[i];
+                let clip = gltf.animations[i].clone();
                 let name = clip.name;
 
                 // add actions
