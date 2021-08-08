@@ -122,7 +122,11 @@ class View {
 
         // trees folders
         [treesFolders, branchingFolders, trunkFolders].forEach((folders) => {
-            folders.forEach((folder) => { folder.onChange(() => { this.forest.addTrees(); }); });
+            folders.forEach((folder) => {
+                folder.onChange(() => {
+                    this.forest.addTrees();
+                });
+            });
         });
 
         // persons folder
@@ -226,10 +230,13 @@ class View {
     async capture() {
         const date = new Date().yyyymmddhhmmss();
 
-        // reset forest and drone
-        await this.reset();
+        // reset persons
+        await this.forest.clear();
 
-        // capture drone images
+        // reset drone
+        await this.drone.reset();
+
+        // capture images
         await this.drone.capture()
 
         // reset stage camera

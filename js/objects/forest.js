@@ -168,19 +168,22 @@ class Forest {
                     treeGroup.add(new THREE.Mesh(twigGeometry, twigMaterial));
 
                     // tree position
-                    const scale = 3;
-                    treeGroup.scale.set(scale, scale, scale);
-                    treeGroup.position.x = this.treePositions[tree.index].x;
-                    treeGroup.position.y = this.treePositions[tree.index].y;
-                    treeGroup.position.z = this.treePositions[tree.index].z;
+                    treeGroup.scale.multiplyScalar(3);
+                    treeGroup.position.set(
+                        this.treePositions[tree.index].x,
+                        this.treePositions[tree.index].y,
+                        this.treePositions[tree.index].z
+                    );
                     treeGroup.rotateY(rad(randomInt(0, 360, tree.index)));
 
                     if (tree.index < this.trees.length) {
                         // update tree
                         if (this.trees[tree.index]) {
-                            treeGroup.position.x = this.trees[tree.index].position.x;
-                            treeGroup.position.y = this.trees[tree.index].position.y;
-                            treeGroup.position.z = this.trees[tree.index].position.z;
+                            treeGroup.position.set(
+                                this.trees[tree.index].position.x,
+                                this.trees[tree.index].position.y,
+                                this.trees[tree.index].position.z
+                            );
                             this.scene.remove(this.trees[tree.index]);
                         }
                         this.trees[tree.index] = treeGroup;
@@ -241,7 +244,7 @@ class Forest {
         }
     }
 
-    async update() {
+    async initTreePos() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
         const sizeOuter = this.config.forest.ground + 2 * coverage;
 
@@ -267,17 +270,29 @@ class Forest {
                     const gridPositionMaxZ = treePositionMin + (i + 1) * gridSize;
 
                     // apply random position within grid
-                    treePositions.push({
-                        x: randomFloat(gridPositionMinX, gridPositionMaxX),
-                        y: 0.01,
-                        z: randomFloat(gridPositionMinZ, gridPositionMaxZ)
-                    });
+                    treePositions.push(new THREE.Vector3(
+                        randomFloat(gridPositionMinX, gridPositionMaxX),
+                        0.01,
+                        randomFloat(gridPositionMinZ, gridPositionMaxZ)
+                    ));
                 }
             }
 
             // shuffle grid positions and append to existing
             this.treePositions = this.treePositions.concat(shuffle(treePositions, k));
         }
+    }
+
+    async update() {
+        this.initTreePos();
+
+        const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
+        const sizeOuter = this.config.forest.ground + 2 * coverage;
+
+        // ground position constraints
+        const treeMargin = 1;
+        const treePositionMin = -sizeOuter / 2 + coverage / 2 + treeMargin;
+        const treePositionMax = sizeOuter / 2 - coverage / 2 - treeMargin;
 
         // hide trees outside margin area
         this.trees.forEach((tree) => {
@@ -307,18 +322,22 @@ class Forest {
         // export trees
         const trees = { positions: [] };
         for (let i = 0; i < this.trees.length; i++) {
-            // TODO only visible positions
-            trees.positions.push(this.treePositions[i]);
+            const tree = this.trees[i];
+            if (tree.visible) {
+                trees.positions.push(tree.position);
+            }
         }
         forest.file('trees.json', JSON.stringify(trees, null, 4));
 
         // export persons
-        //const persons = { positions: [] };
-        //for (let i = 0; i < this.persons.length; i++) {
-        // TODO move to image capture function
-        //persons.positions.push(this.personPositions[i]);
-        //}
-        //forest.file('persons.json', JSON.stringify(persons, null, 4));
+        const persons = { positions: [] };
+        for (let i = 0; i < this.persons.length; i++) {
+            const person = this.persons[i];
+            if (person.visible) {
+                persons.positions.push(person.positions);
+            }
+        }
+        forest.file('persons.json', JSON.stringify(persons, null, 4));
     }
 
     async clear() {
