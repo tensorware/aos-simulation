@@ -94,7 +94,7 @@ class Person {
         });
 
         this.loaded = new Promise(function (resolve) {
-            new THREE.GLTFLoader().load(['models/male.glb', 'models/female.glb'][this.gender], ((gltf) => {
+            new THREE.GLTFLoader().load(['model/male.glb', 'model/female.glb'][this.gender], ((gltf) => {
                 this.person = gltf.scene;
 
                 // init person

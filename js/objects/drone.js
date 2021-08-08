@@ -11,7 +11,7 @@ class Drone {
         this.goal = new THREE.Vector3();
 
         this.loaded = new Promise(function (resolve) {
-            new THREE.STLLoader().load('models/drone.stl', ((stl) => {
+            new THREE.STLLoader().load('model/drone.stl', ((stl) => {
                 const droneGeometry = stl;
                 droneGeometry.rotateX(rad(-90)).rotateY(rad(-90)).translate(0, 0, 0);
 
@@ -210,7 +210,7 @@ class Drone {
 
         // flight start
         this.flying = true;
-        this.stage.status('0%');
+        this.stage.status('Capturing', 0);
 
         // approximate number of images
         const imageCount = Math.ceil((end.z - start.z) / step.z) * Math.ceil((end.x - start.x) / step.x) + 1;
@@ -231,7 +231,7 @@ class Drone {
                 await sleep();
 
                 // update capture status
-                this.stage.status(`${Math.round(++i * 100 / imageCount)}%`);
+                this.stage.status('Capturing', Math.round(++i * 100 / imageCount));
             }
 
             // swap direction
@@ -251,7 +251,7 @@ class Drone {
         await this.update();
 
         // capture finished
-        this.stage.status('100%');
+        this.stage.status('Capturing', 100);
         sleep(1000).then(() => {
             this.stage.status();
         });

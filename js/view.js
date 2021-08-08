@@ -251,7 +251,7 @@ class View {
         const zipName = `${this.stage.name}-${date || new Date().yyyymmddhhmmss()}.zip`;
 
         // export status
-        this.stage.status('0%');
+        this.stage.status('Exporting', 0);
 
         // add folders
         this.stage.export(zip);
@@ -267,13 +267,13 @@ class View {
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
         }, (zipMeta) => {
-            this.stage.status(`${Math.round(zipMeta.percent)}%`);
+            this.stage.status('Exporting', Math.round(zipMeta.percent));
         }).then((zipData) => {
             // export zip
             saveAs(zipData, zipName);
 
             // export finished
-            this.stage.status('100%');
+            this.stage.status('Exporting', 100);
             sleep(1000).then(() => {
                 this.stage.status();
             });

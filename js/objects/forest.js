@@ -123,7 +123,7 @@ class Forest {
 
         // worker status
         let treesDone = 0;
-        this.stage.status('0%');
+        this.stage.status('Loading', 0);
 
         // start workers
         splitArray(workerConfigs, this.workers.length).forEach((configs, i) => {
@@ -190,13 +190,13 @@ class Forest {
                     this.scene.add(treeGroup);
 
                     // update workers status
-                    this.stage.status(`${Math.round(++treesDone * 100 / this.trees.length)}%`);
+                    this.stage.status('Loading', Math.round(++treesDone * 100 / this.trees.length));
                 });
 
                 // workers finished
                 const finished = this.trees.length == treesDone;
                 if (finished) {
-                    this.stage.status('100%');
+                    this.stage.status('Loading', 100);
                     sleep(1000).then(() => {
                         this.stage.status();
                     });

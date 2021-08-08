@@ -59,13 +59,12 @@ class Stage {
         }.bind(this));
     }
 
-    status(text) {
-        if (text) {
-            document.title = `${this.name} (${text})`;
+    status(message, percent) {
+        let status = this.name;
+        if (message) {
+            status = getType(percent) === 'number' ? `${message} (${percent}%)` : message;
         }
-        else {
-            document.title = this.name;
-        }
+        document.title = status;
     }
 
     async animate() {
