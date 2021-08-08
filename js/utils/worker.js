@@ -1,42 +1,39 @@
-importScripts(
-    '../utils/helper.js',
-    '../objects/tree.js'
-);
+importScripts('../utils/helper.js', '../objects/tree.js');
 
-const getTrees = (configs, caller, chunks) => {
-    const trees = [];
+class Task {
+    constructor(chunks) {
+        this.chunks = chunks;
+    }
 
-    configs.forEach((config, i) => {
-        trees.push(new Tree(config));
+    getTrees(configs) {
+        const trees = [];
 
-        // continuous message
-        if (!((i + 1) % chunks)) {
-            self.postMessage({
-                trees: trees,
-                caller: caller,
-                done: false
-            });
-            trees.splice(0, trees.length);
-        }
-    });
+        configs.forEach((config, i) => {
+            trees.push(new Tree(config));
 
-    // final message
-    self.postMessage({
-        trees: trees,
-        caller: caller,
-        done: true
-    });
+            // chunk message
+            if (!((i + 1) % this.chunks)) {
+                self.postMessage({ trees: trees });
+                trees.splice(0, trees.length);
+            }
+        });
+
+        // final message
+        self.postMessage({ trees: trees });
+    }
 };
 
-
 self.onmessage = (e) => {
-    const method = e.data.method;
     const params = e.data.params;
+    const method = e.data.method;
 
-    // execute methods
+    // init task
+    const task = new Task(params.chunks);
+
+    // execute task
     switch (method) {
         case 'getTrees':
-            getTrees(params.configs || [], params.caller, params.chunks);
+            task.getTrees(params.configs || []);
             break;
         default:
             self.postMessage();
