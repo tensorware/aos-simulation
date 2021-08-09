@@ -21,6 +21,12 @@ class Camera {
         this.planes = [];
         this.captures = [];
 
+        this.layers = [
+            this.stage.layer.drone,
+            this.stage.layer.trees,
+            this.stage.layer.persons
+        ];
+
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: this.config.material.color.plane,
             side: THREE.DoubleSide
@@ -101,16 +107,16 @@ class Camera {
     }
 
     addRenderer() {
-        // preview image camera
+        // init preview camera
         this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
-        this.camera.layers.enable(this.stage.layer.drone);
-        this.camera.layers.enable(this.stage.layer.trees);
-        this.camera.layers.enable(this.stage.layer.persons);
         this.scene.add(this.camera);
 
-        // render preview image
+        // init preview renderer
         this.renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
+
+        // set default layer
+        this.setLayers(this.layers);
     }
 
     addPreview() {
@@ -139,6 +145,21 @@ class Camera {
         // append to slider
         this.slider.previews.append(previewContainer);
         this.slider.previews.append(renderContainer);
+    }
+
+    setLayers(layers) {
+        this.camera.layers.disableAll();
+
+        // enable default layer (light)
+        this.camera.layers.enable(0);
+
+        // enable required layers
+        Object.values(layers).forEach((layer) => {
+            this.camera.layers.enable(layer);
+        });
+
+        // render preview
+        this.renderer.render(this.scene, this.camera);
     }
 
     getResolution() {

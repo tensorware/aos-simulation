@@ -14,16 +14,33 @@ class Image {
         this.coverage = this.camera.coverage;
         this.rotation = this.camera.rotation;
 
-        this.plane = this.camera.getPlane();
         this.resolution = this.camera.getResolution();
         this.type = this.config.drone.camera.type;
 
+        // TODO remove
         this.borderPoints = this.camera.viewLines.map(getPoints);
-        this.rendering = cloneCanvas(this.camera.renderer.domElement, this.type === 'monochrome');
+        this.rendering = this.getCanvas([
+            this.stage.layer.drone,
+            this.stage.layer.trees,
+            this.stage.layer.persons
+        ]);
 
         this.loaded = new Promise(async function (resolve) {
             resolve(this);
         }.bind(this));
+    }
+
+    getCanvas(layers) {
+        // enable desired layers
+        this.camera.setLayers(layers);
+
+        // clone canvas
+        const canvas = cloneCanvas(this.camera.renderer.domElement, this.type === 'monochrome');
+
+        // enable default layers
+        this.camera.setLayers(this.camera.layers);
+
+        return canvas;
     }
 
     async capture(preview) {
