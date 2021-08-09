@@ -81,6 +81,10 @@ class Camera {
             this.addPreview();
             this.update();
 
+            // animations
+            this.animate = this.animate.bind(this);
+            requestAnimationFrame(this.animate);
+
             resolve(this);
         }.bind(this));
     }
@@ -157,9 +161,7 @@ class Camera {
         Object.values(layers).forEach((layer) => {
             this.camera.layers.enable(layer);
         });
-
-        // render preview
-        this.renderer.render(this.scene, this.camera);
+        this.render();
     }
 
     getResolution() {
@@ -219,6 +221,17 @@ class Camera {
         };
     }
 
+    async animate() {
+        await this.render();
+        requestAnimationFrame(this.animate);
+    }
+
+    async render() {
+        this.renderer.setSize(this.config.drone.camera.resolution, this.config.drone.camera.resolution);
+        this.renderer.domElement.removeAttribute('style');
+        this.renderer.render(this.scene, this.camera);
+    }
+
     async capture(preview) {
         const index = this.captures.length;
         const image = new Image(this, index);
@@ -269,11 +282,7 @@ class Camera {
         this.camera.lookAt(center.x, 0, center.z);
         this.camera.rotateZ(rotation);
         this.camera.updateProjectionMatrix();
-
-        // render camera preview
-        this.renderer.setSize(this.config.drone.camera.resolution, this.config.drone.camera.resolution);
-        this.renderer.domElement.removeAttribute('style');
-        this.renderer.render(this.scene, this.camera);
+        this.render();
     }
 
     async export(zip) {
