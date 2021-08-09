@@ -163,6 +163,7 @@ class View {
         });
         colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => {
             this.drone.camera.planeMaterial.color.setHex(v);
+            this.drone.camera.clear();
             this.drone.update();
         });
         colorFolder.addColor(this.config.material.color, 'person').onChange((v) => {

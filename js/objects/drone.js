@@ -294,7 +294,6 @@ class Drone {
 
         // clear camera
         await this.camera.clear();
-
     }
 
     async reset() {
