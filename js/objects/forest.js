@@ -321,10 +321,10 @@ class Forest {
         forest.file('trees.json', JSON.stringify(trees, null, 4));
 
         // export persons
-        const persons = { positions: [] };
+        const persons = { tracks: [] };
         for (let i = 0; i < this.persons.length; i++) {
             const person = this.persons[i];
-            persons.positions.push(person.positions);
+            persons.tracks.push(person.track);
         }
         forest.file('persons.json', JSON.stringify(persons, null, 4));
     }

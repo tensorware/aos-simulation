@@ -21,7 +21,7 @@ class Person {
         this.lastPosition = this.initialPosition.clone();
         this.lastDirection = this.initialDirection;
 
-        this.positions = [];
+        this.track = [];
         this.actions = [];
 
         this.currentActivity;
@@ -107,6 +107,7 @@ class Person {
             });
             this.person.scale.multiplyScalar(10 / 1000);
             this.setPosition(this.initialPosition, this.initialDirection);
+            this.track.push({ position: this.initialPosition, direction: this.initialDirection });
 
             // init animation mixer
             this.animations = gltf.animations.length;
@@ -226,9 +227,6 @@ class Person {
         // set direction rotation
         const rotation = new THREE.Euler(0, rad(this.lastDirection + 90), 0);
         this.person.setRotationFromEuler(rotation);
-
-        // TODO append to position list
-        //this.positions.push(position);
     }
 
     async animate() {
@@ -278,9 +276,7 @@ class Person {
             current.y = height;
 
             // set position
-            this.person.position.x = current.x;
-            this.person.position.y = current.y;
-            this.person.position.z = current.z;
+            this.person.position.set(current.x, current.y, current.z);
 
             // boundary detection
             if (this.mixer.time > 0.1) {
@@ -304,6 +300,7 @@ class Person {
 
                     // move to opposite direction using a random angle
                     this.setPosition(current, oppositeDirections[boundaryReached]);
+                    this.track.push({ position: current, direction: oppositeDirections[boundaryReached] });
                 }
             }
         }
@@ -322,8 +319,8 @@ class Person {
         this.mixer.setTime(0.0);
 
         // set initial position
-        this.positions = [];
         this.setPosition(this.initialPosition, this.initialDirection);
+        this.track = [{ position: this.initialPosition, direction: this.initialDirection }];
     }
 
     async remove() {
