@@ -68,13 +68,6 @@ class Camera {
         // init slider
         this.slider = new Slider(document.querySelector('#captures'), this.config, this.loader);
 
-        // move objects to layer 1 (invisible for preview camera)
-        this.plane.border.layers.set(1);
-        this.plane.text.layers.set(1);
-        this.viewLines.forEach((viewLine) => {
-            viewLine.layers.set(1);
-        });
-
         this.loaded = new Promise(async function (resolve) {
             this.addView();
             this.addPlane();
@@ -91,19 +84,28 @@ class Camera {
         this.viewLines.forEach((viewLine) => {
             view.add(viewLine);
         });
+
+        setLayer(view, this.stage.layer.drone);
         this.scene.add(view);
     }
 
     addPlane() {
+        setLayer(this.plane.rectangle, this.stage.layer.drone);
         this.scene.add(this.plane.rectangle);
+
+        setLayer(this.plane.border, this.stage.layer.drone);
         this.scene.add(this.plane.border);
+
+        setLayer(this.plane.text, this.stage.layer.text);
         this.scene.add(this.plane.text);
     }
 
     addRenderer() {
-        // preview image camera (layer 0)
+        // preview image camera
         this.camera = new THREE.PerspectiveCamera(this.config.drone.camera.view, 1, 0.1, 1000);
-        this.camera.layers.enable(0);
+        this.camera.layers.enable(this.stage.layer.drone);
+        this.camera.layers.enable(this.stage.layer.trees);
+        this.camera.layers.enable(this.stage.layer.persons);
         this.scene.add(this.camera);
 
         // render preview image
@@ -144,17 +146,18 @@ class Camera {
     }
 
     getPlane() {
-        // rectangle
-        const rectangle = this.plane.rectangle.clone();
-        rectangle.material = this.plane.rectangle.material.clone();
-        rectangle.geometry = this.plane.rectangle.geometry.clone();
-        rectangle.translateY(0);
+        // plane
+        const plane = this.plane.rectangle.clone();
+        plane.material = this.plane.rectangle.material.clone();
+        plane.geometry = this.plane.rectangle.geometry.clone();
+        plane.translateY(0);
 
         // add to scene
-        this.scene.add(rectangle);
-        this.planes.push(rectangle);
+        setLayer(plane, this.stage.layer.ground);
+        this.planes.push(plane);
+        this.scene.add(plane);
 
-        return rectangle;
+        return plane;
     }
 
     getText() {

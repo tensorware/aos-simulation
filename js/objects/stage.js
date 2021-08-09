@@ -5,6 +5,13 @@ class Stage {
         this.loader = loader;
 
         this.name = document.title;
+        this.layer = {
+            ground: 1,
+            trees: 2,
+            persons: 3,
+            drone: 4,
+            text: 5
+        };
 
         this.loaded = new Promise(async function (resolve) {
             const path = 'font/opensans.json';
@@ -17,18 +24,20 @@ class Stage {
             // stage directional light
             this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             this.directionalLight.position.set(100, 100, 100);
-            this.directionalLight.layers.set(1);
 
             // stage ambient light
             this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
 
-            // stage camera (layer 0 and layer 1)
+            // stage camera
             this.camera = new THREE.PerspectiveCamera(this.fov, this.root.clientWidth / this.root.clientHeight, 0.1, 1000);
-            this.camera.layers.enable(0);
-            this.camera.layers.enable(1);
             this.camera.add(this.directionalLight);
             this.camera.add(this.ambientLight);
             this.scene.add(this.camera);
+
+            // stage camera layers
+            Object.values(this.layer).forEach((layer) => {
+                this.camera.layers.enable(layer);
+            });
 
             // renderer
             this.renderer = new THREE.WebGLRenderer({ logarithmicDepthBuffer: true, preserveDrawingBuffer: true, antialias: true });
@@ -38,8 +47,6 @@ class Stage {
             this.controls = new THREE.MapControls(this.camera, this.renderer.domElement);
             this.controls.minDistance = 0.1;
             this.controls.maxDistance = 500;
-            this.controls.autoRotateSpeed = 1;
-            this.controls.autoRotate = false;
             this.controls.enablePan = true;
 
             // user interface

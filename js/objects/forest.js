@@ -108,9 +108,13 @@ class Forest {
     }
 
     getGround(size) {
-        const geometry = new THREE.PlaneGeometry(size, size);
-        geometry.rotateX(rad(90)).translate(0, 0, 0);
+        const geometry = new THREE.PlaneGeometry();
+        geometry.rotateX(rad(90));
+
         const ground = new THREE.Mesh(geometry, this.groundMaterial);
+        ground.scale.set(size, 1, size);
+
+        setLayer(ground, this.stage.layer.ground);
         return ground;
     }
 
@@ -234,6 +238,7 @@ class Forest {
                     }
 
                     // add tree
+                    setLayer(treeGroup, this.stage.layer.trees);
                     this.trees[tree.index] = treeGroup;
                     this.scene.add(treeGroup);
 
@@ -280,7 +285,8 @@ class Forest {
 
     async update() {
         const coverage = 2 * this.config.drone.height * Math.tan(rad(this.config.drone.camera.view / 2));
-        const sizeOuter = this.config.forest.ground + 2 * coverage;
+        const sizeInner = this.config.forest.ground;
+        const sizeOuter = sizeInner + 2 * coverage;
 
         // ground position constraints
         const treeMargin = 1;
@@ -296,15 +302,9 @@ class Forest {
             }
         });
 
-        // inner ground
-        const planeGeometryInner = new THREE.PlaneGeometry(this.config.forest.ground, this.config.forest.ground);
-        planeGeometryInner.rotateX(rad(90)).translate(0, 0, 0);
-        this.grounds[0].geometry.copy(planeGeometryInner);
-
-        // outer ground
-        const planeGeometryOuter = new THREE.PlaneGeometry(sizeOuter, sizeOuter);
-        planeGeometryOuter.rotateX(rad(90)).translate(0, -0.01, 0);
-        this.grounds[1].geometry.copy(planeGeometryOuter);
+        // update ground size
+        this.grounds[0].scale.set(sizeInner, 1, sizeInner);
+        this.grounds[1].scale.set(sizeOuter, 1, sizeOuter);
     }
 
     async export(zip) {

@@ -140,6 +140,7 @@ class Person {
     }
 
     addPerson() {
+        setLayer(this.person, this.stage.layer.persons);
         this.scene.add(this.person);
     }
 
@@ -289,10 +290,10 @@ class Person {
                 const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
                 if (boundaryReached) {
                     const oppositeDirections = {
-                        'top': randomInt(185, 355, this.lastDirection),
-                        'bottom': randomInt(5, 175, this.lastDirection),
-                        'left': randomInt(85, -85, this.lastDirection),
-                        'right': randomInt(95, 265, this.lastDirection)
+                        top: randomInt(185, 355, this.lastDirection),
+                        bottom: randomInt(5, 175, this.lastDirection),
+                        left: randomInt(85, -85, this.lastDirection),
+                        right: randomInt(95, 265, this.lastDirection)
                     };
 
                     // reset time

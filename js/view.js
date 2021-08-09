@@ -149,14 +149,22 @@ class View {
 
         // color folder
         const colorFolder = materialFolder.addFolder('color');
-        colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => this.forest.treeMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'tree').onChange((v) => {
+            this.forest.treeMaterial.color.setHex(v);
+        });
         colorFolder.addColor(this.config.material.color, 'twig').onChange((v) => {
             Object.values(this.forest.twigMaterials).forEach((material) => {
                 material.color.setHex(v);
             });
         });
-        colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => this.forest.groundMaterial.color.setHex(v));
-        colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => this.drone.camera.planeMaterial.color.setHex(v));
+        colorFolder.addColor(this.config.material.color, 'ground').onChange((v) => {
+            this.forest.groundMaterial.color.setHex(v);
+            this.drone.update();
+        });
+        colorFolder.addColor(this.config.material.color, 'plane').onChange((v) => {
+            this.drone.camera.planeMaterial.color.setHex(v);
+            this.drone.update();
+        });
         colorFolder.addColor(this.config.material.color, 'person').onChange((v) => {
             this.forest.persons.forEach((person) => {
                 person.surfaceMaterial.color.setHex(v);

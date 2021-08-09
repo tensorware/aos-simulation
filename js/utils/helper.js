@@ -1,3 +1,8 @@
+const setLayer = (object, layer) => {
+    object.layers.set(layer);
+    object.traverse((o) => { o.layers.set(layer); });
+};
+
 const createFloatAttribute = (array, itemSize) => {
     const typedArray = new Float32Array(flattenArray(array));
     return new THREE.BufferAttribute(typedArray, itemSize);

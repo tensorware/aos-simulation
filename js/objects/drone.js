@@ -44,17 +44,18 @@ class Drone {
 
             // animations
             this.animate = this.animate.bind(this);
-            this.click = doubleClick(this.click.bind(this));
+            this.groundClick = doubleClick(this.groundClick.bind(this));
 
             // events
-            window.addEventListener('pointerdown', this.click);
-            window.addEventListener('pointerup', this.click);
+            window.addEventListener('pointerdown', this.groundClick);
+            window.addEventListener('pointerup', this.groundClick);
 
             resolve(this);
         }.bind(this));
     }
 
     addDrone() {
+        setLayer(this.drone, this.stage.layer.drone);
         this.scene.add(this.drone);
     }
 
@@ -79,7 +80,7 @@ class Drone {
         };
     }
 
-    click(e) {
+    groundClick(e) {
         if (e.target.parentElement.id !== 'stage' || e.which != 1) {
             return;
         }
@@ -92,6 +93,7 @@ class Drone {
 
         // raycast target
         const ray = new THREE.Raycaster();
+        ray.layers.set(this.stage.layer.ground);
         ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
 
         const intersects = ray.intersectObject(this.forest.grounds[0]);
@@ -260,10 +262,6 @@ class Drone {
     }
 
     async update() {
-        if (!this.drone) {
-            return;
-        }
-
         const { rotation } = this.getView();
 
         // set height
@@ -273,9 +271,7 @@ class Drone {
         this.drone.setRotationFromEuler(new THREE.Euler(0, rotation, 0));
 
         // update camera
-        if (this.camera) {
-            await this.camera.update();
-        }
+        await this.camera.update();
     }
 
     async export(zip) {
@@ -285,9 +281,7 @@ class Drone {
         drone.file('drone.json', JSON.stringify(this.getView(), null, 4));
 
         // export camera
-        if (this.camera) {
-            await this.camera.export(drone);
-        }
+        await this.camera.export(drone);
     }
 
     async clear() {
@@ -298,9 +292,9 @@ class Drone {
         await this.setEastWest(0.0);
         await this.setNorthSouth(0.0);
 
-        if (this.camera) {
-            await this.camera.clear();
-        }
+        // clear camera
+        await this.camera.clear();
+
     }
 
     async reset() {
