@@ -249,10 +249,7 @@ class Forest {
                 // workers finished
                 const finished = this.trees.length == done;
                 if (finished) {
-                    this.stage.status('Loading', 100);
-                    sleep(1000).then(() => {
-                        this.stage.status();
-                    });
+                    this.stage.status();
                 }
                 this.workersSubscriber.forEach((callback) => { callback(finished); });
             }).bind(this);

@@ -274,22 +274,22 @@ class View {
         // add config file
         zip.file('config.json', JSON.stringify(this.config, null, 4));
 
+        // compression status
+        this.stage.status('Compressing', 0);
+
         // generate zip
         zip.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
         }, (zipMeta) => {
-            this.stage.status('Exporting', Math.round(zipMeta.percent));
+            this.stage.status('Compressing', Math.round(zipMeta.percent));
         }).then((zipData) => {
-            // export zip
+            // download zip
             saveAs(zipData, zipName);
 
-            // export finished
-            this.stage.status('Exporting', 100);
-            sleep(1000).then(() => {
-                this.stage.status();
-            });
+            // compression finished
+            this.stage.status();
         });
     }
 

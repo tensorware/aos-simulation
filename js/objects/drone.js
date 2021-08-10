@@ -189,10 +189,7 @@ class Drone {
             this.flying = false;
 
             // capture finished
-            this.stage.status('Capturing', 100);
-            sleep(1000).then(() => {
-                this.stage.status();
-            });
+            this.stage.status();
         }
     }
 
@@ -260,10 +257,7 @@ class Drone {
         await this.update();
 
         // capture finished
-        this.stage.status('Capturing', 100);
-        sleep(1000).then(() => {
-            this.stage.status();
-        });
+        this.stage.status();
     }
 
     async update() {
