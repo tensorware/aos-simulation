@@ -10,7 +10,7 @@ class Stage {
             trees: 2,
             persons: 3,
             drone: 4,
-            text: 5
+            camera: 5
         };
 
         this.loaded = new Promise(async function (resolve) {

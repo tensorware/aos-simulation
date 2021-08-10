@@ -22,9 +22,9 @@ class Camera {
         this.captures = [];
 
         this.layers = [
-            this.stage.layer.drone,
             this.stage.layer.trees,
-            this.stage.layer.persons
+            this.stage.layer.persons,
+            this.stage.layer.camera
         ];
 
         this.planeMaterial = new THREE.MeshStandardMaterial({
@@ -100,13 +100,13 @@ class Camera {
     }
 
     addPlane() {
-        setLayer(this.plane.rectangle, this.stage.layer.drone);
+        setLayer(this.plane.rectangle, this.stage.layer.camera);
         this.scene.add(this.plane.rectangle);
 
         setLayer(this.plane.border, this.stage.layer.drone);
         this.scene.add(this.plane.border);
 
-        setLayer(this.plane.text, this.stage.layer.text);
+        setLayer(this.plane.text, this.stage.layer.drone);
         this.scene.add(this.plane.text);
     }
 
