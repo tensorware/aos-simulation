@@ -102,6 +102,7 @@ class Drone {
 
             // flight start
             this.flying = true;
+            this.stage.status('Capturing', 0);
 
             // animate movement
             this.animate();
@@ -163,6 +164,9 @@ class Drone {
                 await this.camera.capture(true);
             }
 
+            // update capture status
+            this.stage.status('Capturing', Math.round(trajectoryTime * 100));
+
             if (this.flying) {
                 // next animation
                 requestAnimationFrame(this.animate);
@@ -171,6 +175,9 @@ class Drone {
                 // reset position
                 await this.setEastWest(0.0);
                 await this.setNorthSouth(0.0);
+
+                // capture abort
+                this.stage.status();
             }
         }
         else {
@@ -180,6 +187,12 @@ class Drone {
 
             // flight stop
             this.flying = false;
+
+            // capture finished
+            this.stage.status('Capturing', 100);
+            sleep(1000).then(() => {
+                this.stage.status();
+            });
         }
     }
 
