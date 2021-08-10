@@ -185,11 +185,20 @@ const shadeColor = (color, percent) => {
 };
 
 const colorMatch = (c1, c2, delta) => {
-    let match = true;
-    ['r', 'g', 'b'].forEach((k) => {
-        match = match && c1[k] <= (c2[k] + delta) && c1[k] >= (c2[k] - delta);
-    });
-    return match;
+    const r = Math.abs(c1.r - c2.r);
+    const g = Math.abs(c1.g - c2.g);
+    const b = Math.abs(c1.b - c2.b);
+    return (r + g + b) <= delta;
+};
+
+const getCanvas = (width, height) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return {
+        canvas: canvas,
+        ctx: canvas.getContext('2d')
+    };
 };
 
 const canvasImage = (canvas) => {
@@ -197,16 +206,29 @@ const canvasImage = (canvas) => {
     return dataUrl.substr(dataUrl.indexOf(',') + 1);
 };
 
-const cloneCanvas = (canvas, grayscale) => {
-    const cloned = document.createElement('canvas');
-    cloned.width = canvas.width;
-    cloned.height = canvas.height;
-    const ctx = cloned.getContext('2d');
-    if (grayscale) {
-        ctx.filter = 'grayscale(1)';
+const cloneCanvas = (canvas, options) => {
+    let { canvas: cloneCanvas, ctx: cloneCtx } = getCanvas(canvas.width, canvas.height);
+    cloneCtx.filter = options.grayscale ? 'grayscale(1)' : 'none';
+    cloneCtx.drawImage(canvas, 0, 0);
+    if (getType(options.transparent) === 'number') {
+        cloneCanvas = transparentCanvas(canvas, options.transparent);
     }
-    ctx.drawImage(canvas, 0, 0);
-    return cloned;
+    return cloneCanvas;
+};
+
+const transparentCanvas = (canvas, color) => {
+    const ctx = canvas.getContext('2d');
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = img.data;
+    const replaceColor = rgbColor(color);
+    for (let i = 0, n = data.length; i < n; i += 4) {
+        const currentColor = { r: data[i], g: data[i + 1], b: data[i + 2] };
+        if (colorMatch(currentColor, replaceColor, 3)) {
+            data[i + 3] = 0;
+        }
+    }
+    ctx.putImageData(img, 0, 0);
+    return canvas;
 };
 
 const interpolate = (v0, v1, t) => {

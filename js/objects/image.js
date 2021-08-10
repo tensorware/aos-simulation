@@ -18,23 +18,7 @@ class Image {
         this.resolution = this.camera.getResolution();
         this.type = this.config.drone.camera.type;
 
-        // TODO remove
         this.borderPoints = this.camera.viewLines.map(getPoints);
-
-        this.canvas = {
-            trees: this.getCanvas([
-                this.stage.layer.trees
-            ]),
-            persons: this.getCanvas([
-                this.stage.layer.persons,
-                this.stage.layer.camera
-            ]),
-            full: this.getCanvas([
-                this.stage.layer.trees,
-                this.stage.layer.persons,
-                this.stage.layer.camera
-            ])
-        };
 
         this.loaded = new Promise(async function (resolve) {
             resolve(this);
@@ -46,7 +30,9 @@ class Image {
         this.camera.setLayers(layers);
 
         // clone canvas
-        const canvas = cloneCanvas(this.camera.renderer.domElement, this.type === 'monochrome');
+        const canvas = cloneCanvas(this.camera.renderer.domElement, {
+            grayscale: this.type === 'monochrome'
+        });
 
         // enable default layers
         this.camera.setLayers(this.camera.layers);
@@ -63,9 +49,6 @@ class Image {
     }
 
     async captureImage(preview) {
-        // TODO remove
-        const visiblePoints = [];
-
         // get min values for each axes
         const min = new THREE.Vector3(
             Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].x; })),
@@ -84,38 +67,38 @@ class Image {
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const capture = {
-            number: this.index + 1,
-            rendered: {
-                center: new THREE.Vector3(
-                    this.center.x,
-                    0,
-                    this.center.z
-                ),
-                points: visiblePoints.map((p) => {
-                    return new THREE.Vector3(
-                        p.x * max.x / this.resolution.x,
-                        0,
-                        p.z * max.z / this.resolution.z
-                    );
-                })
-            },
-            processed: {
-                center: new THREE.Vector3(
-                    Math.round(this.center.x * this.resolution.x / max.x),
-                    0,
-                    Math.round(this.center.z * this.resolution.z / max.z)
-                ),
-                points: visiblePoints
-            }
+        const rendered = new THREE.Vector3(
+            this.center.x,
+            0,
+            this.center.z
+        );
+        const processed = new THREE.Vector3(
+            Math.round(this.center.x * this.resolution.x / max.x),
+            0,
+            Math.round(this.center.z * this.resolution.z / max.z)
+        );
+
+        // render canvas per layer
+        this.canvas = {
+            trees: preview ? this.getCanvas([this.stage.layer.trees]) : undefined,
+            persons: preview ? this.getCanvas([this.stage.layer.persons]) : undefined,
+            full: this.getCanvas([this.stage.layer.trees, this.stage.layer.persons, this.stage.layer.camera])
         };
 
-        // canvas image
-        const canvas = this.canvas.full;
-
-        // save image
-        capture.canvas = canvas;
-        capture.base64 = canvasImage(canvas);
+        // final capture object
+        const capture = {
+            number: this.index + 1,
+            center: {
+                rendered: rendered,
+                processed: processed
+            },
+            base64: {
+                trees: undefined,
+                persons: undefined,
+                full: canvasImage(this.canvas.full)
+            },
+            canvas: this.canvas
+        };
 
         if (preview) {
             // canvas container
@@ -123,7 +106,7 @@ class Image {
             container.className = 'image';
 
             // append image
-            container.append(canvas);
+            container.append(capture.canvas.full);
             this.camera.slider.addImage(container);
         }
 
@@ -131,55 +114,53 @@ class Image {
         this.camera.captures.push(capture);
 
         // return last captures
-        return this.camera.captures.slice(Math.max(this.camera.captures.length - this.config.drone.camera.images, 0));
+        const last = Math.max(this.camera.captures.length - this.config.drone.camera.images, 0);
+        return this.camera.captures.slice(last);
     }
 
     async integrateImages(captures) {
-        // canvas image
-        const canvas = this.canvas.trees;
-        const ctx = canvas.getContext('2d');
+        const { canvas: canvasPersons, ctx: ctxPersons } = getCanvas(this.resolution.x, this.resolution.z);
+        const { canvas: canvasTrees, ctx: ctxTrees } = getCanvas(this.resolution.x, this.resolution.z);
 
-        // only trees black
-        ctx.globalCompositeOperation = 'difference';
-        ctx.drawImage(this.canvas.full, 0, 0);
-
-        const center = captures[captures.length - 1].processed.center;
+        // integrate last images
+        const center = captures[captures.length - 1].center.processed;
         captures.forEach((capture) => {
-
-            // delta from current center to captured images
+            // delta between image centers
             const delta = new THREE.Vector3();
-            delta.copy(center).sub(capture.processed.center);
+            delta.copy(center).sub(capture.center.processed);
 
-            // choose lightest pixel between black trees and ground
-            ctx.globalCompositeOperation = 'lighten';
-            ctx.drawImage(capture.canvas, -delta.x, -delta.z);
+            // integrate persons
+            ctxPersons.globalCompositeOperation = 'lighten';
+            ctxPersons.drawImage(capture.canvas.persons, -delta.x, -delta.z);
+
+            // integrate trees
+            ctxTrees.globalCompositeOperation = 'darken';
+            ctxTrees.drawImage(capture.canvas.trees, -delta.x, -delta.z);
         });
 
-        // canvas image
-        const canvas1 = this.canvas.persons;
-        const ctx1 = canvas1.getContext('2d');
+        // transparent background
+        const integratedTrees = transparentCanvas(canvasTrees, 0x000000);
+        const integratedPersons = transparentCanvas(canvasPersons, 0x000000);
 
-        // add last image persons to integrated
-        ctx1.globalCompositeOperation = 'darken';
-        ctx1.drawImage(canvas, 0, 0);
+        // ground image
+        const { canvas: canvas, ctx: ctx } = getCanvas(this.resolution.x, this.resolution.z);
+        ctx.fillStyle = hexColor(this.config.material.color.plane);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        captures.forEach((capture) => {
+        // draw integrated persons
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(integratedPersons, 0, 0);
 
-            // delta from current center to captured images
-            const delta = new THREE.Vector3();
-            delta.copy(center).sub(capture.processed.center);
-
-            //ctx1.filter = 'invert(1)'
-            //ctx1.globalCompositeOperation = 'lighten';
-            //ctx1.drawImage(capture.canvas, -delta.x, -delta.z);
-        });
+        // draw integrated trees
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(integratedTrees, 0, 0);
 
         // canvas container
         const container = document.createElement('div');
         container.className = 'image';
 
         // append preview
-        container.append(canvas1);
+        container.append(canvas);
         this.camera.slider.addPreview(container);
 
         // return image index

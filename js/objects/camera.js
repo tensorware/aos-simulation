@@ -131,12 +131,7 @@ class Camera {
         previewContainer.className = 'image';
 
         // preview image
-        const previewCanvas = document.createElement('canvas');
-        previewCanvas.width = resolution.x;
-        previewCanvas.height = resolution.z;
-
-        // preview background
-        const previewContext = previewCanvas.getContext('2d');
+        const { canvas: previewCanvas, ctx: previewContext } = getCanvas(resolution.x, resolution.z);
         previewContext.fillStyle = hexColor(this.config.material.color.plane);
         previewContext.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
         previewContainer.append(previewCanvas);
@@ -292,14 +287,12 @@ class Camera {
         this.captures.forEach((capture) => {
             images.captures.push({
                 image: capture.number,
-                center: {
-                    rendered: capture.rendered.center,
-                    processed: capture.processed.center
-                }
+                center: capture.center
             });
 
             // export images
-            camera.file(`image-${capture.number}-${this.config.drone.camera.type}.png`, capture.base64, { base64: true });
+            const filename = `image-${capture.number}-${this.config.drone.camera.type}.png`;
+            camera.file(filename, capture.base64.full, { base64: true });
         });
 
         // export config
