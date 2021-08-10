@@ -146,9 +146,6 @@ class Drone {
         const currentDistance = deltaTime * this.config.drone.speed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
 
-        // DEBUG
-        // log('debug', moveDuration, deltaTime, start.distanceTo(end), currentDistance);
-
         // TODO use distance based logic
         if (deltaTime <= moveDuration) {
             const current = new THREE.Vector3();
