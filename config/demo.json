@@ -1,6 +1,6 @@
 {
     "drone": {
-        "speed": 4,
+        "speed": 10,
         "height": 35.0,
         "rotation": 0.0,
         "eastWest": 0.0,
@@ -9,8 +9,8 @@
             "view": 50,
             "resolution": 512,
             "sampling": 1,
-            "images": 30,
-            "type": "monochrome"
+            "images": 10,
+            "type": "color"
         },
         "cpu": {
             "speed": 0.50
@@ -50,12 +50,12 @@
             "count": 5,
             "activities": {
                 "laying": true,
-                "sitting": false,
-                "standing": false,
+                "sitting": true,
+                "standing": true,
                 "waving": true,
                 "injured": false,
                 "walking": false,
-                "running": true
+                "running": false
             }
         }
     },
