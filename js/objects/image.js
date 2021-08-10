@@ -92,11 +92,6 @@ class Image {
                 rendered: rendered,
                 processed: processed
             },
-            base64: {
-                trees: undefined,
-                persons: undefined,
-                full: canvasImage(this.canvas.full)
-            },
             canvas: this.canvas
         };
 

@@ -283,16 +283,21 @@ class Camera {
     async export(zip) {
         const camera = zip.folder('camera');
 
+        // load captures
         const images = { captures: [] };
-        this.captures.forEach((capture) => {
+        this.captures.forEach((capture, i) => {
             images.captures.push({
                 image: capture.number,
                 center: capture.center
             });
 
             // export images
+            const base64 = canvasImage(capture.canvas.full);
             const filename = `image-${capture.number}-${this.config.drone.camera.type}.png`;
-            camera.file(filename, capture.base64.full, { base64: true });
+            camera.file(filename, base64, { base64: true });
+
+            // update export status
+            this.stage.status('Exporting', Math.round(i * 100 / this.captures.length));
         });
 
         // export config
