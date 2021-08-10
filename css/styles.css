@@ -111,6 +111,7 @@ html {
   position: absolute;
   display: inline-block;
   content: counter(count);
+  text-shadow: 0px 0px 2px #ffffff;
 }
 
 #main #bottom #captures #images .image canvas {
