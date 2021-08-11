@@ -246,11 +246,6 @@ class Person {
     }
 
     async update() {
-        // ground position constraints
-        const personMargin = 1;
-        const personPositionMin = -this.config.forest.ground / 2 + personMargin;
-        const personPositionMax = this.config.forest.ground / 2 - personMargin;
-
         // update action mixer time
         this.mixer.update(this.clock.getDelta());
 
@@ -271,7 +266,8 @@ class Person {
         }
 
         // calculate time
-        const trajectoryTime = this.mixer.time / moveDuration;
+        const elapsedTime = this.mixer.time;
+        const trajectoryTime = elapsedTime / moveDuration;
 
         // calculate trajectory
         const current = new THREE.Vector3();
@@ -282,8 +278,15 @@ class Person {
         current.y = height;
         this.person.position.set(current.x, current.y, current.z);
 
-        // check boundary 
-        if (this.mixer.time > 0.1) {
+        // boundary check
+        if (elapsedTime > 0.1) {
+
+            // ground position constraints
+            const personMargin = 1;
+            const personPositionMin = -this.config.forest.ground / 2 + personMargin;
+            const personPositionMax = this.config.forest.ground / 2 - personMargin;
+
+            // boundary check
             const top = current.z <= personPositionMin;
             const bottom = current.z >= personPositionMax;
             const left = current.x <= personPositionMin;
