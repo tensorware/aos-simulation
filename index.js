@@ -15,7 +15,7 @@ app.whenReady().then(() => {
     show: true,
     width: 1280,
     height: 720,
-    autoHideMenuBar: true,
+    autoHideMenuBar: false,
     icon: path.join(__dirname, 'img', 'favicon.ico')
   });
   main.loadURL(`file://${__dirname}/index.html${hash}`);
