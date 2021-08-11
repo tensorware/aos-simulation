@@ -19,6 +19,7 @@ class Camera {
         this.boxes = [];
 
         this.planes = [];
+        this.persons = [];
         this.captures = [];
 
         this.layers = [
@@ -282,18 +283,26 @@ class Camera {
 
     async export(zip) {
         const camera = zip.folder('camera');
+        const data = { persons: [], captures: [] };
 
-        // load captures
-        const images = { captures: [] };
+        // append persons
+        this.persons.forEach((person) => {
+            data.persons.push({
+                image: person.image,
+                centers: person.centers
+            });
+        });
+
+        // append captures
         this.captures.forEach((capture, i) => {
-            images.captures.push({
-                image: capture.number,
+            data.captures.push({
+                image: capture.image,
                 center: capture.center
             });
 
             // export images
             const base64 = canvasImage(capture.canvas.full);
-            const filename = `image-${capture.number}-${this.config.drone.camera.type}.png`;
+            const filename = `image-${capture.image}-${this.config.drone.camera.type}.png`;
             camera.file(filename, base64, { base64: true });
 
             // update export status
@@ -301,7 +310,7 @@ class Camera {
         });
 
         // export config
-        camera.file('camera.json', JSON.stringify(images, null, 4));
+        camera.file('camera.json', JSON.stringify(data, null, 4));
     }
 
     async clear() {
