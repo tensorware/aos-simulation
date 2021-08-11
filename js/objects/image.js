@@ -30,9 +30,7 @@ class Image {
         this.camera.setLayers(layers);
 
         // clone canvas
-        const canvas = cloneCanvas(this.camera.renderer.domElement, {
-            grayscale: this.type === 'monochrome'
-        });
+        const canvas = cloneCanvas(this.camera.renderer.domElement, { grayscale: this.type === 'monochrome' });
 
         // enable default layers
         this.camera.setLayers(this.camera.layers);
