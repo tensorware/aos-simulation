@@ -59,7 +59,12 @@ class Slider {
         for (let i = 0; i <= this.count - this.config.drone.camera.images; i++) {
             const img = this.image[i];
             img.classList.add('removed');
-            setTimeout(() => { this.images.removeChild(img); }, 0);
+            img.classList.remove('visible');
+            sleep().then(() => {
+                if (this.images.contains(img)) {
+                    this.images.removeChild(img);
+                }
+            });
         }
 
         // append child
@@ -78,7 +83,12 @@ class Slider {
         for (let i = 0; i < this.preview.length - 1; i++) {
             const img = this.preview[i];
             img.classList.add('removed');
-            setTimeout(() => { this.previews.removeChild(img); }, 0);
+            img.classList.remove('visible');
+            sleep().then(() => {
+                if (this.images.contains(img)) {
+                    this.images.removeChild(img);
+                }
+            });
         }
 
         // prepend child
@@ -108,8 +118,13 @@ class Slider {
                     scale: 1 - Math.min(100, Math.abs(delta)) * 0.003
                 });
 
+                // scroll start position
                 this.scroll.start = this.scroll.next;
-                this.image[this.count - 1].style.zIndex = 1;
+
+                // image visibility
+                for (let i = 1; i < this.count; i++) {
+                    this.image[i].classList.add('visible');
+                }
             }
             else {
                 // reset positions
