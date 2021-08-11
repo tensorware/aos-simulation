@@ -198,14 +198,14 @@ class Drone {
 
         const { coverage } = this.getView();
 
-        // top-left
+        // ground top-left
         const start = {
             x: Math.round(-this.config.forest.ground / 2 - coverage / 2),
             y: 0,
             z: Math.round(-this.config.forest.ground / 2 + coverage / 2)
         };
 
-        // bottom-right
+        // ground bottom-right
         const end = {
             x: Math.round(this.config.forest.ground / 2 + coverage / 2),
             y: 0,
@@ -230,11 +230,13 @@ class Drone {
         let i = 0;
         let dir = 1;
         for (let z = start.z; z <= end.z && this.flying; z += step.z) {
-            // set north/south position
+
+            // set north-south position
             await this.setNorthSouth(z);
 
             for (let x = start.x; x <= end.x && this.flying; x += step.x) {
-                // set east/west position
+
+                // set east-west position
                 await this.setEastWest(x * dir);
 
                 // capture image
