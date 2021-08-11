@@ -8,19 +8,19 @@ class View {
         // init stage
         this.stage = new Stage(this.root, this.config, this.loader);
         this.stage.loaded.then(() => {
-            // init html
+            // dom
             this.background(this.config.material.color.background);
             this.controls(this.root.querySelector('#controls'), presets);
             this.splitter(['#top', '#bottom']);
 
-            // init objects
+            // objects
             this.forest = new Forest(this.stage, 0);
             this.drone = new Drone(this.forest, 0);
             this.forest.loaded.then(() => {
                 this.update();
             });
 
-            // init events
+            // events
             window.addEventListener('hashchange', () => {
                 this.update();
             });
@@ -218,7 +218,10 @@ class View {
         await this.drone.setEastWest(this.config.drone.eastWest);
         await this.drone.setNorthSouth(this.config.drone.northSouth);
 
-        // update persons
+        // reset camera
+        await this.drone.camera.reset();
+
+        // reset persons
         this.forest.persons.forEach((person) => { person.setActivity(); });
 
         // execute capture
