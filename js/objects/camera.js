@@ -326,6 +326,9 @@ class Camera {
         this.boxes.forEach((ray) => { this.scene.remove(ray); });
         this.boxes = [];
 
+        // clear persons
+        this.persons = [];
+
         // clear captures
         this.captures = [];
 

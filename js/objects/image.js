@@ -40,52 +40,7 @@ class Image {
         return canvas;
     }
 
-    async capture(preview) {
-        return this.capturePersons(preview).then((persons) => {
-            return this.captureImage(preview).then((captures) => {
-                if (preview) {
-                    return this.integrateImages(persons, captures);
-                }
-            });
-        });
-    }
-
-    async capturePersons(preview) {
-        // get person positions
-        const positions = this.forest.persons.map((p) => { return p.person.position; });
-
-        // convert simulation coordinates (meter) into image coordinates (pixel)
-        const centers = positions.map((position) => {
-            return {
-                rendered: new THREE.Vector3(
-                    position.x,
-                    0,
-                    position.z
-                ),
-                // TODO
-                processed: new THREE.Vector3(
-                    0,
-                    0,
-                    0
-                )
-            }
-        });
-
-        // persons object
-        const person = {
-            image: this.index + 1,
-            centers: centers
-        };
-
-        // append persons to camera
-        this.camera.persons.push(person);
-
-        // return last persons
-        const last = Math.max(this.camera.persons.length - this.config.drone.camera.images, 0);
-        return this.camera.persons.slice(last);
-    }
-
-    async captureImage(preview) {
+    translate(point) {
         // get min values for each axes
         const min = new THREE.Vector3(
             Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].x; })),
@@ -104,19 +59,56 @@ class Image {
         );
 
         // convert simulation coordinates (meter) into image coordinates (pixel)
-        const rendered = new THREE.Vector3(
-            this.center.x,
-            0,
-            this.center.z
+        return new THREE.Vector3(
+            Math.round(point.x * this.resolution.x / max.x),
+            Math.round(point.y * this.resolution.x / max.x),
+            Math.round(point.z * this.resolution.z / max.z)
         );
-        const processed = new THREE.Vector3(
-            Math.round(this.center.x * this.resolution.x / max.x),
-            0,
-            Math.round(this.center.z * this.resolution.z / max.z)
-        );
+    }
+
+    async capture(preview) {
+        return this.capturePersons(preview).then((persons) => {
+            return this.captureImage(preview).then((captures) => {
+                if (preview) {
+                    return this.integrateImages(persons, captures);
+                }
+            });
+        });
+    }
+
+    async capturePersons(preview) {
+        const positions = this.forest.persons.map((p) => { return p.person.position; });
+
+        // get persons centers
+        const centers = positions.map((position) => {
+            const rendered = new THREE.Vector3(position.x, 0, position.z);
+            const processed = this.translate(rendered);
+            return {
+                rendered: rendered,
+                processed: processed
+            };
+        });
+
+        // persons object
+        const person = {
+            image: this.index + 1,
+            centers: centers
+        };
+
+        // append persons to camera
+        this.camera.persons.push(person);
+
+        // return last persons
+        const last = Math.max(this.camera.persons.length - this.config.drone.camera.images, 0);
+        return this.camera.persons.slice(last);
+    }
+
+    async captureImage(preview) {
+        const rendered = new THREE.Vector3(this.center.x, 0, this.center.z);
+        const processed = this.translate(rendered);
 
         // render canvas per layer
-        this.canvas = {
+        const canvas = {
             trees: preview ? this.getCanvas([this.stage.layer.trees]) : undefined,
             persons: preview ? this.getCanvas([this.stage.layer.persons]) : undefined,
             full: this.getCanvas([this.stage.layer.trees, this.stage.layer.persons, this.stage.layer.camera])
@@ -129,7 +121,7 @@ class Image {
                 rendered: rendered,
                 processed: processed
             },
-            canvas: this.canvas
+            canvas: canvas
         };
 
         if (preview) {
@@ -138,7 +130,7 @@ class Image {
             container.className = 'image';
 
             // append image
-            container.append(capture.canvas.full);
+            container.append(canvas.full);
             this.camera.slider.addImage(container);
         }
 
@@ -195,7 +187,7 @@ class Image {
         container.append(canvas);
         this.camera.slider.addPreview(container);
 
-        // return image index
-        return captures.length - 1;
+        // return integrated image
+        return canvas;
     }
 };
