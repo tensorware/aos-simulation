@@ -307,10 +307,6 @@ class Person {
         }
     }
 
-    async export(zip) {
-        // TODO export json to camera.json
-    }
-
     async clear() {
         if (!this.mixer) {
             return;
