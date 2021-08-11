@@ -107,6 +107,7 @@ class Drone {
             this.stage.status('Capturing', 0);
 
             // animate movement
+            this.capturesCount = 0;
             this.clock.stop();
             this.clock.start();
             this.animate();
@@ -130,34 +131,36 @@ class Drone {
 
         // move duration
         const speed = this.config.drone.speed;
-        const moveDuration = start.distanceTo(end) / speed * 1000;
+        const moveDistance = start.distanceTo(end);
+        const moveDuration = moveDistance / speed;
         if (moveDuration <= 0) {
             return;
         }
 
         // calculate time
-        const deltaTime = this.clock.getElapsedTime() * 1000;
-        const trajectoryTime = deltaTime / moveDuration;
+        const elapsedTime = this.clock.getElapsedTime();
+        const trajectoryTime = elapsedTime / moveDuration;
 
-        // calculate distance
-        const currentDistance = deltaTime * this.config.drone.speed / 1000;
-        const deltaDistance = currentDistance - this.lastCapture;
-
-        if (deltaTime <= moveDuration) {
+        // goal check
+        if (elapsedTime <= moveDuration) {
 
             // calculate trajectory
             const current = new THREE.Vector3();
             const trajectory = new THREE.Line3(start, end);
             trajectory.at(trajectoryTime, current);
 
+            // calculate distance
+            const currentDistance = elapsedTime * speed;
+            const samplingDistance = this.config.drone.camera.sampling;
+            const capturesCount = Math.floor(currentDistance / samplingDistance);
+
             // update drone position
-            this.drone.position.x = current.x;
-            this.drone.position.z = current.z;
+            this.drone.position.set(current.x, current.y, current.z);
             await this.update();
 
             // capture image
-            if (deltaDistance >= this.config.drone.camera.sampling) {
-                this.lastCapture = Math.floor(currentDistance);
+            if (this.capturesCount < capturesCount) {
+                this.capturesCount++;
                 await this.camera.capture(true);
             }
 
@@ -195,18 +198,21 @@ class Drone {
 
         const { coverage } = this.getView();
 
+        // top-left
         const start = {
             x: Math.round(-this.config.forest.ground / 2 - coverage / 2),
             y: 0,
             z: Math.round(-this.config.forest.ground / 2 + coverage / 2)
         };
 
+        // bottom-right
         const end = {
             x: Math.round(this.config.forest.ground / 2 + coverage / 2),
             y: 0,
             z: Math.round(this.config.forest.ground / 2 + coverage / 2)
         };
 
+        // sampling step distance
         const step = {
             x: this.config.drone.camera.sampling,
             y: 0,
