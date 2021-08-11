@@ -266,43 +266,45 @@ class Person {
         // move duration
         const speed = this.currentActivity.speed;
         const moveDuration = speed ? start.distanceTo(end) / speed : 0;
+        if (moveDuration <= 0) {
+            return;
+        }
 
         // calculate time
-        if (moveDuration > 0) {
-            const trajectoryTime = this.mixer.time / moveDuration;
+        const trajectoryTime = this.mixer.time / moveDuration;
 
-            const current = new THREE.Vector3();
-            const trajectory = new THREE.Line3(start, end);
-            trajectory.at(trajectoryTime, current);
-            current.y = height;
+        // calculate trajectory
+        const current = new THREE.Vector3();
+        const trajectory = new THREE.Line3(start, end);
+        trajectory.at(trajectoryTime, current);
 
-            // set position
-            this.person.position.set(current.x, current.y, current.z);
+        // update person position
+        current.y = height;
+        this.person.position.set(current.x, current.y, current.z);
+
+        // check boundary 
+        if (this.mixer.time > 0.1) {
+            const top = current.z <= personPositionMin;
+            const bottom = current.z >= personPositionMax;
+            const left = current.x <= personPositionMin;
+            const right = current.x >= personPositionMax;
 
             // boundary detection
-            if (this.mixer.time > 0.1) {
-                const top = current.z <= personPositionMin;
-                const bottom = current.z >= personPositionMax;
-                const left = current.x <= personPositionMin;
-                const right = current.x >= personPositionMax;
+            const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
+            if (boundaryReached) {
+                const oppositeDirections = {
+                    top: randomInt(185, 355, this.lastDirection),
+                    bottom: randomInt(5, 175, this.lastDirection),
+                    left: randomInt(85, -85, this.lastDirection),
+                    right: randomInt(95, 265, this.lastDirection)
+                };
 
-                // check boundary
-                const boundaryReached = top ? 'top' : (bottom ? 'bottom' : (left ? 'left' : (right ? 'right' : '')));
-                if (boundaryReached) {
-                    const oppositeDirections = {
-                        top: randomInt(185, 355, this.lastDirection),
-                        bottom: randomInt(5, 175, this.lastDirection),
-                        left: randomInt(85, -85, this.lastDirection),
-                        right: randomInt(95, 265, this.lastDirection)
-                    };
+                // reset time
+                this.mixer.setTime(0.0);
 
-                    // reset time
-                    this.mixer.setTime(0.0);
-
-                    // move to opposite direction using a random angle
-                    this.setPosition(current, oppositeDirections[boundaryReached]);
-                    this.track.push({ position: current, direction: oppositeDirections[boundaryReached] });
-                }
+                // move to opposite direction using a random angle
+                this.setPosition(current, oppositeDirections[boundaryReached]);
+                this.track.push({ position: current, direction: oppositeDirections[boundaryReached] });
             }
         }
     }
