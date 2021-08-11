@@ -125,6 +125,7 @@ class Slider {
                 for (let i = 1; i < this.count; i++) {
                     this.image[i].classList.add('visible');
                 }
+                this.image[this.count - 1].classList.add('visible');
             }
             else {
                 // reset positions
