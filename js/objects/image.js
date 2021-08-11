@@ -65,6 +65,8 @@ class Image {
     }
 
     async capture(preview) {
+        const integrate = preview && this.config.drone.camera.images > 0;
+
         // check persons loaded
         const persons = this.forest.persons.filter((p) => { return !!p.person; });
         if (persons.length != this.forest.persons.length) {
@@ -72,18 +74,16 @@ class Image {
         }
 
         // capture persons positions
-        return this.capturePersons(preview).then((persons) => {
+        return this.capturePersons(integrate).then((persons) => {
             // capture image pixels
-            return this.captureImage(preview).then((captures) => {
-                if (preview) {
-                    // integrate preview images
-                    return this.integrateImages(persons, captures);
-                }
+            return this.captureImage(integrate).then((captures) => {
+                // integrate preview images
+                return integrate ? this.integrateImages(persons, captures) : undefined;
             });
         });
     }
 
-    async capturePersons(preview) {
+    async capturePersons(integrate) {
         const positions = this.forest.persons.map((p) => { return p.person.position; });
 
         // get persons centers
@@ -110,14 +110,14 @@ class Image {
         return this.camera.persons.slice(last);
     }
 
-    async captureImage(preview) {
+    async captureImage(integrate) {
         const rendered = new THREE.Vector3(this.center.x, 0, this.center.z);
         const processed = this.translate(rendered);
 
         // render canvas per layer
         const canvas = {
-            trees: preview ? this.getCanvas([this.stage.layer.trees]) : undefined,
-            persons: preview ? this.getCanvas([this.stage.layer.persons]) : undefined,
+            trees: integrate ? this.getCanvas([this.stage.layer.trees]) : undefined,
+            persons: integrate ? this.getCanvas([this.stage.layer.persons]) : undefined,
             full: this.getCanvas([this.stage.layer.trees, this.stage.layer.persons, this.stage.layer.camera])
         };
 
@@ -131,7 +131,7 @@ class Image {
             canvas: canvas
         };
 
-        if (preview) {
+        if (integrate) {
             // canvas container
             const container = document.createElement('div');
             container.className = 'image';

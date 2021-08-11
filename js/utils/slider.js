@@ -59,7 +59,6 @@ class Slider {
         for (let i = 0; i <= this.count - this.config.drone.camera.images; i++) {
             const img = this.image[i];
             img.classList.add('removed');
-            img.classList.remove('visible');
             sleep().then(() => {
                 if (this.images.contains(img)) {
                     this.images.removeChild(img);
@@ -83,7 +82,6 @@ class Slider {
         for (let i = 0; i < this.preview.length - 1; i++) {
             const img = this.preview[i];
             img.classList.add('removed');
-            img.classList.remove('visible');
             sleep().then(() => {
                 if (this.images.contains(img)) {
                     this.images.removeChild(img);
@@ -123,9 +121,9 @@ class Slider {
 
                 // image visibility
                 for (let i = 1; i < this.count; i++) {
-                    this.image[i].classList.add('visible');
+                    this.image[i].style.zIndex = 1;
                 }
-                this.image[this.count - 1].classList.add('visible');
+                this.image[this.count - 1].style.zIndex = 1;
             }
             else {
                 // reset positions
