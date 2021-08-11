@@ -149,6 +149,10 @@ class Image {
         // integrate last images
         const center = captures[captures.length - 1].center.processed;
         captures.forEach((capture) => {
+            if (!capture.canvas.persons || !capture.canvas.trees) {
+                return;
+            }
+
             // delta between image centers
             const delta = new THREE.Vector3();
             delta.copy(center).sub(capture.center.processed);
