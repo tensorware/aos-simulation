@@ -131,7 +131,7 @@ class View {
 
         // persons folder
         const personsFolder = forestFolder.addFolder('persons');
-        personsFolder.add(this.config.forest.persons, 'count', 0, 20, 1).onFinishChange(() => {
+        personsFolder.add(this.config.forest.persons, 'count', 0, 50, 1).onFinishChange(() => {
             this.forest.removePersons();
             this.forest.addPersons();
         });

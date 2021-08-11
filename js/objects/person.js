@@ -177,13 +177,13 @@ class Person {
     }
 
     getActivity() {
-        let activeSeed = `${this.index}`;
+        let activeSeed = `${this.index}-${this.config.forest.persons.count}`;
 
         // get active activities
         let activeActivities = [];
         Object.entries(this.config.forest.persons.activities).forEach(([activity, active]) => {
             if (active) {
-                activeSeed += `${activity}`;
+                activeSeed += `-${activity}`;
                 activeActivities.push(this.activityMapping[activity]);
             }
         });
