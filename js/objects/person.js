@@ -153,10 +153,6 @@ class Person {
     }
 
     crossFade(startActivity, endActivity, duration) {
-        if (!this.mixer) {
-            return;
-        }
-
         const startActivityName = startActivity ? startActivity.name : this.activityMapping['idle'].name;
         const endActivityName = endActivity.name;
 
@@ -313,10 +309,6 @@ class Person {
     }
 
     async clear() {
-        if (!this.mixer) {
-            return;
-        }
-
         // reset time
         this.mixer.setTime(0.0);
 

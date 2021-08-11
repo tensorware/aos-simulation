@@ -48,16 +48,22 @@ class Forest {
             }
 
             this.init();
-
             this.addGround();
             this.addTrees();
             this.addPersons();
             this.update();
 
-            this.workersMessage((finished) => {
-                if (finished) {
-                    resolve(this);
+            // tree worker message
+            this.workersMessage(async (finished) => {
+                if (!finished) {
+                    return;
                 }
+
+                // trees and persons finished
+                await Promise.all(this.persons.map((p) => { return p.loaded; }));
+                this.stage.status();
+
+                resolve(this);
             });
         }.bind(this));
     }
@@ -248,9 +254,6 @@ class Forest {
 
                 // workers finished
                 const finished = this.trees.length == done;
-                if (finished) {
-                    this.stage.status();
-                }
                 this.workersSubscriber.forEach((callback) => { callback(finished); });
             }).bind(this);
         });
