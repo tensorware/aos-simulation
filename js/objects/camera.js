@@ -242,7 +242,7 @@ class Camera {
         this.coverage = coverage;
         this.rotation = rotation;
 
-        // view corners (right-top, left-top, left-bottom, right-bottom])
+        // view corners (right-top, left-top, left-bottom, right-bottom)
         const cornerAngles = [45, 135, 225, 315];
         const cornerDistance = Math.sqrt((coverage / 2) ** 2 + (coverage / 2) ** 2);
 

@@ -65,9 +65,18 @@ class Image {
     }
 
     async capture(preview) {
+        // check persons loaded
+        const persons = this.forest.persons.filter((p) => { return !!p.person; });
+        if (persons.length != this.forest.persons.length) {
+            return;
+        }
+
+        // capture persons positions
         return this.capturePersons(preview).then((persons) => {
+            // capture image pixels
             return this.captureImage(preview).then((captures) => {
                 if (preview) {
+                    // integrate preview images
                     return this.integrateImages(persons, captures);
                 }
             });
