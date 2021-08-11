@@ -11,6 +11,8 @@ class Drone {
         this.flying = false;
         this.goal = new THREE.Vector3();
 
+        this.clock = new THREE.Clock();
+
         this.loaded = new Promise(async function (resolve) {
             const path = 'model/drone.stl';
             const stl = await this.loader.load('stl', path);
@@ -105,6 +107,8 @@ class Drone {
             this.stage.status('Capturing', 0);
 
             // animate movement
+            this.clock.stop();
+            this.clock.start();
             this.animate();
         }
     }
@@ -119,36 +123,29 @@ class Drone {
         await this.update();
     }
 
-    async animate(currentTime) {
-        if (!currentTime) {
-            this.startTime = 0;
-            this.lastCapture = 0;
-            requestAnimationFrame(this.animate);
-            return;
-        }
-        else if (!this.startTime) {
-            this.startTime = currentTime;
-        }
-
+    async animate() {
         // trajectory coordinates
         const start = new THREE.Vector3(this.config.drone.eastWest, this.config.drone.height, this.config.drone.northSouth);
         const end = new THREE.Vector3(this.goal.x, this.config.drone.height, this.goal.z);
 
-        const moveDuration = start.distanceTo(end) / this.config.drone.speed * 1000;
+        // move duration
+        const speed = this.config.drone.speed;
+        const moveDuration = start.distanceTo(end) / speed * 1000;
         if (moveDuration <= 0) {
             return;
         }
 
         // calculate time
-        const deltaTime = currentTime - this.startTime;
+        const deltaTime = this.clock.getElapsedTime() * 1000;
         const trajectoryTime = deltaTime / moveDuration;
 
         // calculate distance
         const currentDistance = deltaTime * this.config.drone.speed / 1000;
         const deltaDistance = currentDistance - this.lastCapture;
 
-        // TODO use distance based logic
         if (deltaTime <= moveDuration) {
+
+            // calculate trajectory
             const current = new THREE.Vector3();
             const trajectory = new THREE.Line3(start, end);
             trajectory.at(trajectoryTime, current);
@@ -194,6 +191,8 @@ class Drone {
     }
 
     async capture() {
+        // TODO synchronize drone and persons time frame
+
         const { coverage } = this.getView();
 
         const start = {
