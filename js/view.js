@@ -20,7 +20,7 @@ class View {
                 this.update();
             });
 
-            // events
+            // init events
             window.addEventListener('hashchange', () => {
                 this.update();
             });
