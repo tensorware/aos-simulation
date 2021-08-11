@@ -41,11 +41,48 @@ class Image {
     }
 
     async capture(preview) {
-        return this.captureImage(preview).then((captures) => {
-            if (preview) {
-                return this.integrateImages(captures);
+        return this.capturePersons(preview).then((persons) => {
+            return this.captureImage(preview).then((captures) => {
+                if (preview) {
+                    return this.integrateImages(persons, captures);
+                }
+            });
+        });
+    }
+
+    async capturePersons(preview) {
+        // get person positions
+        const positions = this.forest.persons.map((p) => { return p.person.position; });
+
+        // convert simulation coordinates (meter) into image coordinates (pixel)
+        const centers = positions.map((position) => {
+            return {
+                rendered: new THREE.Vector3(
+                    position.x,
+                    0,
+                    position.z
+                ),
+                // TODO
+                processed: new THREE.Vector3(
+                    0,
+                    0,
+                    0
+                )
             }
         });
+
+        // persons object
+        const person = {
+            image: this.index + 1,
+            centers: centers
+        };
+
+        // append persons to camera
+        this.camera.persons.push(person);
+
+        // return last persons
+        const last = Math.max(this.camera.persons.length - this.config.drone.camera.images, 0);
+        return this.camera.persons.slice(last);
     }
 
     async captureImage(preview) {
@@ -85,9 +122,9 @@ class Image {
             full: this.getCanvas([this.stage.layer.trees, this.stage.layer.persons, this.stage.layer.camera])
         };
 
-        // final capture object
+        // capture object
         const capture = {
-            number: this.index + 1,
+            image: this.index + 1,
             center: {
                 rendered: rendered,
                 processed: processed
@@ -105,7 +142,7 @@ class Image {
             this.camera.slider.addImage(container);
         }
 
-        // append capture to camera
+        // append captures to camera
         this.camera.captures.push(capture);
 
         // return last captures
@@ -113,7 +150,7 @@ class Image {
         return this.camera.captures.slice(last);
     }
 
-    async integrateImages(captures) {
+    async integrateImages(persons, captures) {
         const { canvas: canvasPersons, ctx: ctxPersons } = getCanvas(this.resolution.x, this.resolution.z);
         const { canvas: canvasTrees, ctx: ctxTrees } = getCanvas(this.resolution.x, this.resolution.z);
 
