@@ -141,6 +141,7 @@ class Stage {
         const height = (size + 2 * coverage) / (2 * Math.tan(rad(this.fov / 2)));
 
         // reset camera position
+        this.camera.setRotationFromEuler(new THREE.Euler(0, 0, 0));
         this.camera.position.set(0.0, height * 1.1, 0.0);
         this.controls.target.set(0.0, 0.0, 0.0);
 
