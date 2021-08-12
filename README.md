@@ -42,7 +42,9 @@ Live demo of this repository code can be found [here](https://aos.tensorware.app
 ### Application [![electron](https://img.shields.io/badge/electron-gray?logo=electron&logoColor=white)](#Application) [![platform](https://img.shields.io/badge/platform-windows%20|%20linux%20|%20macos-lightgrey)](#Application)
 
 A standalone application is available that allows automated and parallel data export.
+
 ![app](/img/app.gif)
+
 Details can be found in [INSTALL.md](/INSTALL.md).
 
 ## Source [![download](https://img.shields.io/badge/download-free-lightgrey)](#Source)
