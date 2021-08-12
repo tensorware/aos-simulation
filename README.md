@@ -10,13 +10,16 @@
 
 > We show that automated person detection under occlusion conditions can be significantly improved by combining multi-perspective images before classification. Here, we employed image integration by Airborne Optical Sectioning (AOS) - a synthetic aperture imaging technique that uses camera drones to capture unstructured thermal light fields - to achieve this with a precision/recall of 96/93%. Finding lost or injured people in dense forests is not generally feasible with thermal recordings, but becomes practical with use of AOS integral images. Our findings lay the foundation for effective future search and rescue technologies that can be applied in combination with autonomous or manned aircraft. They can also be beneficial for other fields that currently suffer from inaccurate classification of partially occluded people, animals, or objects.
 
-### Publications ![github](https://img.shields.io/badge/github-black?logo=github&logoColor=white)
+### Publications [![github](https://img.shields.io/badge/github-gray?logo=github&logoColor=white)](#Publications)
 
 Additional publications and software modules for AOS based search and rescue can be found on the author's [main repository](https://github.com/JKU-ICG/AOS).
 
-## Simulation ![html](https://img.shields.io/badge/html-black?logo=html5&logoColor=white)
+## Simulation [![html](https://img.shields.io/badge/html-gray?logo=html5&logoColor=white)](#Simulation)
 
-The simulation is based on [three.js](https://threejs.org) and runs on all major platforms and web browsers. Navigation (zoom, pan, rotate) is available via mouse and touch events. User controls allow the adjustment of several parameters for:
+The simulation is based on [three.js](https://threejs.org) and runs on all major platforms and web browsers.
+
+Navigation (zoom, pan, rotate) is available via mouse and touch events.
+User controls allow the adjustment of several parameters for:
 
 - `drone`
   - `camera`
@@ -32,17 +35,17 @@ The simulation is based on [three.js](https://threejs.org) and runs on all major
 
 The simulation data can be exported to a zip file for further processing.
 
-### Demo ![browser](https://img.shields.io/badge/browser-black?logo=googlechrome&logoColor=white) ![status](https://img.shields.io/badge/status-up-brightgreen)
+### Demo [![browser](https://img.shields.io/badge/browser-gray?logo=googlechrome&logoColor=white)](#Demo) [![status](https://img.shields.io/badge/status-up-brightgreen)](#Demo)
 
 Live demo of this repository code can be found [here](https://aos.tensorware.app).
 
-### Application ![electron](https://img.shields.io/badge/electron-black?logo=electron&logoColor=white) ![platform](https://img.shields.io/badge/platform-windows%20|%20linux%20|%20macos-lightgrey)
+### Application [![electron](https://img.shields.io/badge/electron-gray?logo=electron&logoColor=white)](#Application) [![platform](https://img.shields.io/badge/platform-windows%20|%20linux%20|%20macos-lightgrey)](#Application)
 
 A standalone application is available that allows automated and parallel data export.
 ![app](/img/app.gif)
-Details can be found in [INSTALL](/INSTALL.md).
+Details can be found in [INSTALL.md](/INSTALL.md).
 
-## Source ![download](https://img.shields.io/badge/download-free-lightgrey)
+## Source [![download](https://img.shields.io/badge/download-free-lightgrey)](#Source)
 
 Drone from [clara.io](https://clara.io):
 
@@ -62,6 +65,6 @@ Fonts from [fonts.google.com](https://fonts.google.com):
 
 - [opensans.json](https://fonts.google.com/specimen/Open+Sans)
 
-## License ![license](https://img.shields.io/badge/license-MIT-green)
+## License [![license](https://img.shields.io/badge/license-MIT-green)](#License)
 
 [MIT](/LICENSE)
