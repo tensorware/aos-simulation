@@ -108,14 +108,21 @@ const getConfig = async (preset) => {
 };
 
 const setConfig = async (config, objects) => {
+    const next = jsonParse(objects.next) || 0;
+
+    // update config values  
     for (const key in objects) {
         if (key != 'preset') {
-            const value = jsonParse(objects[key]);
+            let value = jsonParse(objects[key]);
+            if (getType(value) === 'array') {
+                const idx = clamp(next, 0, value.length - 1);
+                value = value[idx];
+            }
             setProperty(config, key.split('.'), value);
         }
     }
 
-    // update material color format
+    // update material color values
     for (key in config.material.color) {
         const value = config.material.color[key];
         config.material.color[key] = parseInt(value, 16);

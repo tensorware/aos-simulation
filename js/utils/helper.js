@@ -116,14 +116,9 @@ const getPoints = (mesh) => {
     return points;
 };
 
-const getType = (obj) => {
-    if (typeof obj == 'undefined') return 'undefined';
-    if (typeof obj == 'object') return 'object';
-    if (typeof obj == 'string') return 'string';
-    if (Array.isArray(obj)) return 'array';
-    if (!isNaN(obj - 0)) return 'number';
-    if (obj == null) return 'null';
-    return 'other';
+const getType = (value) => {
+    const str = Object.prototype.toString.call(value);
+    return str.slice(8, -1).toLowerCase();
 };
 
 const setProperty = (object, path, value) => {
