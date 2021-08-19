@@ -1,27 +1,26 @@
-const path = require('path');
-const electron = require('electron');
+const { join } = require('path');
+const { app, BrowserWindow, Notification, Menu } = require('electron');
 
-const { app, dialog, BrowserWindow, Menu } = electron;
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 app.whenReady().then(() => {
 
-  // command arguments (url-params)
+  // command arguments (url params)
   const args = process.argv.slice(2).map((arg) => arg.replace(/^\-+/g, ''));
   const hash = (args.length ? '#' : '') + args.join('&');
 
-  // main browser window (index.html)
+  // main browser (index.html)
   const main = new BrowserWindow({
     show: true,
     width: 1280,
     height: 720,
     autoHideMenuBar: false,
-    icon: path.join(__dirname, 'img', 'favicon.ico')
+    icon: join(__dirname, 'img', 'favicon.ico')
   });
   main.loadURL(`file://${__dirname}/index.html${hash}`);
   main.maximize();
 
-  // main browser window menu (alt-key)
+  // main browser menu (alt key)
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
       label: 'Exit',
@@ -40,17 +39,20 @@ app.whenReady().then(() => {
     }
   ]));
 
-  // data download path
+  // data download (zip file)
   main.webContents.session.on('will-download', (event, item) => {
-    const fileName = path.join(__dirname, 'data', item.getFilename());
+    const fileName = join(__dirname, 'data', item.getFilename());
     const fileSize = (item.getTotalBytes() / (1024 * 1024)).toFixed(2);
 
+    // data download path
     item.setSavePath(fileName);
 
-    dialog.showMessageBox(main, {
+    // data download notification
+    new Notification({
       title: 'Download completed',
-      message: `File of size ${fileSize} MB saved to "${fileName}"`
-    });
+      icon: join(__dirname, 'img', 'favicon.ico'),
+      body: `File of size ${fileSize} MB saved to "${fileName}"`
+    }).show();
   });
 
 });
