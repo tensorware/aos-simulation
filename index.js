@@ -8,6 +8,7 @@ app.whenReady().then(() => {
   // command arguments (url params)
   const args = process.argv.slice(2).map((arg) => arg.replace(/^\-+/g, ''));
   const hash = (args.length ? '#' : '') + args.join('&');
+  const url = `file://${__dirname}/index.html${hash}`;
 
   // main browser (index.html)
   const main = new BrowserWindow({
@@ -17,7 +18,7 @@ app.whenReady().then(() => {
     autoHideMenuBar: false,
     icon: join(__dirname, 'img', 'favicon.ico')
   });
-  main.loadURL(`file://${__dirname}/index.html${hash}`);
+  main.loadURL(url);
   main.maximize();
 
   // main browser menu (alt key)
@@ -41,7 +42,10 @@ app.whenReady().then(() => {
 
   // data download (zip file)
   main.webContents.session.on('will-download', (event, item) => {
-    const fileName = join(__dirname, 'data', item.getFilename());
+    const sessionUrl = new URL(main.webContents.getURL().replace(/#/g, '&').replace('&', '?'));
+    const sessionParams = Object.fromEntries(sessionUrl.searchParams);
+
+    const fileName = join(__dirname, 'data', sessionParams.preset || '', item.getFilename());
     const fileSize = (item.getTotalBytes() / (1024 * 1024)).toFixed(2);
 
     // data download path
@@ -51,7 +55,7 @@ app.whenReady().then(() => {
     new Notification({
       title: 'Download completed',
       icon: join(__dirname, 'img', 'favicon.ico'),
-      body: `File of size ${fileSize} MB saved to "${fileName}"`
+      body: `File with ${fileSize} MB exported to "${fileName}"`
     }).show();
   });
 
