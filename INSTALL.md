@@ -1,6 +1,6 @@
 # Requirements
 
-A simple http server is sufficient to run the simulation, no other backend is necessary.  
+A simple http server is sufficient to run the simulation, no other backend is needed.  
 Additional a standalone application is available that runs on [Electron](https://www.electronjs.org) and requires [Node.js](https://nodejs.org).
 
 ## Setup [![github](https://img.shields.io/badge/github-gray?logo=github&logoColor=white)](#Setup)
@@ -11,7 +11,7 @@ Download this repository code or use git:
 git clone https://github.com/tensorware/aos-simulation.git
 ```
 
-### Necessary [![html](https://img.shields.io/badge/html-gray?logo=html5&logoColor=white)](#Necessary)
+### Basic [![html](https://img.shields.io/badge/html-gray?logo=html5&logoColor=white)](#Basic)
 
 Browse into the repository root folder and start a webserver: (e.g. builtin python webserver)
 
@@ -19,11 +19,11 @@ Browse into the repository root folder and start a webserver: (e.g. builtin pyth
 python3 -m http.server 8080
 ```
 
-The simulation should be now available via http://127.0.0.1:8080.
+The simulation is now available via http://127.0.0.1:8080.
 
-### Additional [![nodejs](https://img.shields.io/badge/nodejs-gray?logo=nodedotjs&logoColor=white)](#Additional)
+### Optional [![nodejs](https://img.shields.io/badge/nodejs-gray?logo=nodedotjs&logoColor=white)](#Optional)
 
-First [install Node.js](https://nodejs.org/en/download) and run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in **package.json**.
+At first [install Node.js](https://nodejs.org/en/download) and then run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in **package.json**.
 The application can be started with:
 
 ```

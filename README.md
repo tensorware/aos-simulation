@@ -33,19 +33,19 @@ User controls allow the adjustment of several parameters for:
 - `material`
   - `color`
 
-The simulation data can be exported to a zip file for further processing.
+The simulation data may be exported as a zip file for further processing and analysis.
 
-### Demo [![browser](https://img.shields.io/badge/browser-gray?logo=googlechrome&logoColor=white)](#Demo) [![status](https://img.shields.io/badge/status-up-brightgreen)](#Demo)
+### Online [![browser](https://img.shields.io/badge/browser-gray?logo=googlechrome&logoColor=white)](#Online) [![status](https://img.shields.io/badge/status-up-brightgreen)](#Online)
 
-Live demo of this repository code can be found [here](https://aos.tensorware.app).
+An online version of this repository code can be found [here](https://aos.tensorware.app).
 
 ### Application [![electron](https://img.shields.io/badge/electron-gray?logo=electron&logoColor=white)](#Application) [![platform](https://img.shields.io/badge/platform-windows%20|%20linux%20|%20macos-lightgrey)](#Application)
 
-A standalone application is available that allows automated and parallel data export.
+Additional a standalone application is available for automated and parallelized data export.
 
-![app](/img/app.gif)
+[![app](/img/app.gif)](https://aos.tensorware.app)
 
-Details can be found in [INSTALL.md](/INSTALL.md).
+More details can be found in [INSTALL.md](/INSTALL.md).
 
 ## Source [![download](https://img.shields.io/badge/download-free-lightgrey)](#Source)
 
