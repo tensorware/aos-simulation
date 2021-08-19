@@ -34,7 +34,7 @@ const loadPreset = async (configs) => {
 
                 // set config target
                 let configTarget = configRoot;
-                let configSource = clone(configRoot);
+                let configSource = cloneObject(configRoot);
                 configParents.forEach((key) => {
                     configTarget = configTarget[key];
                     configSource = configSource[key];
@@ -67,7 +67,7 @@ const loadPreset = async (configs) => {
         });
     });
 
-    return jsonParse(localStorage.getItem(getLocalStorageKey('gui'))).preset;
+    return jsonParse(localStorage.getItem(localStorageKey('gui'))).preset;
 };
 
 const getPreset = async (configs) => {
@@ -78,7 +78,7 @@ const getPreset = async (configs) => {
     }
 
     // load preset from local storage
-    const load = jsonParse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+    const load = jsonParse(localStorage.getItem(localStorageKey('gui')) || '{}');
     if (load.preset) {
         return load.preset;
     }
@@ -92,11 +92,11 @@ const getConfig = async (preset) => {
         // load json config file
         fetch(`config/${preset}.json`).then((response) => {
             return response.json();
-        }).then((config) => {
+        }).then(async (config) => {
             // set config from hash
             const hash = getHash();
-            setConfig(config, hash);
-            config.preset = preset
+            await setConfig(config, hash);
+            config.preset = preset;
 
             // resolve promise
             resolve(config);
@@ -108,16 +108,23 @@ const getConfig = async (preset) => {
 };
 
 const setConfig = async (config, objects) => {
-    const next = jsonParse(objects.next) || 0;
+    // previous config
+    const prevConfig = cloneObject(config);
+    delete prevConfig.next;
 
-    // update config values  
+    // update config values
+    const next = jsonParse(objects.next) || 0;
     for (const key in objects) {
         if (key != 'preset') {
             let value = jsonParse(objects[key]);
+
+            // array values based on next index
             if (getType(value) === 'array') {
                 const idx = clamp(next, 0, value.length - 1);
                 value = value[idx];
             }
+
+            // update config value
             setProperty(config, key.split('.'), value);
         }
     }
@@ -125,16 +132,30 @@ const setConfig = async (config, objects) => {
     // update material color values
     for (key in config.material.color) {
         const value = config.material.color[key];
-        config.material.color[key] = parseInt(value, 16);
+        if (getType(value) === 'string') {
+            config.material.color[key] = parseInt(value, 16);
+        }
     }
+
+    // next config
+    const nextConfig = cloneObject(config);
+    delete nextConfig.next;
+
+    return !objectEquals(prevConfig, nextConfig);
 };
 
 const getHash = (key) => {
-    const query = new URL(window.location.href.replace(/#/g, '?'));
-    const params = Object.fromEntries(query.searchParams);
+    const url = new URL(window.location.href.replace(/#/g, '&').replace('&', '?'));
+    const params = Object.fromEntries(url.searchParams);
     return key ? params[key] : params;
 };
 
-const getLocalStorageKey = (key) => {
+const setHash = (key, value) => {
+    const hash = getHash();
+    hash[key] = value;
+    window.location.hash = Object.keys(hash).map((key) => `${key}=${hash[key]}`).join('&');
+};
+
+const localStorageKey = (key) => {
     return `${document.location.href}.${key}`;
 };

@@ -148,6 +148,10 @@ const jsonParse = (value) => {
     }
 };
 
+const objectEquals = (obj1, obj2) => {
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+};
+
 const hexColor = (color) => {
     return '#' + color.toString(16).padStart(6, '0');
 };
@@ -185,6 +189,20 @@ const colorMatch = (c1, c2, delta) => {
     return (r + g + b) <= delta;
 };
 
+const cloneObject = (obj) => {
+    return jsonParse(JSON.stringify(obj));
+};
+
+const cloneCanvas = (canvas, options) => {
+    let { canvas: cloneCanvas, ctx: cloneCtx } = getCanvas(canvas.width, canvas.height);
+    cloneCtx.filter = options.grayscale ? 'grayscale(1)' : 'none';
+    cloneCtx.drawImage(canvas, 0, 0);
+    if (getType(options.transparent) === 'number') {
+        cloneCanvas = transparentCanvas(canvas, options.transparent);
+    }
+    return cloneCanvas;
+};
+
 const getCanvas = (width, height) => {
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -198,16 +216,6 @@ const getCanvas = (width, height) => {
 const canvasImage = (canvas) => {
     const dataUrl = canvas.toDataURL('image/png');
     return dataUrl.substr(dataUrl.indexOf(',') + 1);
-};
-
-const cloneCanvas = (canvas, options) => {
-    let { canvas: cloneCanvas, ctx: cloneCtx } = getCanvas(canvas.width, canvas.height);
-    cloneCtx.filter = options.grayscale ? 'grayscale(1)' : 'none';
-    cloneCtx.drawImage(canvas, 0, 0);
-    if (getType(options.transparent) === 'number') {
-        cloneCanvas = transparentCanvas(canvas, options.transparent);
-    }
-    return cloneCanvas;
 };
 
 const transparentCanvas = (canvas, color) => {
@@ -254,10 +262,6 @@ const rad = (deg) => {
 
 const clamp = (value, min, max) => {
     return Math.min(Math.max(value, min), max);
-};
-
-const clone = (obj) => {
-    return jsonParse(JSON.stringify(obj));
 };
 
 const sleep = (ms) => {

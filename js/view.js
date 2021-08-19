@@ -17,12 +17,12 @@ class View {
             this.forest = new Forest(this.stage, 0);
             this.drone = new Drone(this.forest, 0);
             this.forest.loaded.then(() => {
-                this.update();
+                this.update({ loaded: true });
             });
 
             // events
-            window.addEventListener('hashchange', () => {
-                this.update();
+            window.addEventListener('hashchange', (event) => {
+                this.update(event);
             });
         });
     }
@@ -37,7 +37,7 @@ class View {
 
     controls(root) {
         // gui state
-        const state = jsonParse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+        const state = jsonParse(localStorage.getItem(localStorageKey('gui')) || '{}');
 
         // gui root
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
@@ -186,9 +186,8 @@ class View {
         this.gui.add(this, 'reset');
     }
 
-    splitter(elements) {
-        // init split
-        Split(elements, {
+    splitter(container) {
+        const options = {
             gutterSize: 5,
             sizes: [80, 20],
             minSize: [0, 0],
@@ -200,16 +199,22 @@ class View {
                 gutter.id = 'gutter';
                 return gutter;
             }
-        });
+        };
 
-        // update stage canvas
+        // init split
+        Split(container, options);
+
+        // update stage
         this.stage.update();
     }
 
-    async update() {
+    async update(event) {
         // set config from hash
         const hash = getHash();
-        setConfig(this.config, hash);
+        const changed = event.loaded || await setConfig(this.config, hash);
+        if (!changed) {
+            return;
+        }
 
         // update forest
         await this.forest.update();
@@ -268,9 +273,9 @@ class View {
         this.stage.status('Exporting', 0);
 
         // add folders
-        this.stage.export(zip);
-        this.forest.export(zip);
-        this.drone.export(zip);
+        await this.stage.export(zip);
+        await this.forest.export(zip);
+        await this.drone.export(zip);
 
         // add config file
         zip.file('config.json', JSON.stringify(this.config, null, 4));
@@ -278,19 +283,23 @@ class View {
         // compression status
         this.stage.status('Compressing', 0);
 
-        // generate zip
-        zip.generateAsync({
+        // generate zip file
+        await zip.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
             compressionOptions: { level: 6 }
         }, (zipMeta) => {
             this.stage.status('Compressing', Math.round(zipMeta.percent));
         }).then((zipData) => {
-            // download zip
-            saveAs(zipData, zipName);
-
             // compression finished
             this.stage.status();
+
+            // download zip file
+            saveAs(zipData, zipName);
+
+            // update hash for next array value
+            const next = getHash('next') | 0;
+            setHash('next', next + 1);
         });
     }
 
