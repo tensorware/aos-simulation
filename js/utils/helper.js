@@ -116,16 +116,6 @@ const getPoints = (mesh) => {
     return points;
 };
 
-const getLocalStorageKey = (key) => {
-    return `${document.location.href}.${key}`;
-};
-
-const getHash = (key) => {
-    const query = new URL(window.location.href.replace(/#/g, '?'));
-    const params = Object.fromEntries(query.searchParams);
-    return key ? params[key] : params;
-};
-
 const getType = (obj) => {
     if (typeof obj == 'undefined') return 'undefined';
     if (typeof obj == 'object') return 'object';
@@ -151,6 +141,15 @@ const setProperty = (object, path, value) => {
             object[path[0]] = {};
             return setProperty(object[path[0]], path.slice(1), value);
         }
+    }
+};
+
+const jsonParse = (value) => {
+    try {
+        return JSON.parse(value);
+    }
+    catch {
+        return value;
     }
 };
 
@@ -263,7 +262,7 @@ const clamp = (value, min, max) => {
 };
 
 const clone = (obj) => {
-    return JSON.parse(JSON.stringify(obj));
+    return jsonParse(JSON.stringify(obj));
 };
 
 const sleep = (ms) => {

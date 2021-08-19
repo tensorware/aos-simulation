@@ -12,7 +12,6 @@ const configs = [
 ];
 
 const loadPreset = async (configs) => {
-
     // load preset from json
     const presets = (configRoot, config, guiRoot, gui) => {
         for (let key in config) {
@@ -68,11 +67,10 @@ const loadPreset = async (configs) => {
         });
     });
 
-    return JSON.parse(localStorage.getItem(getLocalStorageKey('gui'))).preset;
+    return jsonParse(localStorage.getItem(getLocalStorageKey('gui'))).preset;
 };
 
 const getPreset = async (configs) => {
-
     // load preset from url
     const hash = getHash();
     if (hash.preset) {
@@ -80,7 +78,7 @@ const getPreset = async (configs) => {
     }
 
     // load preset from local storage
-    const load = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+    const load = jsonParse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
     if (load.preset) {
         return load.preset;
     }
@@ -98,19 +96,7 @@ const getConfig = async (preset) => {
             // set config from hash
             const hash = getHash();
             setConfig(config, hash);
-            config.preset = preset;
-
-            // update forest persons activities format
-            for (key in config.forest.persons.activities) {
-                const value = String(config.forest.persons.activities[key]);
-                config.forest.persons.activities[key] = value.toLowerCase() === 'true';
-            }
-
-            // update material color format
-            for (key in config.material.color) {
-                const value = config.material.color[key];
-                config.material.color[key] = parseInt(value, 16);
-            }
+            config.preset = preset
 
             // resolve promise
             resolve(config);
@@ -124,8 +110,24 @@ const getConfig = async (preset) => {
 const setConfig = async (config, objects) => {
     for (const key in objects) {
         if (key != 'preset') {
-            const value = !isNaN(objects[key]) ? Number(objects[key]) : objects[key];
+            const value = jsonParse(objects[key]);
             setProperty(config, key.split('.'), value);
         }
     }
+
+    // update material color format
+    for (key in config.material.color) {
+        const value = config.material.color[key];
+        config.material.color[key] = parseInt(value, 16);
+    }
+};
+
+const getHash = (key) => {
+    const query = new URL(window.location.href.replace(/#/g, '?'));
+    const params = Object.fromEntries(query.searchParams);
+    return key ? params[key] : params;
+};
+
+const getLocalStorageKey = (key) => {
+    return `${document.location.href}.${key}`;
 };

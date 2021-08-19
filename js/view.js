@@ -37,7 +37,7 @@ class View {
 
     controls(root) {
         // gui state
-        const state = JSON.parse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
+        const state = jsonParse(localStorage.getItem(getLocalStorageKey('gui')) || '{}');
 
         // gui root
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
@@ -223,22 +223,20 @@ class View {
 
         // reset persons
         this.forest.persons.forEach((person) => { person.setActivity(); });
+        await sleep(100);
 
         // execute capture
         if ('capture' in hash) {
-            await sleep(100);
             await this.capture();
         }
 
         // execute export
         if ('export' in hash) {
-            await sleep(100);
             await this.export();
         }
 
         // execute reset
         if ('reset' in hash) {
-            await sleep(100);
             await this.reset();
         }
     }
