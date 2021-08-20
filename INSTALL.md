@@ -5,7 +5,7 @@ Additional a standalone application is available that runs on [Electron](https:/
 
 ## Setup [![github](https://img.shields.io/badge/github-gray?logo=github&logoColor=white)](#Setup)
 
-Download the [latest version](/archive/refs/heads/master.zip) as zip or clone this repository using git:
+Download the [latest version](https://github.com/tensorware/aos-simulation/archive/refs/heads/master.zip) as zip or clone this repository using git:
 
 ```
 git clone https://github.com/tensorware/aos-simulation.git
