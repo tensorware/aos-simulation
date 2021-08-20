@@ -17,7 +17,7 @@ class Stage {
             const path = 'font/opensans.json';
             const font = await this.loader.load('font', path);
 
-            this.fov = 60
+            this.fov = 60;
             this.font = font;
             this.scene = new THREE.Scene();
 
@@ -152,4 +152,4 @@ class Stage {
         // reset status
         await sleep(100);
     }
-};
+}

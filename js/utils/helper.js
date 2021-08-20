@@ -23,13 +23,6 @@ const normalizeAttribute = (attribute) => {
     return attribute;
 };
 
-const rayCast = (from, to, intersects) => {
-    const rayVector = new THREE.Vector3();
-    rayVector.subVectors(to, from);
-    const ray = new THREE.Raycaster(from, rayVector.normalize());
-    return Array.isArray(intersects) ? ray.intersectObjects(intersects) : ray.intersectObject(intersects);
-};
-
 const flattenArray = (input) => {
     const result = [];
     for (let i = 0; i < input.length; i++) {
@@ -85,7 +78,7 @@ const doubleClick = (callback) => {
                 callback(e);
             }
         }
-    }
+    };
 };
 
 const getWorkers = (size) => {
@@ -266,31 +259,31 @@ const clamp = (value, min, max) => {
 
 const sleep = (ms) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
-}
+};
 
-const log = (...arguments) => {
+const log = (...args) => {
     let level = 'log';
-    let args = Array.from(arguments);
-    if (args.length > 0 && getType(args[0]) === 'string') {
-        if (['debug', 'info', 'warn', 'error'].includes(args[0])) {
-            level = args.shift();
+    let entries = Array.from(args);
+    if (entries.length > 0 && getType(entries[0]) === 'string') {
+        if (['debug', 'info', 'warn', 'error'].includes(entries[0])) {
+            level = entries.shift();
         }
     }
     switch (level) {
         case 'debug':
-            console.debug.apply(console, args);
+            console.debug.apply(console, entries);
             break;
         case 'info':
-            console.info.apply(console, args);
+            console.info.apply(console, entries);
             break;
         case 'warn':
-            console.warn.apply(console, args);
+            console.warn.apply(console, entries);
             break;
         case 'error':
-            console.error.apply(console, args);
+            console.error.apply(console, entries);
             break;
         default:
-            console.log.apply(console, args);
+            console.log.apply(console, entries);
     }
 };
 

@@ -201,4 +201,4 @@ class Image {
         // return integrated image
         return canvas;
     }
-};
+}

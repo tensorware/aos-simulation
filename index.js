@@ -6,7 +6,7 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 app.whenReady().then(() => {
 
   // command arguments (url params)
-  const args = process.argv.slice(2).map((arg) => arg.replace(/^\-+/g, ''));
+  const args = process.argv.slice(2).map((arg) => arg.replace(/^-+/g, ''));
   const hash = (args.length ? '#' : '') + args.join('&');
   const url = `file://${__dirname}/index.html${hash}`;
 

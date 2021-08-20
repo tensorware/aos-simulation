@@ -188,7 +188,7 @@ class Camera {
             // plane text
             const text = this.coverage.toFixed(2) + ' x ' + this.coverage.toFixed(2);
             const textGeometry = new THREE.TextGeometry(text, { font: this.stage.font, size: this.coverage / 10, height: 0.01 });
-            textGeometry.rotateX(rad(-90))
+            textGeometry.rotateX(rad(-90));
             planeText.geometry.copy(textGeometry);
 
             // plane text width/height
@@ -345,4 +345,4 @@ class Camera {
 
         await sleep(100);
     }
-};
+}

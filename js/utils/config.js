@@ -15,7 +15,7 @@ const loadPreset = async (configs) => {
     // load preset from json
     const presets = (configRoot, config, guiRoot, gui) => {
         for (let key in config) {
-            if (!config.hasOwnProperty(key)) {
+            if (!Object.prototype.hasOwnProperty.call(config, key)) {
                 continue;
             }
 

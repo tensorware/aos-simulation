@@ -88,7 +88,7 @@ class Drone {
             y: (e.clientY / this.root.clientHeight) * -2 + 1
         };
 
-        // raycast target
+        // ray cast target
         const ray = new THREE.Raycaster();
         ray.layers.set(this.stage.layer.ground);
         ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
@@ -308,4 +308,4 @@ class Drone {
 
         await sleep(100);
     }
-};
+}

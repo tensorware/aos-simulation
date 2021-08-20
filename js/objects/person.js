@@ -327,4 +327,4 @@ class Person {
 
         await sleep(100);
     }
-};
+}

@@ -55,7 +55,7 @@ class Slider {
     }
 
     addImage(image) {
-        // remove first childs, ignore up to number of used images
+        // remove first children, ignore up to number of used images
         for (let i = 0; i <= this.count - this.config.drone.camera.images; i++) {
             const img = this.image[i];
             img.classList.add('removed');
@@ -78,7 +78,7 @@ class Slider {
     }
 
     addPreview(preview) {
-        // remove first childs, ignore last live preview image
+        // remove first children, ignore last live preview image
         for (let i = 0; i < this.preview.length - 1; i++) {
             const img = this.preview[i];
             img.classList.add('removed');
@@ -171,4 +171,4 @@ class Slider {
 
         await sleep(100);
     }
-};
+}

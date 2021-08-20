@@ -340,4 +340,4 @@ class Forest {
 
         await sleep(100);
     }
-};
+}

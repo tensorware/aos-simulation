@@ -64,7 +64,7 @@ class View {
 
         // cpu folder
         const cpuFolder = droneFolder.addFolder('cpu');
-        cpuFolder.add(this.config.drone.cpu, 'speed', 0.1, 2.0, 0.1).onChange(() => this.drone.update()).listen();;
+        cpuFolder.add(this.config.drone.cpu, 'speed', 0.1, 2.0, 0.1).onChange(() => this.drone.update()).listen();
 
         // forest folder
         const forestFolder = this.gui.addFolder('forest');
@@ -263,7 +263,7 @@ class View {
         await this.drone.reset();
 
         // capture images
-        await this.drone.capture()
+        await this.drone.capture();
 
         // reset stage camera
         await this.stage.reset();
@@ -314,7 +314,7 @@ class View {
         await this.forest.reset();
         await this.drone.reset();
     }
-};
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     // make Math.random() globally predictable

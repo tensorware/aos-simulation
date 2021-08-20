@@ -21,7 +21,7 @@ class Task {
         // final message
         self.postMessage({ trees: trees });
     }
-};
+}
 
 self.onmessage = (e) => {
     const params = e.data.params;
