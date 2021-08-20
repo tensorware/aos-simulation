@@ -23,7 +23,7 @@ The simulation is now available via http://127.0.0.1:8080.
 
 ### Optional [![nodejs](https://img.shields.io/badge/nodejs-gray?logo=nodedotjs&logoColor=white)](#Optional)
 
-At first [install Node.js](https://nodejs.org/en/download) and then run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in **package.json**.
+At first [install Node.js](https://nodejs.org/en/download) and then run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in [**package.json**](/package.json).
 The application can be started with:
 
 ```
@@ -64,11 +64,13 @@ npx electron . --preset=demo --drone.camera.view=[90,80,70] --capture=true
 
 ## Development [![vscode](https://img.shields.io/badge/made%20with-VSCode-blue)](#Development)
 
-Source code is written in plain JavaScript, no additional build is required.
+The source code is written in plain JavaScript, no additional build is required.  
+[ESLint](https://eslint.org) version defined in [**package.json**](/package.json) and the corresponding [**eslintrc.json**](/peslintrc.json) file is configured for basic syntax checking.
 
-Presets for VSCode are available in **launch.json**, **settings.json** and **tasks.json**.  
-Used VSCode extensions:
+Settings for VSCode are available in [**launch.json**](/.vscode/launch.json), [**settings.json**](/.vscode/settings.json) and [**tasks.json**](/.vscode/tasks.json).  
+Additional extensions may be installed from here:
 
 - [Live Preview](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server)
 - [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
 - [Debugger for Firefox](https://marketplace.visualstudio.com/items?itemName=firefox-devtools.vscode-firefox-debug)
+- [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
