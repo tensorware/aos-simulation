@@ -65,7 +65,7 @@ npx electron . --preset=demo --drone.camera.view=[90,80,70] --capture=true
 ## Development [![vscode](https://img.shields.io/badge/made%20with-VSCode-blue)](#Development)
 
 The source code is written in plain JavaScript, no additional build is required.  
-[ESLint](https://eslint.org) version defined in [**package.json**](/package.json) and the corresponding [**eslintrc.json**](/peslintrc.json) file is configured for basic syntax checking.
+[ESLint](https://eslint.org) version defined in [**package.json**](/package.json) and the corresponding [**.eslintrc.json**](/.eslintrc.json) file is configured for basic syntax checking.
 
 Settings for VSCode are available in [**launch.json**](/.vscode/launch.json), [**settings.json**](/.vscode/settings.json) and [**tasks.json**](/.vscode/tasks.json).  
 Additional extensions may be installed from here:
