@@ -209,8 +209,10 @@ class View {
     }
 
     async update(event) {
-        // set config from hash
+        // get config from hash
         const hash = getHash();
+
+        // set config from hash
         const changed = await setConfig(this.config, hash);
 
         // check event type
