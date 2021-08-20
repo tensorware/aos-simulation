@@ -5,7 +5,7 @@ Additional a standalone application is available that runs on [Electron](https:/
 
 ## Setup [![github](https://img.shields.io/badge/github-gray?logo=github&logoColor=white)](#Setup)
 
-Download this repository code or use git:
+Download the [latest version](/archive/refs/heads/master.zip) as zip or clone this repository using git:
 
 ```
 git clone https://github.com/tensorware/aos-simulation.git
@@ -23,8 +23,7 @@ The simulation is now available via http://127.0.0.1:8080.
 
 ### Optional [![nodejs](https://img.shields.io/badge/nodejs-gray?logo=nodedotjs&logoColor=white)](#Optional)
 
-At first [install Node.js](https://nodejs.org/en/download) and then run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in [**package.json**](/package.json).
-The application can be started with:
+First [install Node.js](https://nodejs.org/en/download) and then run `npm install` from the repository root folder. This [installs Electron](https://www.electronjs.org/docs/latest/tutorial/installation) with the version defined in [**package.json**](/package.json). Start the application with:
 
 ```
 npx electron .
@@ -64,13 +63,15 @@ npx electron . --preset=demo --drone.camera.view=[90,80,70] --capture=true
 
 ## Development [![vscode](https://img.shields.io/badge/made%20with-VSCode-blue)](#Development)
 
-The source code is written in plain JavaScript, no additional build is required.  
-[ESLint](https://eslint.org) version defined in [**package.json**](/package.json) and the corresponding [**.eslintrc.json**](/.eslintrc.json) file is configured for basic syntax checking.
+Source code is written in plain JavaScript, no additional build is required.  
+The [ESLint](https://eslint.org) version defined in [**package.json**](/package.json) and the corresponding [**.eslintrc.json**](/.eslintrc.json) file is configured for basic syntax checking.
 
 Settings for VSCode are available in [**launch.json**](/.vscode/launch.json), [**settings.json**](/.vscode/settings.json) and [**tasks.json**](/.vscode/tasks.json).  
-Additional extensions may be installed from here:
+Additional extensions may be installed:
 
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 - [Live Preview](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server)
 - [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
 - [Debugger for Firefox](https://marketplace.visualstudio.com/items?itemName=firefox-devtools.vscode-firefox-debug)
+- [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)
 - [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker)
