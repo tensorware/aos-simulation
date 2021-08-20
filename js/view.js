@@ -17,7 +17,7 @@ class View {
             this.forest = new Forest(this.stage, 0);
             this.drone = new Drone(this.forest, 0);
             this.forest.loaded.then(() => {
-                this.update({ loaded: true });
+                this.update({ type: 'loaded' });
             });
 
             // events
@@ -211,8 +211,13 @@ class View {
     async update(event) {
         // set config from hash
         const hash = getHash();
-        const changed = event.loaded || await setConfig(this.config, hash);
-        if (!changed) {
+        const changed = await setConfig(this.config, hash);
+
+        // check event type
+        const loadEvent = event.type === 'loaded';
+        const hashEvent = event.type === 'hashchange';
+        const changeEvent = loadEvent || (hashEvent && changed);
+        if (!changeEvent) {
             return;
         }
 
