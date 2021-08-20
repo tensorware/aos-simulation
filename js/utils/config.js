@@ -89,13 +89,17 @@ const getPreset = async (configs) => {
 
 const getConfig = async (preset) => {
     return new Promise((resolve) => {
-        // load json config file
-        fetch(`config/${preset}.json`).then((response) => {
-            return response.json();
-        }).then(async (config) => {
-            // set config from hash
+        fetch(`config/${preset}.json`).then((response) => response.json()).then(async (config) => {
+            // get config from hash
             const hash = getHash();
+
+            // filter drone parameter
+            Object.keys(hash).filter((key) => key.startsWith('drone.')).forEach((key) => delete hash[key]);
+
+            // set config from hash
             await setConfig(config, hash);
+
+            // set preset
             config.preset = preset;
 
             // resolve promise
@@ -107,16 +111,16 @@ const getConfig = async (preset) => {
     });
 };
 
-const setConfig = async (config, objects) => {
+const setConfig = async (config, update) => {
     // previous config
     const prevConfig = cloneObject(config);
     delete prevConfig.next;
 
     // update config values
-    const next = jsonParse(objects.next) || 0;
-    for (const key in objects) {
+    const next = jsonParse(update.next) || 0;
+    for (const key in update) {
         if (key != 'preset') {
-            let value = jsonParse(objects[key]);
+            let value = jsonParse(update[key]);
 
             // array values based on next index
             if (getType(value) === 'array') {
