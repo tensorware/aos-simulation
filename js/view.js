@@ -8,23 +8,48 @@ class View {
         // init stage
         this.stage = new Stage(this.root, this.config, this.loader);
         this.stage.loaded.then(() => {
-            // dom
-            this.background(this.config.material.color.background);
-            this.controls(this.root.querySelector('#controls'), presets);
-            this.splitter(['#top', '#bottom']);
 
-            // objects
+            // init dom
+            this.splitter(['#top', '#bottom']);
+            this.background(this.config.material.color.background);
+
+            // init objects
             this.forest = new Forest(this.stage, 0);
             this.drone = new Drone(this.forest, 0);
+            this.drone.loaded.then(() => {
+                this.controls(this.root.querySelector('#controls'), presets);
+            });
             this.forest.loaded.then(() => {
                 this.update({ type: 'loaded' });
             });
 
-            // events
+            // init events
             window.addEventListener('hashchange', (event) => {
                 this.update(event);
             });
         });
+    }
+
+    splitter(container) {
+        const options = {
+            gutterSize: 5,
+            sizes: [80, 20],
+            minSize: [0, 0],
+            cursor: 'ns-resize',
+            direction: 'vertical',
+            onDrag: () => { this.stage.update(); },
+            gutter: () => {
+                const gutter = document.createElement('div');
+                gutter.id = 'gutter';
+                return gutter;
+            }
+        };
+
+        // init split
+        Split(container, options);
+
+        // update stage
+        this.stage.update();
     }
 
     background(color) {
@@ -36,6 +61,8 @@ class View {
     }
 
     controls(root) {
+        const bound = this.config.forest.ground / 2 + this.drone.getView().coverage;
+
         // gui state
         const state = jsonParse(localStorage.getItem(localStorageKey('gui')) || '{}');
 
@@ -46,13 +73,12 @@ class View {
         root.append(this.gui.domElement);
 
         // drone folder
-        const size = this.config.forest.ground / 2;
         const droneFolder = this.gui.addFolder('drone');
         droneFolder.add(this.config.drone, 'speed', 1, 20, 1).onChange(() => this.drone.update()).listen();
         droneFolder.add(this.config.drone, 'height', 1, 100, 1).onChange(() => this.drone.update()).onFinishChange(() => this.forest.update()).listen();
         droneFolder.add(this.config.drone, 'rotation', -180, 180, 1).onChange(() => this.drone.update()).listen();
-        droneFolder.add(this.config.drone, 'eastWest', -size, size, 0.5).onChange((v) => this.drone.setEastWest(v)).listen();
-        droneFolder.add(this.config.drone, 'northSouth', -size, size, 0.5).onChange((v) => this.drone.setNorthSouth(v)).listen();
+        droneFolder.add(this.config.drone, 'eastWest', -bound, bound, 0.5).onChange((v) => this.drone.setEastWest(v)).listen();
+        droneFolder.add(this.config.drone, 'northSouth', -bound, bound, 0.5).onChange((v) => this.drone.setNorthSouth(v)).listen();
 
         // camera folder
         const cameraFolder = droneFolder.addFolder('camera');
@@ -184,28 +210,6 @@ class View {
         this.gui.add(this, 'capture');
         this.gui.add(this, 'export');
         this.gui.add(this, 'reset');
-    }
-
-    splitter(container) {
-        const options = {
-            gutterSize: 5,
-            sizes: [80, 20],
-            minSize: [0, 0],
-            cursor: 'ns-resize',
-            direction: 'vertical',
-            onDrag: () => { this.stage.update(); },
-            gutter: () => {
-                const gutter = document.createElement('div');
-                gutter.id = 'gutter';
-                return gutter;
-            }
-        };
-
-        // init split
-        Split(container, options);
-
-        // update stage
-        this.stage.update();
     }
 
     async update(event) {

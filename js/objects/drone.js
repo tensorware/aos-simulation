@@ -93,7 +93,7 @@ class Drone {
         ray.layers.set(this.stage.layer.ground);
         ray.setFromCamera(new THREE.Vector3(mouse.x, mouse.y, 1), this.stage.camera);
 
-        const intersects = ray.intersectObject(this.forest.grounds[0]);
+        const intersects = ray.intersectObjects(this.forest.grounds);
         if (intersects.length) {
             // set goal position
             this.goal = intersects[0].point;
