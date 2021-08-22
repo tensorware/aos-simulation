@@ -42,21 +42,38 @@ app.whenReady().then(() => {
 
   // data download (zip file)
   main.webContents.session.on('will-download', (event, item) => {
+
+    // get params
     const sessionUrl = new URL(main.webContents.getURL().replace(/#/g, '&').replace('&', '?'));
     const sessionParams = Object.fromEntries(sessionUrl.searchParams);
+    const sessionCount = parseInt(sessionParams.next, 10);
 
-    const fileName = join(__dirname, 'data', sessionParams.preset || '', item.getFilename());
+    // get array size
+    const arrayParams = Object.values(sessionParams).map(JSON.parse).filter(Array.isArray);
+    const arrayParamsLength = Math.max(...arrayParams.map((x) => x.length).concat([1]));
+
+    // get file path
+    const filePath = join(__dirname, 'data', sessionParams.preset || '', item.getFilename());
     const fileSize = (item.getTotalBytes() / (1024 * 1024)).toFixed(2);
 
     // data download path
-    item.setSavePath(fileName);
+    item.setSavePath(filePath);
 
     // data download notification
     new Notification({
       title: 'Download completed',
       icon: join(__dirname, 'img', 'favicon.ico'),
-      body: `File with ${fileSize} MB exported to "${fileName}"`
+      body: `File with ${fileSize} MB exported to "${filePath}"`
     }).show();
+
+    // close application on data download finished
+    if (sessionParams.capture && sessionCount >= arrayParamsLength) {
+      item.once('done', (event, state) => {
+        if (state === 'completed') {
+          main.close();
+        }
+      });
+    }
   });
 
 });
