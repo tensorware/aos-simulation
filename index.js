@@ -49,8 +49,8 @@ app.whenReady().then(() => {
     const sessionCount = parseInt(sessionParams.next, 10);
 
     // get array size
-    const arrayParams = Object.values(sessionParams).map(JSON.parse).filter(Array.isArray);
-    const arrayParamsLength = Math.max(...arrayParams.map((x) => x.length).concat([1]));
+    const arrayParams = Object.values(sessionParams).map((value) => { try { return JSON.parse(value); } catch { return value; } });
+    const arrayParamsLength = Math.max(...arrayParams.filter(Array.isArray).map((array) => array.length));
 
     // get file path
     const filePath = join(__dirname, 'data', sessionParams.preset || '', item.getFilename());
