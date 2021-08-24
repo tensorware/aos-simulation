@@ -63,12 +63,9 @@ class View {
     controls(root) {
         const bound = this.config.forest.ground / 2 + this.drone.getView().coverage;
 
-        // gui state
-        const state = jsonParse(localStorage.getItem(localStorageKey('gui')) || '{}');
-
         // gui root
         this.gui = new dat.GUI({ autoPlace: false, width: 320 });
-        this.gui.closed = state.closed || false;
+        this.gui.closed = !!getLocalStorage('gui').closed;
         this.gui.useLocalStorage = true;
         root.append(this.gui.domElement);
 

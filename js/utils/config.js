@@ -67,7 +67,7 @@ const loadPreset = async (configs) => {
         });
     });
 
-    return jsonParse(localStorage.getItem(localStorageKey('gui'))).preset;
+    return getLocalStorage('gui').preset;
 };
 
 const getPreset = async (configs) => {
@@ -78,7 +78,7 @@ const getPreset = async (configs) => {
     }
 
     // load preset from local storage
-    const load = jsonParse(localStorage.getItem(localStorageKey('gui')) || '{}');
+    const load = getLocalStorage('gui');
     if (load.preset) {
         return load.preset;
     }
@@ -160,6 +160,12 @@ const setHash = (key, value) => {
     window.location.hash = Object.keys(hash).map((key) => `${key}=${hash[key]}`).join('&');
 };
 
-const localStorageKey = (key) => {
-    return `${document.location.href}.${key}`;
+const getLocalStorage = (key) => {
+    try {
+        const item = `${document.location.href}.${key}`;
+        return jsonParse(localStorage.getItem(item) || '{}');
+    }
+    catch {
+        return {};
+    }
 };
