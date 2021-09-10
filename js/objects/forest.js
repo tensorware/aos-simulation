@@ -311,11 +311,16 @@ class Forest {
         const forest = zip.folder('forest');
 
         // export trees
-        const trees = { positions: [] };
+        const trees = { locations: [] };
         for (let i = 0; i < this.trees.length; i++) {
             const tree = this.trees[i];
             if (tree.visible) {
-                trees.positions.push(tree.position);
+                const treeBox = new THREE.BoxHelper(tree);
+                treeBox.geometry.computeBoundingBox();
+                trees.locations.push({
+                    position: tree.position,
+                    box: treeBox.geometry.boundingBox
+                });
             }
         }
         forest.file('trees.json', JSON.stringify(trees, null, 4));
