@@ -107,7 +107,11 @@ class Person {
             });
             this.person.scale.multiplyScalar(10 / 1000);
             this.setPosition(this.initialPosition, this.initialDirection);
-            this.track.push({ position: this.initialPosition, direction: this.initialDirection });
+            this.track.push({
+                position: this.initialPosition,
+                direction: this.initialDirection,
+                activity: this.getActivity().name
+            });
 
             // init animation mixer
             this.animations = gltf.animations.length;
@@ -303,7 +307,11 @@ class Person {
 
                 // move to opposite direction using a random angle
                 this.setPosition(current, oppositeDirections[boundaryReached]);
-                this.track.push({ position: current, direction: oppositeDirections[boundaryReached] });
+                this.track.push({
+                    position: current,
+                    direction: oppositeDirections[boundaryReached],
+                    activity: this.getActivity().name
+                });
             }
         }
     }
@@ -314,7 +322,11 @@ class Person {
 
         // set initial position
         this.setPosition(this.initialPosition, this.initialDirection);
-        this.track = [{ position: this.initialPosition, direction: this.initialDirection }];
+        this.track = [{
+            position: this.initialPosition,
+            direction: this.initialDirection,
+            activity: this.getActivity().name
+        }];
     }
 
     async remove() {
