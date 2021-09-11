@@ -5,10 +5,7 @@ const configs = [
     'forest-23',
     'forest-31',
     'forest-32',
-    'forest-33',
-    'forest-41',
-    'forest-42',
-    'forest-43'
+    'forest-33'
 ];
 
 const loadPreset = async (configs) => {
