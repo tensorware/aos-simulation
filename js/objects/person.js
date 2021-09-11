@@ -108,6 +108,7 @@ class Person {
             this.person.scale.multiplyScalar(10 / 1000);
             this.setPosition(this.initialPosition, this.initialDirection);
             this.track.push({
+                person: this.index + 1,
                 position: this.initialPosition,
                 direction: this.initialDirection,
                 activity: this.getActivity().name
@@ -308,6 +309,7 @@ class Person {
                 // move to opposite direction using a random angle
                 this.setPosition(current, oppositeDirections[boundaryReached]);
                 this.track.push({
+                    person: this.index + 1,
                     position: current,
                     direction: oppositeDirections[boundaryReached],
                     activity: this.getActivity().name
@@ -323,6 +325,7 @@ class Person {
         // set initial position
         this.setPosition(this.initialPosition, this.initialDirection);
         this.track = [{
+            person: this.index + 1,
             position: this.initialPosition,
             direction: this.initialDirection,
             activity: this.getActivity().name
