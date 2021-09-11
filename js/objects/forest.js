@@ -318,19 +318,27 @@ class Forest {
                 const treeBox = new THREE.BoxHelper(tree);
                 treeBox.geometry.computeBoundingBox();
                 trees.locations.push({
+                    tree: i + 1,
                     position: tree.position,
                     box: treeBox.geometry.boundingBox
                 });
             }
         }
+        trees.locations.forEach((location) => {
+            location.position.y = 0.0;
+            location.box.min.y = 0.0;
+        });
         forest.file('trees.json', JSON.stringify(trees, null, 4));
 
         // export persons
         const persons = { tracks: [] };
         for (let i = 0; i < this.persons.length; i++) {
             const person = this.persons[i];
-            persons.tracks.push(person.track);
+            persons.tracks = persons.tracks.concat(person.track);
         }
+        persons.tracks.forEach((track) => {
+            track.position.y = 0.0;
+        });
         forest.file('persons.json', JSON.stringify(persons, null, 4));
     }
 
