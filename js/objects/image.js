@@ -18,8 +18,6 @@ class Image {
         this.resolution = this.camera.getResolution();
         this.type = this.config.drone.camera.type;
 
-        this.borderPoints = this.camera.viewLines.map(getPoints);
-
         this.loaded = new Promise(async function (resolve) {
             resolve(this);
         }.bind(this));
@@ -39,28 +37,11 @@ class Image {
     }
 
     translate(point) {
-        // get min values for each axes
-        const min = new THREE.Vector3(
-            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].x; })),
-            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].y; })),
-            Math.min.apply(Math, this.borderPoints.map((p) => { return p[1].z; }))
-        );
-
-        // subtract min point value for each border points axes
-        const borderPointsGround = this.borderPoints.map((p) => { return p.map((a) => { return a.sub(min); })[1]; });
-
-        // get max values for each axes
-        const max = new THREE.Vector3(
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.x; })),
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.y; })),
-            Math.max.apply(Math, borderPointsGround.map((p) => { return p.z; }))
-        );
-
         // convert simulation coordinates (meter) into image coordinates (pixel)
         return new THREE.Vector3(
-            Math.round(point.x * this.resolution.x / max.x),
-            Math.round(point.y * this.resolution.x / max.x),
-            Math.round(point.z * this.resolution.z / max.z)
+            Math.round(point.x * this.resolution.x / this.coverage),
+            Math.round(point.y * this.resolution.y / this.coverage),
+            Math.round(point.z * this.resolution.z / this.coverage)
         );
     }
 
@@ -88,12 +69,7 @@ class Image {
 
         // get persons centers
         const centers = positions.map((position) => {
-            const rendered = new THREE.Vector3(position.x, 0, position.z);
-            const processed = this.translate(rendered);
-            return {
-                rendered: rendered,
-                processed: processed
-            };
+            return new THREE.Vector3(position.x, 0, position.z);
         });
 
         // persons object
@@ -111,8 +87,7 @@ class Image {
     }
 
     async captureImage(integrate) {
-        const rendered = new THREE.Vector3(this.center.x, 0, this.center.z);
-        const processed = this.translate(rendered);
+        const center = new THREE.Vector3(this.center.x, 0, this.center.z);
 
         // render canvas per layer
         const canvas = {
@@ -124,10 +99,7 @@ class Image {
         // capture object
         const capture = {
             image: this.index + 1,
-            center: {
-                rendered: rendered,
-                processed: processed
-            },
+            center: center,
             canvas: canvas
         };
 
@@ -154,7 +126,7 @@ class Image {
         const { canvas: canvasTrees, ctx: ctxTrees } = getCanvas(this.resolution.x, this.resolution.z);
 
         // integrate last images
-        const center = captures[captures.length - 1].center.processed;
+        const center = this.translate(captures[captures.length - 1].center);
         captures.forEach((capture) => {
             if (!capture.canvas.persons || !capture.canvas.trees) {
                 return;
@@ -162,7 +134,7 @@ class Image {
 
             // delta between image centers
             const delta = new THREE.Vector3();
-            delta.copy(center).sub(capture.center.processed);
+            delta.copy(center).sub(this.translate(capture.center));
 
             // integrate persons
             ctxPersons.globalCompositeOperation = 'lighten';
