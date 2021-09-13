@@ -1,7 +1,13 @@
 const { join } = require('path');
 const { app, BrowserWindow, Notification, Menu } = require('electron');
 
+// disable console security warning
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
+// improve webgl performance
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=8192');
+app.commandLine.appendSwitch('max-active-webgl-contexts=64');
+app.disableDomainBlockingFor3DAPIs();
 
 app.whenReady().then(() => {
 
