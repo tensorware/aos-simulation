@@ -80,11 +80,11 @@ class Slider {
     addPreview(preview) {
         // remove first children, ignore last live preview image
         for (let i = 0; i < this.preview.length - 1; i++) {
-            const img = this.preview[i];
-            img.classList.add('removed');
+            const prev = this.preview[i];
+            prev.classList.add('removed');
             sleep().then(() => {
-                if (this.images.contains(img)) {
-                    this.images.removeChild(img);
+                if (this.previews.contains(prev)) {
+                    this.previews.removeChild(prev);
                 }
             });
         }
@@ -154,14 +154,24 @@ class Slider {
     }
 
     async clear() {
-        // clear images, all of them
+        // clear images
         for (let i = 0; i < this.image.length; i++) {
-            this.images.removeChild(this.image[i]);
+            const img = this.image[i];
+            sleep().then(() => {
+                if (this.images.contains(img)) {
+                    this.images.removeChild(img);
+                }
+            });
         }
 
-        // clear previews, ignore last live preview
+        // clear previews
         for (let i = 0; i < this.preview.length; i++) {
-            this.previews.removeChild(this.preview[i]);
+            const prev = this.preview[i];
+            sleep().then(() => {
+                if (this.previews.contains(prev)) {
+                    this.previews.removeChild(prev);
+                }
+            });
         }
     }
 
