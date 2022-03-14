@@ -11,7 +11,7 @@ class View {
 
             // init dom
             this.splitter(['#top', '#bottom']);
-            this.elements(this.config.material.color.background);
+            this.background(this.config.material.color.background);
 
             // init objects
             this.forest = new Forest(this.stage, 0);
@@ -52,14 +52,14 @@ class View {
         this.stage.update();
     }
 
-    elements(color) {
+    background(color) {
         // canvas background
         this.stage.renderer.setClearColor(color);
 
         // document background
         document.body.style.backgroundColor = hexColor(color);
 
-        // source hyperlink
+        // github source hyperlink
         this.root.querySelector('#source').style.display = 'flex';
     }
 
