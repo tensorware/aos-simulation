@@ -17,7 +17,7 @@
         }
     },
     "forest": {
-        "size": 150,
+        "size": 100,
         "ground": 70,
         "trees": {
             "levels": 6,
@@ -47,7 +47,7 @@
             }
         },
         "persons": {
-            "count": 15,
+            "count": 5,
             "activities": {
                 "laying": true,
                 "sitting": false,
