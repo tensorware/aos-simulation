@@ -1,6 +1,6 @@
 # AOS-Simulation
 
-[Airborne Optical Sectioning Simulation](https://aos.tensorware.app) based on:
+Airborne Optical Sectioning Simulation based on:
 
 - David C. Schedl, Indrajit Kurmi, and Oliver Bimber, Search and rescue with airborne optical sectioning, Nature Machine Intelligence 2, 783-790, https://doi.org/10.1038/s42256-020-00261-3 (2020)
   - [Nature (final version)](https://www.nature.com/articles/s42256-020-00261-3) | [(view only version)](https://rdcu.be/cbcf2)
